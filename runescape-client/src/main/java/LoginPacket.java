@@ -4,69 +4,60 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("gb")
+@ObfuscatedName("gh")
 @Implements("LoginPacket")
-public class LoginPacket implements class190 {
-	@ObfuscatedName("x")
+public class LoginPacket implements class181 {
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Lgb;"
+		signature = "Lgh;"
 	)
-	public static final LoginPacket field2315;
-	@ObfuscatedName("m")
-	@ObfuscatedSignature(
-		signature = "Lgb;"
-	)
-	static final LoginPacket field2311;
-	@ObfuscatedName("k")
-	@ObfuscatedSignature(
-		signature = "Lgb;"
-	)
-	public static final LoginPacket field2317;
-	@ObfuscatedName("d")
-	@ObfuscatedSignature(
-		signature = "Lgb;"
-	)
-	public static final LoginPacket field2313;
+	public static final LoginPacket field2306;
 	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Lgb;"
+		signature = "Lgh;"
 	)
-	public static final LoginPacket field2314;
-	@ObfuscatedName("v")
-	@ObfuscatedSignature(
-		signature = "Lgb;"
-	)
-	static final LoginPacket field2319;
-	@ObfuscatedName("z")
-	@ObfuscatedSignature(
-		signature = "[Lgb;"
-	)
-	static final LoginPacket[] LoginPacked_indexedValues;
+	static final LoginPacket field2307;
 	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "Lew;"
+		signature = "Lgh;"
 	)
-	@Export("World_request")
-	static UrlRequest World_request;
-	@ObfuscatedName("q")
+	public static final LoginPacket field2308;
+	@ObfuscatedName("p")
+	@ObfuscatedSignature(
+		signature = "Lgh;"
+	)
+	public static final LoginPacket field2311;
+	@ObfuscatedName("k")
+	@ObfuscatedSignature(
+		signature = "Lgh;"
+	)
+	static final LoginPacket field2310;
+	@ObfuscatedName("b")
+	@ObfuscatedSignature(
+		signature = "[Lgh;"
+	)
+	static final LoginPacket[] field2312;
+	@ObfuscatedName("a")
+	static String[] field2309;
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 774244909
+		intValue = 1829786709
 	)
 	@Export("id")
 	public final int id;
 
 	static {
-		field2315 = new LoginPacket(14, 0);
-		field2311 = new LoginPacket(15, 4);
-		field2317 = new LoginPacket(16, -2);
-		field2313 = new LoginPacket(18, -2);
-		field2314 = new LoginPacket(19, -2);
-		field2319 = new LoginPacket(27, 0);
-		LoginPacked_indexedValues = new LoginPacket[32];
-		LoginPacket[] var0 = class51.method895();
+		field2306 = new LoginPacket(14, 0);
+		field2307 = new LoginPacket(15, 4);
+		field2308 = new LoginPacket(16, -2);
+		field2311 = new LoginPacket(18, -2);
+		field2310 = new LoginPacket(27, 0);
+		field2312 = new LoginPacket[32];
+		LoginPacket[] var0 = new LoginPacket[]{field2310, field2306, field2308, field2311, field2307};
+		LoginPacket[] var1 = var0;
 
-		for (int var1 = 0; var1 < var0.length; ++var1) {
-			LoginPacked_indexedValues[var0[var1].id] = var0[var1];
+		for (int var2 = 0; var2 < var1.length; ++var2) {
+			field2312[var1[var2].id] = var1[var2];
 		}
 
 	}
@@ -79,12 +70,13 @@ public class LoginPacket implements class190 {
 		this.id = var1;
 	}
 
-	@ObfuscatedName("e")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "1902674476"
+		signature = "(Lbb;B)V",
+		garbageValue = "-119"
 	)
-	static final void method3692() {
-		GrandExchangeEvent.method165("Your friend list is full. Max of 200 for free users, and 400 for members");
+	@Export("runScriptEvent")
+	public static void runScriptEvent(ScriptEvent var0) {
+		class96.runScript(var0, 500000);
 	}
 }

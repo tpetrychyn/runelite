@@ -6,65 +6,70 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("du")
+@ObfuscatedName("ce")
 @Implements("ReflectionCheck")
 public class ReflectionCheck extends Node {
-	@ObfuscatedName("gi")
-	@ObfuscatedSignature(
-		signature = "[Lla;"
-	)
-	@Export("headIconPrayerSprites")
-	static Sprite[] headIconPrayerSprites;
-	@ObfuscatedName("x")
+	@ObfuscatedName("co")
 	@ObfuscatedGetter(
-		intValue = 1911756689
+		intValue = 749425319
+	)
+	public static int field1338;
+	@ObfuscatedName("q")
+	@ObfuscatedGetter(
+		intValue = -1523966437
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("m")
-	@Export("arguments")
-	byte[][][] arguments;
-	@ObfuscatedName("k")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = -28201163
+		intValue = 970491183
 	)
 	@Export("size")
 	int size;
-	@ObfuscatedName("d")
+	@ObfuscatedName("e")
 	@Export("operations")
 	int[] operations;
-	@ObfuscatedName("w")
+	@ObfuscatedName("p")
 	@Export("creationErrors")
 	int[] creationErrors;
-	@ObfuscatedName("v")
+	@ObfuscatedName("k")
 	@Export("fields")
 	Field[] fields;
-	@ObfuscatedName("q")
+	@ObfuscatedName("l")
 	@Export("intReplaceValues")
 	int[] intReplaceValues;
-	@ObfuscatedName("z")
+	@ObfuscatedName("b")
 	@Export("methods")
 	Method[] methods;
+	@ObfuscatedName("i")
+	@Export("arguments")
+	byte[][][] arguments;
 
 	ReflectionCheck() {
 	}
 
-	@ObfuscatedName("g")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "100"
+		signature = "(I)V",
+		garbageValue = "2118101811"
 	)
-	static void method2396() {
-		Login.loginIndex = 24;
-		HealthBarUpdate.setLoginResponseString("", "You were disconnected from the server.", "");
-	}
+	@Export("savePreferences")
+	static void savePreferences() {
+		AccessFile var0 = null;
 
-	@ObfuscatedName("an")
-	@ObfuscatedSignature(
-		signature = "(Ldg;S)V",
-		garbageValue = "-25430"
-	)
-	public static final void method2397(class108 var0) {
-		PcmPlayer.pcmPlayerProvider = var0;
+		try {
+			var0 = WorldMapIcon_0.getPreferencesFile("", WorldMapRegion.field248.name, true);
+			Buffer var1 = WorldMapLabelSize.clientPreferences.toBuffer();
+			var0.write(var1.array, 0, var1.offset);
+		} catch (Exception var3) {
+		}
+
+		try {
+			if (var0 != null) {
+				var0.closeSync(true);
+			}
+		} catch (Exception var2) {
+		}
+
 	}
 }

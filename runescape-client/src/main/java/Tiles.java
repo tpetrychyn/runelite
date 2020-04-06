@@ -4,282 +4,201 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ba")
+@ObfuscatedName("bg")
 @Implements("Tiles")
 public final class Tiles {
-	@ObfuscatedName("qs")
-	@ObfuscatedSignature(
-		signature = "Ldz;"
+	@ObfuscatedName("rr")
+	@ObfuscatedGetter(
+		intValue = 1255791215
 	)
-	@Export("pcmStreamMixer")
-	static PcmStreamMixer pcmStreamMixer;
-	@ObfuscatedName("x")
+	static int field501;
+	@ObfuscatedName("q")
 	@Export("Tiles_heights")
 	static int[][][] Tiles_heights;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("Tiles_renderFlags")
 	static byte[][][] Tiles_renderFlags;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = -824487333
+		intValue = -1687687411
 	)
 	@Export("Tiles_minPlane")
 	static int Tiles_minPlane;
-	@ObfuscatedName("d")
-	static byte[][][] field538;
-	@ObfuscatedName("v")
-	static byte[][][] field539;
-	@ObfuscatedName("q")
-	static byte[][][] field540;
-	@ObfuscatedName("t")
-	static int[][] field545;
-	@ObfuscatedName("n")
-	@Export("Tiles_hueMultiplier")
-	static int[] Tiles_hueMultiplier;
-	@ObfuscatedName("b")
-	static final int[] field544;
+	@ObfuscatedName("p")
+	static byte[][][] field504;
+	@ObfuscatedName("k")
+	static byte[][][] field505;
 	@ObfuscatedName("l")
-	static final int[] field542;
-	@ObfuscatedName("r")
-	static final int[] field541;
-	@ObfuscatedName("o")
-	static final int[] field547;
+	static byte[][][] field506;
 	@ObfuscatedName("c")
-	static final int[] field546;
+	static int[][] field515;
+	@ObfuscatedName("m")
+	@Export("Tiles_saturation")
+	static int[] Tiles_saturation;
+	@ObfuscatedName("u")
+	@Export("Tiles_lightness")
+	static int[] Tiles_lightness;
 	@ObfuscatedName("j")
-	static final int[] field552;
-	@ObfuscatedName("y")
+	static final int[] field512;
+	@ObfuscatedName("t")
+	static final int[] field513;
+	@ObfuscatedName("h")
+	static final int[] field514;
+	@ObfuscatedName("o")
+	static final int[] field520;
+	@ObfuscatedName("n")
+	static final int[] field509;
+	@ObfuscatedName("d")
+	static final int[] field517;
+	@ObfuscatedName("s")
 	@ObfuscatedGetter(
-		intValue = -408208893
+		intValue = 2138239411
 	)
-	static int field550;
-	@ObfuscatedName("f")
+	static int field519;
+	@ObfuscatedName("z")
 	@ObfuscatedGetter(
-		intValue = 747701179
+		intValue = -217342215
 	)
-	static int field548;
+	static int field510;
 
 	static {
 		Tiles_heights = new int[4][105][105];
 		Tiles_renderFlags = new byte[4][104][104];
 		Tiles_minPlane = 99;
-		field544 = new int[]{1, 2, 4, 8};
-		field542 = new int[]{16, 32, 64, 128};
-		field541 = new int[]{1, 0, -1, 0};
-		field547 = new int[]{0, -1, 0, 1};
-		field546 = new int[]{1, -1, -1, 1};
-		field552 = new int[]{-1, -1, 1, 1};
-		field550 = (int)(Math.random() * 17.0D) - 8;
-		field548 = (int)(Math.random() * 33.0D) - 16;
+		field512 = new int[]{1, 2, 4, 8};
+		field513 = new int[]{16, 32, 64, 128};
+		field514 = new int[]{1, 0, -1, 0};
+		field520 = new int[]{0, -1, 0, 1};
+		field509 = new int[]{1, -1, -1, 1};
+		field517 = new int[]{-1, -1, 1, 1};
+		field519 = (int)(Math.random() * 17.0D) - 8;
+		field510 = (int)(Math.random() * 33.0D) - 16;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("gk")
 	@ObfuscatedSignature(
-		signature = "(Ljava/lang/CharSequence;I)I",
-		garbageValue = "3344543"
+		signature = "(ZLkx;I)V",
+		garbageValue = "-1936823520"
 	)
-	@Export("parseInt")
-	public static int parseInt(CharSequence var0) {
-		return class105.parseIntCustomRadix(var0, 10, true);
-	}
+	@Export("loadRegions")
+	static final void loadRegions(boolean var0, PacketBuffer var1) {
+		Client.isInInstance = var0;
+		int var2;
+		int var3;
+		int var5;
+		int var6;
+		int var7;
+		int var8;
+		if (!Client.isInInstance) {
+			var2 = var1.method5534();
+			var3 = var1.method5518();
+			int var4 = var1.readUnsignedShort();
+			WorldMapRegion.xteaKeys = new int[var4][4];
 
-	@ObfuscatedName("au")
-	@ObfuscatedSignature(
-		signature = "(Ljw;I)Z",
-		garbageValue = "-1065823023"
-	)
-	static boolean method1239(ObjectDefinition var0) {
-		if (var0.transforms != null) {
-			int[] var1 = var0.transforms;
-
-			for (int var2 = 0; var2 < var1.length; ++var2) {
-				int var3 = var1[var2];
-				ObjectDefinition var4 = WorldMapSection2.getObjectDefinition(var3);
-				if (var4.mapIconId != -1) {
-					return true;
+			for (var5 = 0; var5 < var4; ++var5) {
+				for (var6 = 0; var6 < 4; ++var6) {
+					WorldMapRegion.xteaKeys[var5][var6] = var1.readInt();
 				}
 			}
-		} else if (var0.mapIconId != -1) {
-			return true;
-		}
 
-		return false;
-	}
+			DirectByteArrayCopier.regions = new int[var4];
+			SecureRandomFuture.regionMapArchiveIds = new int[var4];
+			WorldMapRectangle.regionLandArchiveIds = new int[var4];
+			class13.regionLandArchives = new byte[var4][];
+			class80.regionMapArchives = new byte[var4][];
+			boolean var16 = false;
+			if ((var3 / 8 == 48 || var3 / 8 == 49) && var2 / 8 == 48) {
+				var16 = true;
+			}
 
-	@ObfuscatedName("gl")
-	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "29"
-	)
-	static final int method1238() {
-		if (GrandExchangeOfferOwnWorldComparator.clientPreferences.roofsHidden) {
-			return ScriptEvent.Client_plane;
+			if (var3 / 8 == 48 && var2 / 8 == 148) {
+				var16 = true;
+			}
+
+			var4 = 0;
+
+			for (var6 = (var3 - 6) / 8; var6 <= (var3 + 6) / 8; ++var6) {
+				for (var7 = (var2 - 6) / 8; var7 <= (var2 + 6) / 8; ++var7) {
+					var8 = var7 + (var6 << 8);
+					if (!var16 || var7 != 49 && var7 != 149 && var7 != 147 && var6 != 50 && (var6 != 49 || var7 != 47)) {
+						DirectByteArrayCopier.regions[var4] = var8;
+						SecureRandomFuture.regionMapArchiveIds[var4] = WorldMapCacheName.archive5.getGroupId("m" + var6 + "_" + var7);
+						WorldMapRectangle.regionLandArchiveIds[var4] = WorldMapCacheName.archive5.getGroupId("l" + var6 + "_" + var7);
+						++var4;
+					}
+				}
+			}
+
+			UserComparator8.method3399(var3, var2, true);
 		} else {
-			int var0 = class277.getTileHeight(WorldMapRectangle.cameraX, class200.cameraZ, ScriptEvent.Client_plane);
-			return var0 - GrandExchangeOfferWorldComparator.cameraY < 800 && (Tiles_renderFlags[ScriptEvent.Client_plane][WorldMapRectangle.cameraX >> 7][class200.cameraZ >> 7] & 4) != 0 ? ScriptEvent.Client_plane : 3;
-		}
-	}
+			var2 = var1.method5518();
+			var3 = var1.method5534();
+			boolean var15 = var1.readUnsignedByte() == 1;
+			var5 = var1.readUnsignedShort();
+			var1.importIndex();
 
-	@ObfuscatedName("jx")
-	@ObfuscatedSignature(
-		signature = "(Lhe;II)I",
-		garbageValue = "2058882289"
-	)
-	static final int method1227(Widget var0, int var1) {
-		if (var0.cs1Instructions != null && var1 < var0.cs1Instructions.length) {
-			try {
-				int[] var2 = var0.cs1Instructions[var1];
-				int var3 = 0;
-				int var4 = 0;
-				byte var5 = 0;
-
-				while (true) {
-					int var6 = var2[var4++];
-					int var7 = 0;
-					byte var8 = 0;
-					if (var6 == 0) {
-						return var3;
-					}
-
-					if (var6 == 1) {
-						var7 = Client.currentLevels[var2[var4++]];
-					}
-
-					if (var6 == 2) {
-						var7 = Client.levels[var2[var4++]];
-					}
-
-					if (var6 == 3) {
-						var7 = Client.experience[var2[var4++]];
-					}
-
-					int var9;
-					Widget var10;
-					int var11;
-					int var12;
-					if (var6 == 4) {
-						var9 = var2[var4++] << 16;
-						var9 += var2[var4++];
-						var10 = MusicPatchNode.getWidget(var9);
-						var11 = var2[var4++];
-						if (var11 != -1 && (!AbstractWorldMapData.ItemDefinition_get(var11).isMembersOnly || Client.isMembersWorld)) {
-							for (var12 = 0; var12 < var10.itemIds.length; ++var12) {
-								if (var11 + 1 == var10.itemIds[var12]) {
-									var7 += var10.itemQuantities[var12];
-								}
-							}
+			int var9;
+			for (var6 = 0; var6 < 4; ++var6) {
+				for (var7 = 0; var7 < 13; ++var7) {
+					for (var8 = 0; var8 < 13; ++var8) {
+						var9 = var1.readBits(1);
+						if (var9 == 1) {
+							Client.instanceChunkTemplates[var6][var7][var8] = var1.readBits(26);
+						} else {
+							Client.instanceChunkTemplates[var6][var7][var8] = -1;
 						}
 					}
+				}
+			}
 
-					if (var6 == 5) {
-						var7 = Varps.Varps_main[var2[var4++]];
-					}
+			var1.exportIndex();
+			WorldMapRegion.xteaKeys = new int[var5][4];
 
-					if (var6 == 6) {
-						var7 = Skills.Skills_experienceTable[Client.levels[var2[var4++]] - 1];
-					}
+			for (var6 = 0; var6 < var5; ++var6) {
+				for (var7 = 0; var7 < 4; ++var7) {
+					WorldMapRegion.xteaKeys[var6][var7] = var1.readInt();
+				}
+			}
 
-					if (var6 == 7) {
-						var7 = Varps.Varps_main[var2[var4++]] * 100 / 46875;
-					}
+			DirectByteArrayCopier.regions = new int[var5];
+			SecureRandomFuture.regionMapArchiveIds = new int[var5];
+			WorldMapRectangle.regionLandArchiveIds = new int[var5];
+			class13.regionLandArchives = new byte[var5][];
+			class80.regionMapArchives = new byte[var5][];
+			var5 = 0;
 
-					if (var6 == 8) {
-						var7 = ByteArrayPool.localPlayer.combatLevel;
-					}
+			for (var6 = 0; var6 < 4; ++var6) {
+				for (var7 = 0; var7 < 13; ++var7) {
+					for (var8 = 0; var8 < 13; ++var8) {
+						var9 = Client.instanceChunkTemplates[var6][var7][var8];
+						if (var9 != -1) {
+							int var10 = var9 >> 14 & 1023;
+							int var11 = var9 >> 3 & 2047;
+							int var12 = (var10 / 8 << 8) + var11 / 8;
 
-					if (var6 == 9) {
-						for (var9 = 0; var9 < 25; ++var9) {
-							if (Skills.Skills_enabled[var9]) {
-								var7 += Client.levels[var9];
-							}
-						}
-					}
-
-					if (var6 == 10) {
-						var9 = var2[var4++] << 16;
-						var9 += var2[var4++];
-						var10 = MusicPatchNode.getWidget(var9);
-						var11 = var2[var4++];
-						if (var11 != -1 && (!AbstractWorldMapData.ItemDefinition_get(var11).isMembersOnly || Client.isMembersWorld)) {
-							for (var12 = 0; var12 < var10.itemIds.length; ++var12) {
-								if (var11 + 1 == var10.itemIds[var12]) {
-									var7 = 999999999;
+							int var13;
+							for (var13 = 0; var13 < var5; ++var13) {
+								if (DirectByteArrayCopier.regions[var13] == var12) {
+									var12 = -1;
 									break;
 								}
 							}
+
+							if (var12 != -1) {
+								DirectByteArrayCopier.regions[var5] = var12;
+								var13 = var12 >> 8 & 255;
+								int var14 = var12 & 255;
+								SecureRandomFuture.regionMapArchiveIds[var5] = WorldMapCacheName.archive5.getGroupId("m" + var13 + "_" + var14);
+								WorldMapRectangle.regionLandArchiveIds[var5] = WorldMapCacheName.archive5.getGroupId("l" + var13 + "_" + var14);
+								++var5;
+							}
 						}
-					}
-
-					if (var6 == 11) {
-						var7 = Client.runEnergy;
-					}
-
-					if (var6 == 12) {
-						var7 = Client.weight;
-					}
-
-					if (var6 == 13) {
-						var9 = Varps.Varps_main[var2[var4++]];
-						int var13 = var2[var4++];
-						var7 = (var9 & 1 << var13) != 0 ? 1 : 0;
-					}
-
-					if (var6 == 14) {
-						var9 = var2[var4++];
-						var7 = Projectile.getVarbit(var9);
-					}
-
-					if (var6 == 15) {
-						var8 = 1;
-					}
-
-					if (var6 == 16) {
-						var8 = 2;
-					}
-
-					if (var6 == 17) {
-						var8 = 3;
-					}
-
-					if (var6 == 18) {
-						var7 = (ByteArrayPool.localPlayer.x >> 7) + class69.baseX;
-					}
-
-					if (var6 == 19) {
-						var7 = (ByteArrayPool.localPlayer.y >> 7) + class89.baseY;
-					}
-
-					if (var6 == 20) {
-						var7 = var2[var4++];
-					}
-
-					if (var8 == 0) {
-						if (var5 == 0) {
-							var3 += var7;
-						}
-
-						if (var5 == 1) {
-							var3 -= var7;
-						}
-
-						if (var5 == 2 && var7 != 0) {
-							var3 /= var7;
-						}
-
-						if (var5 == 3) {
-							var3 *= var7;
-						}
-
-						var5 = 0;
-					} else {
-						var5 = var8;
 					}
 				}
-			} catch (Exception var14) {
-				return -1;
 			}
-		} else {
-			return -2;
+
+			UserComparator8.method3399(var3, var2, !var15);
 		}
+
 	}
 }

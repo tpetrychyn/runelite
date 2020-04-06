@@ -1,19 +1,27 @@
-import java.awt.FontMetrics;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("km")
+@ObfuscatedName("jo")
 @Implements("Ignored")
 public class Ignored extends User {
-	@ObfuscatedName("ab")
-	@Export("loginScreenFontMetrics")
-	static FontMetrics loginScreenFontMetrics;
-	@ObfuscatedName("x")
+	@ObfuscatedName("v")
+	@ObfuscatedSignature(
+		signature = "Lbr;"
+	)
+	@Export("loginScreenRunesAnimation")
+	static LoginScreenAnimation loginScreenRunesAnimation;
+	@ObfuscatedName("fn")
+	@ObfuscatedSignature(
+		signature = "Lfa;"
+	)
+	@Export("socketTask")
+	static Task socketTask;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -1613598915
+		intValue = -361646417
 	)
 	@Export("id")
 	int id;
@@ -21,20 +29,20 @@ public class Ignored extends User {
 	Ignored() {
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lkm;I)I",
-		garbageValue = "105996759"
+		signature = "(Ljo;I)I",
+		garbageValue = "-1242016495"
 	)
 	@Export("compareTo_ignored")
 	int compareTo_ignored(Ignored var1) {
 		return this.id - var1.id;
 	}
 
-	@ObfuscatedName("am")
+	@ObfuscatedName("ax")
 	@ObfuscatedSignature(
 		signature = "(Ljd;I)I",
-		garbageValue = "-1956183743"
+		garbageValue = "-1938562722"
 	)
 	@Export("compareTo_user")
 	public int compareTo_user(User var1) {
@@ -45,17 +53,19 @@ public class Ignored extends User {
 		return this.compareTo_ignored((Ignored)var1);
 	}
 
-	@ObfuscatedName("g")
+	@ObfuscatedName("y")
 	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "-54"
+		signature = "(CB)Z",
+		garbageValue = "103"
 	)
-	static void method5235() {
-		class335.SpriteBuffer_xOffsets = null;
-		StructDefinition.SpriteBuffer_yOffsets = null;
-		class335.SpriteBuffer_spriteWidths = null;
-		class335.SpriteBuffer_spriteHeights = null;
-		DefaultsGroup.SpriteBuffer_spritePalette = null;
-		class4.SpriteBuffer_pixels = null;
+	@Export("isCharPrintable")
+	public static boolean isCharPrintable(char var0) {
+		if (var0 >= ' ' && var0 <= '~') {
+			return true;
+		} else if (var0 >= 160 && var0 <= 255) {
+			return true;
+		} else {
+			return var0 == 8364 || var0 == 338 || var0 == 8212 || var0 == 339 || var0 == 376;
+		}
 	}
 }

@@ -4,40 +4,35 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("je")
+@ObfuscatedName("iz")
 @Implements("HorizontalAlignment")
 public enum HorizontalAlignment implements Enumerated {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Lje;"
+		signature = "Liz;"
 	)
-	field3458(2, 0),
-	@ObfuscatedName("m")
+	field3461(0, 0),
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Lje;"
+		signature = "Liz;"
 	)
 	@Export("HorizontalAlignment_centered")
-	HorizontalAlignment_centered(0, 1),
-	@ObfuscatedName("k")
+	HorizontalAlignment_centered(2, 1),
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "Lje;"
+		signature = "Liz;"
 	)
-	field3453(1, 2);
+	field3460(1, 2);
 
-	@ObfuscatedName("q")
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = -1684971179
-	)
-	static int field3456;
-	@ObfuscatedName("d")
-	@ObfuscatedGetter(
-		intValue = 1294886119
+		intValue = 1984645021
 	)
 	@Export("value")
 	public final int value;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = 834302777
+		intValue = -2141408149
 	)
 	@Export("id")
 	final int id;
@@ -47,34 +42,22 @@ public enum HorizontalAlignment implements Enumerated {
 		this.id = var4;
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "56"
+		signature = "(I)I",
+		garbageValue = "320353268"
 	)
 	@Export("rsOrdinal")
 	public int rsOrdinal() {
 		return this.id;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(IIIB)J",
-		garbageValue = "3"
+		signature = "(I)I",
+		garbageValue = "-71692752"
 	)
-	static long method4777(int var0, int var1, int var2) {
-		return (long)(var2 << 16 | var0 << 8 | var1);
-	}
-
-	@ObfuscatedName("m")
-	@ObfuscatedSignature(
-		signature = "([BI)[B",
-		garbageValue = "-1597872585"
-	)
-	public static byte[] method4782(byte[] var0) {
-		int var1 = var0.length;
-		byte[] var2 = new byte[var1];
-		System.arraycopy(var0, 0, var2, 0, var1);
-		return var2;
+	static int method4701() {
+		return ++Messages.Messages_count - 1;
 	}
 }

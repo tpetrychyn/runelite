@@ -4,12 +4,23 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ee")
+@ObfuscatedName("eo")
 @Implements("Entity")
 public abstract class Entity extends DualNode {
-	@ObfuscatedName("ci")
+	@ObfuscatedName("ev")
+	@ObfuscatedSignature(
+		signature = "Liu;"
+	)
+	@Export("archive20")
+	static Archive archive20;
+	@ObfuscatedName("fz")
 	@ObfuscatedGetter(
-		intValue = 566997565
+		longValue = -4807383784337722267L
+	)
+	static long field1872;
+	@ObfuscatedName("cb")
+	@ObfuscatedGetter(
+		intValue = -1527077961
 	)
 	@Export("height")
 	public int height;
@@ -18,17 +29,17 @@ public abstract class Entity extends DualNode {
 		this.height = 1000;
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedSignature(
-		signature = "(I)Lel;",
-		garbageValue = "480835067"
+		signature = "(I)Ldm;",
+		garbageValue = "759381421"
 	)
 	@Export("getModel")
 	protected Model getModel() {
 		return null;
 	}
 
-	@ObfuscatedName("cq")
+	@ObfuscatedName("ct")
 	@Export("draw")
 	void draw(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, long var9) {
 		Model var11 = this.getModel();
@@ -39,38 +50,25 @@ public abstract class Entity extends DualNode {
 
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("hn")
 	@ObfuscatedSignature(
-		signature = "(II)Z",
-		garbageValue = "-1030899417"
+		signature = "(Ljava/lang/String;Ljava/lang/String;IIIIZI)V",
+		garbageValue = "-224975698"
 	)
-	public static boolean method3374(int var0) {
-		return var0 >= WorldMapDecorationType.field2719.id && var0 <= WorldMapDecorationType.field2739.id;
-	}
-
-	@ObfuscatedName("x")
-	@ObfuscatedSignature(
-		signature = "([BILjava/lang/CharSequence;I)I",
-		garbageValue = "-304633818"
-	)
-	public static int method3372(byte[] var0, int var1, CharSequence var2) {
-		int var3 = var2.length();
-		int var4 = var1;
-
-		for (int var5 = 0; var5 < var3; ++var5) {
-			char var6 = var2.charAt(var5);
-			if (var6 <= 127) {
-				var0[var4++] = (byte)var6;
-			} else if (var6 <= 2047) {
-				var0[var4++] = (byte)(192 | var6 >> 6);
-				var0[var4++] = (byte)(128 | var6 & '?');
-			} else {
-				var0[var4++] = (byte)(224 | var6 >> '\f');
-				var0[var4++] = (byte)(128 | var6 >> 6 & 63);
-				var0[var4++] = (byte)(128 | var6 & '?');
+	@Export("insertMenuItem")
+	static final void insertMenuItem(String var0, String var1, int var2, int var3, int var4, int var5, boolean var6) {
+		if (!Client.isMenuOpen) {
+			if (Client.menuOptionsCount < 500) {
+				Client.menuActions[Client.menuOptionsCount] = var0;
+				Client.menuTargets[Client.menuOptionsCount] = var1;
+				Client.menuOpcodes[Client.menuOptionsCount] = var2;
+				Client.menuIdentifiers[Client.menuOptionsCount] = var3;
+				Client.menuArguments1[Client.menuOptionsCount] = var4;
+				Client.menuArguments2[Client.menuOptionsCount] = var5;
+				Client.menuShiftClick[Client.menuOptionsCount] = var6;
+				++Client.menuOptionsCount;
 			}
-		}
 
-		return var4 - var1;
+		}
 	}
 }

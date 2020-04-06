@@ -1,182 +1,120 @@
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("em")
+@ObfuscatedName("eg")
 @Implements("Occluder")
 public final class Occluder {
-	@ObfuscatedName("x")
+	@ObfuscatedName("gy")
+	@ObfuscatedSignature(
+		signature = "[Lly;"
+	)
+	@Export("crossSprites")
+	static Sprite[] crossSprites;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -1489465753
+		intValue = 62165825
 	)
 	@Export("minTileX")
 	int minTileX;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = -252661799
+		intValue = -469210933
 	)
 	@Export("maxTileX")
 	int maxTileX;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = -1056714957
+		intValue = -1760688667
 	)
 	@Export("minTileY")
 	int minTileY;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = -1875839743
+		intValue = 830025567
 	)
 	@Export("maxTileY")
 	int maxTileY;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -1984874267
+		intValue = 414289255
 	)
 	@Export("type")
 	int type;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 1069465565
+		intValue = -1048961917
 	)
 	@Export("minX")
 	int minX;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedGetter(
-		intValue = -1744424635
+		intValue = 425957683
 	)
 	@Export("maxX")
 	int maxX;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@ObfuscatedGetter(
-		intValue = -104326363
+		intValue = -876693447
 	)
 	@Export("minZ")
 	int minZ;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedGetter(
-		intValue = -470429171
+		intValue = 2097243889
 	)
 	@Export("maxZ")
 	int maxZ;
-	@ObfuscatedName("e")
+	@ObfuscatedName("f")
 	@ObfuscatedGetter(
-		intValue = 2023575959
+		intValue = -1445457591
 	)
 	@Export("minY")
 	int minY;
-	@ObfuscatedName("s")
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = 1540730751
+		intValue = 2060107965
 	)
 	@Export("maxY")
 	int maxY;
-	@ObfuscatedName("p")
-	@ObfuscatedGetter(
-		intValue = 223971517
-	)
-	int field1916;
-	@ObfuscatedName("n")
-	@ObfuscatedGetter(
-		intValue = 1903761875
-	)
-	int field1917;
 	@ObfuscatedName("u")
 	@ObfuscatedGetter(
-		intValue = 2065104463
+		intValue = -1501659665
 	)
-	int field1914;
-	@ObfuscatedName("h")
+	int field1910;
+	@ObfuscatedName("x")
 	@ObfuscatedGetter(
-		intValue = 213261407
+		intValue = -816168961
 	)
-	int field1920;
+	int field1907;
+	@ObfuscatedName("r")
+	@ObfuscatedGetter(
+		intValue = -861104415
+	)
+	int field1909;
+	@ObfuscatedName("v")
+	@ObfuscatedGetter(
+		intValue = 841128039
+	)
+	int field1900;
+	@ObfuscatedName("y")
+	@ObfuscatedGetter(
+		intValue = 828344139
+	)
+	int field1911;
 	@ObfuscatedName("g")
 	@ObfuscatedGetter(
-		intValue = 1460776299
+		intValue = -596652187
 	)
-	int field1908;
-	@ObfuscatedName("i")
-	@ObfuscatedGetter(
-		intValue = 1267954519
-	)
-	int field1921;
+	int field1912;
 	@ObfuscatedName("a")
 	@ObfuscatedGetter(
-		intValue = -1266608785
+		intValue = 566478077
 	)
-	int field1922;
+	int field1913;
 
 	Occluder() {
-	}
-
-	@ObfuscatedName("ap")
-	@ObfuscatedSignature(
-		signature = "(Lfs;III)Ldw;",
-		garbageValue = "2138193849"
-	)
-	public static final PcmPlayer method3401(TaskHandler var0, int var1, int var2) {
-		if (PcmPlayer.field1421 == 0) {
-			throw new IllegalStateException();
-		} else if (var1 >= 0 && var1 < 2) {
-			if (var2 < 256) {
-				var2 = 256;
-			}
-
-			try {
-				PcmPlayer var3 = PcmPlayer.pcmPlayerProvider.player();
-				var3.samples = new int[(PcmPlayer.PcmPlayer_stereo ? 2 : 1) * 256];
-				var3.field1431 = var2;
-				var3.init();
-				var3.capacity = (var2 & -1024) + 1024;
-				if (var3.capacity > 16384) {
-					var3.capacity = 16384;
-				}
-
-				var3.open(var3.capacity);
-				if (PcmPlayer.field1423 > 0 && class332.soundSystem == null) {
-					class332.soundSystem = new SoundSystem();
-					PcmPlayer.soundSystemExecutor = Executors.newScheduledThreadPool(1);
-					PcmPlayer.soundSystemExecutor.scheduleAtFixedRate(class332.soundSystem, 0L, 10L, TimeUnit.MILLISECONDS);
-				}
-
-				if (class332.soundSystem != null) {
-					if (class332.soundSystem.players[var1] != null) {
-						throw new IllegalArgumentException();
-					}
-
-					class332.soundSystem.players[var1] = var3;
-				}
-
-				return var3;
-			} catch (Throwable var4) {
-				return new PcmPlayer();
-			}
-		} else {
-			throw new IllegalArgumentException();
-		}
-	}
-
-	@ObfuscatedName("lc")
-	@ObfuscatedSignature(
-		signature = "(Ljava/lang/String;I)Ljava/lang/String;",
-		garbageValue = "880911904"
-	)
-	static String method3400(String var0) {
-		PlayerType[] var1 = InterfaceParent.PlayerType_values();
-
-		for (int var2 = 0; var2 < var1.length; ++var2) {
-			PlayerType var3 = var1[var2];
-			if (var3.modIcon != -1 && var0.startsWith(class1.method21(var3.modIcon))) {
-				var0 = var0.substring(6 + Integer.toString(var3.modIcon).length());
-				break;
-			}
-		}
-
-		return var0;
 	}
 }

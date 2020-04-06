@@ -3,42 +3,43 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("ap")
+@ObfuscatedName("h")
 @Implements("WorldMapSectionType")
 public enum WorldMapSectionType implements Enumerated {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Lap;"
+		signature = "Lh;"
 	)
 	@Export("WORLDMAPSECTIONTYPE0")
-	WORLDMAPSECTIONTYPE0(3, (byte)0),
-	@ObfuscatedName("m")
+	WORLDMAPSECTIONTYPE0(1, (byte)0),
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Lap;"
+		signature = "Lh;"
 	)
 	@Export("WORLDMAPSECTIONTYPE1")
 	WORLDMAPSECTIONTYPE1(2, (byte)1),
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "Lap;"
+		signature = "Lh;"
 	)
 	@Export("WORLDMAPSECTIONTYPE2")
 	WORLDMAPSECTIONTYPE2(0, (byte)2),
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "Lap;"
+		signature = "Lh;"
 	)
 	@Export("WORLDMAPSECTIONTYPE3")
-	WORLDMAPSECTIONTYPE3(1, (byte)3);
+	WORLDMAPSECTIONTYPE3(3, (byte)3);
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -27254411
+		intValue = 1941114483
 	)
 	@Export("type")
 	final int type;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@Export("id")
 	final byte id;
 
@@ -47,164 +48,181 @@ public enum WorldMapSectionType implements Enumerated {
 		this.id = var4;
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "56"
+		signature = "(I)I",
+		garbageValue = "320353268"
 	)
 	@Export("rsOrdinal")
 	public int rsOrdinal() {
 		return this.id;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(I)[Lap;",
-		garbageValue = "-1086432793"
+		signature = "(Lkx;B)V",
+		garbageValue = "-61"
 	)
-	static WorldMapSectionType[] method345() {
-		return new WorldMapSectionType[]{WORLDMAPSECTIONTYPE0, WORLDMAPSECTIONTYPE1, WORLDMAPSECTIONTYPE2, WORLDMAPSECTIONTYPE3};
-	}
+	@Export("updatePlayer")
+	static final void updatePlayer(PacketBuffer var0) {
+		var0.importIndex();
+		int var1 = Client.localPlayerIndex;
+		Player var2 = Client.localPlayer = Client.players[var1] = new Player();
+		var2.index = var1;
+		int var3 = var0.readBits(30);
+		byte var4 = (byte)(var3 >> 28);
+		int var5 = var3 >> 14 & 16383;
+		int var6 = var3 & 16383;
+		var2.pathX[0] = var5 - MusicPatchNode2.baseX;
+		var2.x = (var2.pathX[0] << 7) + (var2.transformedSize() << 6);
+		var2.pathY[0] = var6 - class1.baseY;
+		var2.y = (var2.pathY[0] << 7) + (var2.transformedSize() << 6);
+		class42.Client_plane = var2.plane = var4;
+		if (Players.field1254[var1] != null) {
+			var2.read(Players.field1254[var1]);
+		}
 
-	@ObfuscatedName("m")
-	@ObfuscatedSignature(
-		signature = "(III)V",
-		garbageValue = "1841927686"
-	)
-	@Export("changeWorldSelectSorting")
-	static void changeWorldSelectSorting(int var0, int var1) {
-		int[] var2 = new int[4];
-		int[] var3 = new int[4];
-		var2[0] = var0;
-		var3[0] = var1;
-		int var4 = 1;
+		Players.Players_count = 0;
+		Players.Players_indices[++Players.Players_count - 1] = var1;
+		Players.field1252[var1] = 0;
+		Players.Players_emptyIdxCount = 0;
 
-		for (int var5 = 0; var5 < 4; ++var5) {
-			if (World.World_sortOption1[var5] != var0) {
-				var2[var4] = World.World_sortOption1[var5];
-				var3[var4] = World.World_sortOption2[var5];
-				++var4;
+		for (int var7 = 1; var7 < 2048; ++var7) {
+			if (var7 != var1) {
+				int var8 = var0.readBits(18);
+				int var9 = var8 >> 16;
+				int var10 = var8 >> 8 & 597;
+				int var11 = var8 & 597;
+				Players.Players_regions[var7] = (var10 << 14) + var11 + (var9 << 28);
+				Players.Players_orientations[var7] = 0;
+				Players.Players_targetIndices[var7] = -1;
+				Players.Players_emptyIndices[++Players.Players_emptyIdxCount - 1] = var7;
+				Players.field1252[var7] = 0;
 			}
 		}
 
-		World.World_sortOption1 = var2;
-		World.World_sortOption2 = var3;
-		UserComparator9.sortWorlds(UserComparator2.World_worlds, 0, UserComparator2.World_worlds.length - 1, World.World_sortOption1, World.World_sortOption2);
-	}
-
-	@ObfuscatedName("w")
-	@ObfuscatedSignature(
-		signature = "(II)I",
-		garbageValue = "-1148353199"
-	)
-	public static int method347(int var0) {
-		return UserComparator9.method3500(ViewportMouse.ViewportMouse_entityTags[var0]);
+		var0.exportIndex();
 	}
 
 	@ObfuscatedName("aj")
 	@ObfuscatedSignature(
-		signature = "(II)V",
-		garbageValue = "-1668286639"
+		signature = "(ILcx;ZB)I",
+		garbageValue = "1"
 	)
-	@Export("runWidgetOnLoadListener")
-	static void runWidgetOnLoadListener(int var0) {
-		if (var0 != -1) {
-			if (LoginScreenAnimation.loadInterface(var0)) {
-				Widget[] var1 = Widget.Widget_interfaceComponents[var0];
-
-				for (int var2 = 0; var2 < var1.length; ++var2) {
-					Widget var3 = var1[var2];
-					if (var3.onLoad != null) {
-						ScriptEvent var4 = new ScriptEvent();
-						var4.widget = var3;
-						var4.args = var3.onLoad;
-						PlayerAppearance.runScript(var4, 5000000);
-					}
-				}
-
+	static int method239(int var0, Script var1, boolean var2) {
+		int var3;
+		if (var0 == ScriptOpcodes.CAM_FORCEANGLE) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			int var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			if (!Client.isCameraLocked) {
+				Client.camAngleX = var3;
+				Client.camAngleY = var4;
 			}
-		}
-	}
 
-	@ObfuscatedName("hd")
-	@ObfuscatedSignature(
-		signature = "(Lbw;B)V",
-		garbageValue = "80"
-	)
-	static final void method348(PendingSpawn var0) {
-		long var1 = 0L;
-		int var3 = -1;
-		int var4 = 0;
-		int var5 = 0;
-		if (var0.type == 0) {
-			var1 = GrandExchangeOfferWorldComparator.scene.getBoundaryObjectTag(var0.plane, var0.x, var0.y);
-		}
+			return 1;
+		} else if (var0 == ScriptOpcodes.CAM_GETANGLE_XA) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.camAngleX;
+			return 1;
+		} else if (var0 == ScriptOpcodes.CAM_GETANGLE_YA) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.camAngleY;
+			return 1;
+		} else if (var0 == ScriptOpcodes.CAM_SETFOLLOWHEIGHT) {
+			var3 = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize];
+			if (var3 < 0) {
+				var3 = 0;
+			}
 
-		if (var0.type == 1) {
-			var1 = GrandExchangeOfferWorldComparator.scene.getWallDecorationTag(var0.plane, var0.x, var0.y);
-		}
-
-		if (var0.type == 2) {
-			var1 = GrandExchangeOfferWorldComparator.scene.getGameObjectTag(var0.plane, var0.x, var0.y);
-		}
-
-		if (var0.type == 3) {
-			var1 = GrandExchangeOfferWorldComparator.scene.getFloorDecorationTag(var0.plane, var0.x, var0.y);
-		}
-
-		if (var1 != 0L) {
-			int var6 = GrandExchangeOfferWorldComparator.scene.getObjectFlags(var0.plane, var0.x, var0.y, var1);
-			var3 = WorldMapRectangle.Entity_unpackID(var1);
-			var4 = var6 & 31;
-			var5 = var6 >> 6 & 3;
-		}
-
-		var0.objectId = var3;
-		var0.field963 = var4;
-		var0.field968 = var5;
-	}
-
-	@ObfuscatedName("kw")
-	@ObfuscatedSignature(
-		signature = "(Lhe;B)Z",
-		garbageValue = "47"
-	)
-	static final boolean method344(Widget var0) {
-		int var1 = var0.contentType;
-		if (var1 == 205) {
-			Client.logoutTimer = 250;
-			return true;
+			Client.camFollowHeight = var3;
+			return 1;
+		} else if (var0 == ScriptOpcodes.CAM_GETFOLLOWHEIGHT) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.camFollowHeight;
+			return 1;
 		} else {
-			int var2;
-			int var3;
-			if (var1 >= 300 && var1 <= 313) {
-				var2 = (var1 - 300) / 2;
-				var3 = var1 & 1;
-				Client.playerAppearance.changeAppearance(var2, var3 == 1);
+			return 2;
+		}
+	}
+
+	@ObfuscatedName("aq")
+	@ObfuscatedSignature(
+		signature = "(ILcx;ZI)I",
+		garbageValue = "-292172071"
+	)
+	static int method242(int var0, Script var1, boolean var2) {
+		if (var0 == ScriptOpcodes.VIEWPORT_SETFOV) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			Client.field782 = (short)ItemContainer.method1116(Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize]);
+			if (Client.field782 <= 0) {
+				Client.field782 = 256;
 			}
 
-			if (var1 >= 314 && var1 <= 323) {
-				var2 = (var1 - 314) / 2;
-				var3 = var1 & 1;
-				Client.playerAppearance.method4089(var2, var3 == 1);
+			Client.field651 = (short)ItemContainer.method1116(Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1]);
+			if (Client.field651 <= 0) {
+				Client.field651 = 256;
 			}
 
-			if (var1 == 324) {
-				Client.playerAppearance.changeSex(false);
+			return 1;
+		} else if (var0 == ScriptOpcodes.VIEWPORT_SETZOOM) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			Client.zoomHeight = (short)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			if (Client.zoomHeight <= 0) {
+				Client.zoomHeight = 256;
 			}
 
-			if (var1 == 325) {
-				Client.playerAppearance.changeSex(true);
+			Client.zoomWidth = (short)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			if (Client.zoomWidth <= 0) {
+				Client.zoomWidth = 320;
 			}
 
-			if (var1 == 326) {
-				PacketBufferNode var4 = FaceNormal.getPacketBufferNode(ClientPacket.field2239, Client.packetWriter.isaacCipher);
-				Client.playerAppearance.write(var4.packetBuffer);
-				Client.packetWriter.addNode(var4);
-				return true;
+			return 1;
+		} else if (var0 == ScriptOpcodes.VIEWPORT_CLAMPFOV) {
+			HealthBarUpdate.Interpreter_intStackSize -= 4;
+			Client.field820 = (short)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			if (Client.field820 <= 0) {
+				Client.field820 = 1;
+			}
+
+			Client.field790 = (short)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			if (Client.field790 <= 0) {
+				Client.field790 = 32767;
+			} else if (Client.field790 < Client.field820) {
+				Client.field790 = Client.field820;
+			}
+
+			Client.field732 = (short)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 2];
+			if (Client.field732 <= 0) {
+				Client.field732 = 1;
+			}
+
+			Client.field659 = (short)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 3];
+			if (Client.field659 <= 0) {
+				Client.field659 = 32767;
+			} else if (Client.field659 < Client.field732) {
+				Client.field659 = Client.field732;
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.VIEWPORT_GETEFFECTIVESIZE) {
+			if (Client.viewportWidget != null) {
+				UrlRequest.setViewportShape(0, 0, Client.viewportWidget.width, Client.viewportWidget.height, false);
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.viewportWidth;
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.viewportHeight;
 			} else {
-				return false;
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = -1;
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = -1;
 			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.VIEWPORT_GETZOOM) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.zoomHeight;
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.zoomWidth;
+			return 1;
+		} else if (var0 == ScriptOpcodes.VIEWPORT_GETFOV) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = NetFileRequest.method4140(Client.field782);
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = NetFileRequest.method4140(Client.field651);
+			return 1;
+		} else {
+			return 2;
 		}
 	}
 }

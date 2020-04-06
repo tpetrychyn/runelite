@@ -1,57 +1,60 @@
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
-import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("fb")
+@ObfuscatedName("fu")
 @Implements("Clock")
 public abstract class Clock {
-	@ObfuscatedName("t")
-	@ObfuscatedGetter(
-		intValue = 2046484107
+	@ObfuscatedName("oi")
+	@ObfuscatedSignature(
+		signature = "Lca;"
 	)
-	static int field2061;
+	@Export("varcs")
+	static Varcs varcs;
 
 	Clock() {
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "-1351231250"
+		garbageValue = "-1402657312"
 	)
 	@Export("mark")
 	public abstract void mark();
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
 		signature = "(III)I",
-		garbageValue = "-1723558008"
+		garbageValue = "-333181863"
 	)
 	@Export("wait")
 	public abstract int wait(int var1, int var2);
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("fx")
 	@ObfuscatedSignature(
-		signature = "(IB)I",
-		garbageValue = "16"
+		signature = "(II)V",
+		garbageValue = "-1434133306"
 	)
-	public static int method3590(int var0) {
-		var0 = (var0 & 1431655765) + (var0 >>> 1 & 1431655765);
-		var0 = (var0 >>> 2 & 858993459) + (var0 & 858993459);
-		var0 = var0 + (var0 >>> 4) & 252645135;
-		var0 += var0 >>> 8;
-		var0 += var0 >>> 16;
-		return var0 & 255;
-	}
+	@Export("setWindowedMode")
+	static void setWindowedMode(int var0) {
+		Client.field868 = 0L;
+		if (var0 >= 2) {
+			Client.isResizable = true;
+		} else {
+			Client.isResizable = false;
+		}
 
-	@ObfuscatedName("ko")
-	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "2"
-	)
-	static final void method3599() {
-		Client.field873 = Client.cycleCntr;
+		if (AbstractWorldMapIcon.getWindowedMode() == 1) {
+			WorldMapSprite.client.setMaxCanvasSize(765, 503);
+		} else {
+			WorldMapSprite.client.setMaxCanvasSize(7680, 2160);
+		}
+
+		if (Client.gameState >= 25) {
+			HealthBarUpdate.method1677();
+		}
+
 	}
 }

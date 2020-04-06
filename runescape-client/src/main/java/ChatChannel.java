@@ -1,32 +1,29 @@
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import net.runelite.rs.Reflection;
 
-@ObfuscatedName("cl")
+@ObfuscatedName("cs")
 @Implements("ChatChannel")
 public class ChatChannel {
-	@ObfuscatedName("fc")
+	@ObfuscatedName("gr")
 	@ObfuscatedGetter(
-		longValue = -181918079142719425L
+		intValue = 1055466439
 	)
-	static long field1319;
-	@ObfuscatedName("go")
+	static int field1306;
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Lla;"
-	)
-	@Export("compass")
-	static Sprite compass;
-	@ObfuscatedName("m")
-	@ObfuscatedSignature(
-		signature = "[Lby;"
+		signature = "[Lbj;"
 	)
 	@Export("messages")
 	Message[] messages;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = 1013484149
+		intValue = 754027225
 	)
 	@Export("count")
 	int count;
@@ -35,10 +32,10 @@ public class ChatChannel {
 		this.messages = new Message[100];
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;I)Lby;",
-		garbageValue = "922420852"
+		signature = "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;B)Lbj;",
+		garbageValue = "0"
 	)
 	@Export("addMessage")
 	Message addMessage(int var1, String var2, String var3, String var4) {
@@ -66,111 +63,200 @@ public class ChatChannel {
 		return var5;
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(IB)Lby;",
-		garbageValue = "49"
+		signature = "(II)Lbj;",
+		garbageValue = "-55997964"
 	)
 	@Export("getMessage")
 	Message getMessage(int var1) {
 		return var1 >= 0 && var1 < this.count ? this.messages[var1] : null;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
 		signature = "(I)I",
-		garbageValue = "-2095560133"
+		garbageValue = "-410884165"
 	)
 	@Export("size")
 	int size() {
 		return this.count;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V",
-		garbageValue = "-570972962"
+		signature = "(Lkf;IB)V",
+		garbageValue = "67"
 	)
-	@Export("addChatMessage")
-	static void addChatMessage(int var0, String var1, String var2, String var3) {
-		ChatChannel var4 = (ChatChannel)Messages.Messages_channels.get(var0);
-		if (var4 == null) {
-			var4 = new ChatChannel();
-			Messages.Messages_channels.put(var0, var4);
-		}
+	@Export("readReflectionCheck")
+	public static void readReflectionCheck(Buffer var0, int var1) {
+		ReflectionCheck var2 = new ReflectionCheck();
+		var2.size = var0.readUnsignedByte();
+		var2.id = var0.readInt();
+		var2.operations = new int[var2.size];
+		var2.creationErrors = new int[var2.size];
+		var2.fields = new Field[var2.size];
+		var2.intReplaceValues = new int[var2.size];
+		var2.methods = new Method[var2.size];
+		var2.arguments = new byte[var2.size][][];
 
-		Message var5 = var4.addMessage(var0, var1, var2, var3);
-		Messages.Messages_hashTable.put(var5, (long)var5.count);
-		Messages.Messages_queue.add(var5);
-		Client.chatCycle = Client.cycleCntr;
-	}
+		for (int var3 = 0; var3 < var2.size; ++var3) {
+			try {
+				int var4 = var0.readUnsignedByte();
+				String var5;
+				String var6;
+				int var7;
+				if (var4 != 0 && var4 != 1 && var4 != 2) {
+					if (var4 == 3 || var4 == 4) {
+						var5 = var0.readStringCp1252NullTerminated();
+						var6 = var0.readStringCp1252NullTerminated();
+						var7 = var0.readUnsignedByte();
+						String[] var8 = new String[var7];
 
-	@ObfuscatedName("g")
-	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "266221696"
-	)
-	static final void method2351() {
-		GrandExchangeEvent.method165("You can't add yourself to your own ignore list");
-	}
+						for (int var9 = 0; var9 < var7; ++var9) {
+							var8[var9] = var0.readStringCp1252NullTerminated();
+						}
 
-	@ObfuscatedName("fo")
-	@ObfuscatedSignature(
-		signature = "(IZZZB)Lih;",
-		garbageValue = "109"
-	)
-	@Export("newArchive")
-	static Archive newArchive(int var0, boolean var1, boolean var2, boolean var3) {
-		ArchiveDisk var4 = null;
-		if (JagexCache.JagexCache_dat2File != null) {
-			var4 = new ArchiveDisk(var0, JagexCache.JagexCache_dat2File, PacketBufferNode.JagexCache_idxFiles[var0], 1000000);
-		}
+						String var20 = var0.readStringCp1252NullTerminated();
+						byte[][] var10 = new byte[var7][];
+						int var12;
+						if (var4 == 3) {
+							for (int var11 = 0; var11 < var7; ++var11) {
+								var12 = var0.readInt();
+								var10[var11] = new byte[var12];
+								var0.readBytes(var10[var11], 0, var12);
+							}
+						}
 
-		return new Archive(var4, WorldMapRegion.masterDisk, var0, var1, var2, var3);
-	}
+						var2.operations[var3] = var4;
+						Class[] var21 = new Class[var7];
 
-	@ObfuscatedName("fn")
-	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "48"
-	)
-	@Export("playPcmPlayers")
-	static final void playPcmPlayers() {
-		if (AbstractWorldMapData.pcmPlayer1 != null) {
-			AbstractWorldMapData.pcmPlayer1.run();
-		}
+						for (var12 = 0; var12 < var7; ++var12) {
+							var21[var12] = User.loadClassFromDescriptor(var8[var12]);
+						}
 
-		if (WorldMapManager.pcmPlayer0 != null) {
-			WorldMapManager.pcmPlayer0.run();
-		}
+						Class var22 = User.loadClassFromDescriptor(var20);
+						if (User.loadClassFromDescriptor(var5).getClassLoader() == null) {
+							throw new SecurityException();
+						}
 
-	}
+						Method[] var13 = User.loadClassFromDescriptor(var5).getDeclaredMethods();
+						Method[] var14 = var13;
 
-	@ObfuscatedName("ih")
-	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "-2027834560"
-	)
-	static void method2354() {
-		for (int var0 = 0; var0 < Client.menuOptionsCount; ++var0) {
-			if (WorldMapLabelSize.method282(Client.menuOpcodes[var0])) {
-				if (var0 < Client.menuOptionsCount - 1) {
-					for (int var1 = var0; var1 < Client.menuOptionsCount - 1; ++var1) {
-						Client.menuActions[var1] = Client.menuActions[var1 + 1];
-						Client.menuTargets[var1] = Client.menuTargets[var1 + 1];
-						Client.menuOpcodes[var1] = Client.menuOpcodes[var1 + 1];
-						Client.menuIdentifiers[var1] = Client.menuIdentifiers[var1 + 1];
-						Client.menuArguments1[var1] = Client.menuArguments1[var1 + 1];
-						Client.menuArguments2[var1] = Client.menuArguments2[var1 + 1];
-						Client.menuShiftClick[var1] = Client.menuShiftClick[var1 + 1];
+						for (int var15 = 0; var15 < var14.length; ++var15) {
+							Method var16 = var14[var15];
+							if (Reflection.getMethodName(var16).equals(var6)) {
+								Class[] var17 = Reflection.getParameterTypes(var16);
+								if (var17.length == var21.length) {
+									boolean var18 = true;
+
+									for (int var19 = 0; var19 < var21.length; ++var19) {
+										if (var17[var19] != var21[var19]) {
+											var18 = false;
+											break;
+										}
+									}
+
+									if (var18 && var22 == var16.getReturnType()) {
+										var2.methods[var3] = var16;
+									}
+								}
+							}
+						}
+
+						var2.arguments[var3] = var10;
 					}
-				}
+				} else {
+					var5 = var0.readStringCp1252NullTerminated();
+					var6 = var0.readStringCp1252NullTerminated();
+					var7 = 0;
+					if (var4 == 1) {
+						var7 = var0.readInt();
+					}
 
-				--var0;
-				--Client.menuOptionsCount;
+					var2.operations[var3] = var4;
+					var2.intReplaceValues[var3] = var7;
+					if (User.loadClassFromDescriptor(var5).getClassLoader() == null) {
+						throw new SecurityException();
+					}
+
+					var2.fields[var3] = Reflection.findField(User.loadClassFromDescriptor(var5), var6);
+				}
+			} catch (ClassNotFoundException var24) {
+				var2.creationErrors[var3] = -1;
+			} catch (SecurityException var25) {
+				var2.creationErrors[var3] = -2;
+			} catch (NullPointerException var26) {
+				var2.creationErrors[var3] = -3;
+			} catch (Exception var27) {
+				var2.creationErrors[var3] = -4;
+			} catch (Throwable var28) {
+				var2.creationErrors[var3] = -5;
 			}
 		}
 
-		MusicPatchNode.method3922(class49.menuWidth / 2 + WorldMapDecoration.menuX, PacketBufferNode.menuY);
+		class96.reflectionChecks.addFirst(var2);
+	}
+
+	@ObfuscatedName("r")
+	@ObfuscatedSignature(
+		signature = "(B)V",
+		garbageValue = "-4"
+	)
+	static void method2214() {
+		if (UserComparator3.loadWorlds()) {
+			Login.worldSelectOpen = true;
+			Login.worldSelectPage = 0;
+			Login.worldSelectPagesCount = 0;
+		}
+
+	}
+
+	@ObfuscatedName("hh")
+	@ObfuscatedSignature(
+		signature = "(IIIII)V",
+		garbageValue = "-2069013220"
+	)
+	static final void method2215(int var0, int var1, int var2, int var3) {
+		for (int var4 = 0; var4 < Client.rootWidgetCount; ++var4) {
+			if (Client.rootWidgetXs[var4] + Client.rootWidgetWidths[var4] > var0 && Client.rootWidgetXs[var4] < var0 + var2 && Client.rootWidgetHeights[var4] + Client.rootWidgetYs[var4] > var1 && Client.rootWidgetYs[var4] < var3 + var1) {
+				Client.field843[var4] = true;
+			}
+		}
+
+	}
+
+	@ObfuscatedName("ie")
+	@ObfuscatedSignature(
+		signature = "(Lhj;I)Z",
+		garbageValue = "-1045685499"
+	)
+	@Export("runCs1")
+	static final boolean runCs1(Widget var0) {
+		if (var0.cs1Comparisons == null) {
+			return false;
+		} else {
+			for (int var1 = 0; var1 < var0.cs1Comparisons.length; ++var1) {
+				int var2 = Varps.method3969(var0, var1);
+				int var3 = var0.cs1ComparisonValues[var1];
+				if (var0.cs1Comparisons[var1] == 2) {
+					if (var2 >= var3) {
+						return false;
+					}
+				} else if (var0.cs1Comparisons[var1] == 3) {
+					if (var2 <= var3) {
+						return false;
+					}
+				} else if (var0.cs1Comparisons[var1] == 4) {
+					if (var2 == var3) {
+						return false;
+					}
+				} else if (var2 != var3) {
+					return false;
+				}
+			}
+
+			return true;
+		}
 	}
 }

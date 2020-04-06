@@ -4,33 +4,33 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("lw")
+@ObfuscatedName("lg")
 @Implements("IterableNodeHashTableIterator")
 public class IterableNodeHashTableIterator implements Iterator {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Lln;"
+		signature = "Lla;"
 	)
 	@Export("hashTable")
 	IterableNodeHashTable hashTable;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Lga;"
+		signature = "Lfw;"
 	)
 	@Export("head")
 	Node head;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@Export("index")
 	int index;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "Lga;"
+		signature = "Lfw;"
 	)
 	@Export("last")
 	Node last;
 
 	@ObfuscatedSignature(
-		signature = "(Lln;)V"
+		signature = "(Lla;)V"
 	)
 	IterableNodeHashTableIterator(IterableNodeHashTable var1) {
 		this.last = null;
@@ -38,7 +38,7 @@ public class IterableNodeHashTableIterator implements Iterator {
 		this.start();
 	}
 
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@Export("start")
 	void start() {
 		this.head = this.hashTable.buckets[0].previous;
@@ -46,12 +46,20 @@ public class IterableNodeHashTableIterator implements Iterator {
 		this.last = null;
 	}
 
-	public void remove() {
-		if (this.last == null) {
-			throw new IllegalStateException();
+	public boolean hasNext() {
+		if (this.hashTable.buckets[this.index - 1] != this.head) {
+			return true;
 		} else {
-			this.last.remove();
-			this.last = null;
+			while (this.index < this.hashTable.size) {
+				if (this.hashTable.buckets[this.index++].previous != this.hashTable.buckets[this.index - 1]) {
+					this.head = this.hashTable.buckets[this.index - 1].previous;
+					return true;
+				}
+
+				this.head = this.hashTable.buckets[this.index - 1];
+			}
+
+			return false;
 		}
 	}
 
@@ -77,20 +85,12 @@ public class IterableNodeHashTableIterator implements Iterator {
 		}
 	}
 
-	public boolean hasNext() {
-		if (this.hashTable.buckets[this.index - 1] != this.head) {
-			return true;
+	public void remove() {
+		if (this.last == null) {
+			throw new IllegalStateException();
 		} else {
-			while (this.index < this.hashTable.size) {
-				if (this.hashTable.buckets[this.index++].previous != this.hashTable.buckets[this.index - 1]) {
-					this.head = this.hashTable.buckets[this.index - 1].previous;
-					return true;
-				}
-
-				this.head = this.hashTable.buckets[this.index - 1];
-			}
-
-			return false;
+			this.last.remove();
+			this.last = null;
 		}
 	}
 }

@@ -1,18 +1,19 @@
+import java.net.URL;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("fp")
+@ObfuscatedName("fk")
 @Implements("UserComparator3")
 public class UserComparator3 extends AbstractUserComparator {
-	@ObfuscatedName("pl")
+	@ObfuscatedName("gm")
 	@ObfuscatedSignature(
-		signature = "Llg;"
+		signature = "[Lly;"
 	)
-	@Export("privateChatMode")
-	static PrivateChatMode privateChatMode;
-	@ObfuscatedName("x")
+	@Export("headIconPkSprites")
+	static Sprite[] headIconPkSprites;
+	@ObfuscatedName("q")
 	@Export("reversed")
 	final boolean reversed;
 
@@ -20,10 +21,10 @@ public class UserComparator3 extends AbstractUserComparator {
 		this.reversed = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lke;Lke;I)I",
-		garbageValue = "1767041351"
+		signature = "(Ljz;Ljz;I)I",
+		garbageValue = "2060416979"
 	)
 	@Export("compareBuddy")
 	int compareBuddy(Buddy var1, Buddy var2) {
@@ -38,23 +39,43 @@ public class UserComparator3 extends AbstractUserComparator {
 		return this.compareBuddy((Buddy)var1, (Buddy)var2);
 	}
 
-	@ObfuscatedName("n")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lch;S)V",
-		garbageValue = "5308"
+		signature = "(I)Z",
+		garbageValue = "1010038987"
 	)
-	@Export("changeWorld")
-	static void changeWorld(World var0) {
-		if (var0.isMembersOnly() != Client.isMembersWorld) {
-			Client.isMembersWorld = var0.isMembersOnly();
-			ArchiveLoader.method1254(var0.isMembersOnly());
+	@Export("loadWorlds")
+	static boolean loadWorlds() {
+		try {
+			if (World.World_request == null) {
+				World.World_request = SequenceDefinition.urlRequester.request(new URL(WorldMapArea.field213));
+			} else if (World.World_request.isDone()) {
+				byte[] var0 = World.World_request.getResponse();
+				Buffer var1 = new Buffer(var0);
+				var1.readInt();
+				World.World_count = var1.readUnsignedShort();
+				World.World_worlds = new World[World.World_count];
+
+				World var3;
+				for (int var2 = 0; var2 < World.World_count; var3.index = var2++) {
+					var3 = World.World_worlds[var2] = new World();
+					var3.id = var1.readUnsignedShort();
+					var3.properties = var1.readInt();
+					var3.host = var1.readStringCp1252NullTerminated();
+					var3.activity = var1.readStringCp1252NullTerminated();
+					var3.location = var1.readUnsignedByte();
+					var3.population = var1.readShort();
+				}
+
+				Client.sortWorlds(World.World_worlds, 0, World.World_worlds.length - 1, World.World_sortOption1, World.World_sortOption2);
+				World.World_request = null;
+				return true;
+			}
+		} catch (Exception var4) {
+			var4.printStackTrace();
+			World.World_request = null;
 		}
 
-		Script.worldHost = var0.host;
-		Client.worldId = var0.id;
-		Client.worldProperties = var0.properties;
-		WorldMapLabelSize.port1 = Client.gameBuild == 0 ? 43594 : var0.id + 40000;
-		GrandExchangeOfferAgeComparator.port2 = Client.gameBuild == 0 ? 443 : var0.id + 50000;
-		class280.port3 = WorldMapLabelSize.port1;
+		return false;
 	}
 }

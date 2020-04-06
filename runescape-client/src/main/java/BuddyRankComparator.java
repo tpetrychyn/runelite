@@ -1,3 +1,8 @@
+import java.awt.image.BufferedImage;
+import java.awt.image.PixelGrabber;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
@@ -6,7 +11,10 @@ import net.runelite.mapping.ObfuscatedSignature;
 @ObfuscatedName("fg")
 @Implements("BuddyRankComparator")
 public class BuddyRankComparator extends AbstractUserComparator {
-	@ObfuscatedName("x")
+	@ObfuscatedName("m")
+	@Export("musicTrackBoolean")
+	public static boolean musicTrackBoolean;
+	@ObfuscatedName("q")
 	@Export("reversed")
 	final boolean reversed;
 
@@ -14,10 +22,10 @@ public class BuddyRankComparator extends AbstractUserComparator {
 		this.reversed = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lke;Lke;I)I",
-		garbageValue = "258923483"
+		signature = "(Ljz;Ljz;I)I",
+		garbageValue = "-813496584"
 	)
 	@Export("compareBuddy")
 	int compareBuddy(Buddy var1, Buddy var2) {
@@ -32,12 +40,27 @@ public class BuddyRankComparator extends AbstractUserComparator {
 		return this.compareBuddy((Buddy)var1, (Buddy)var2);
 	}
 
-	@ObfuscatedName("z")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "16"
+		signature = "([BB)Lly;",
+		garbageValue = "-3"
 	)
-	public static void method3533() {
-		WorldMapElement.WorldMapElement_cachedSprites.clear();
+	@Export("convertJpgToSprite")
+	public static final Sprite convertJpgToSprite(byte[] var0) {
+		BufferedImage var1 = null;
+
+		try {
+			var1 = ImageIO.read(new ByteArrayInputStream(var0));
+			int var2 = var1.getWidth();
+			int var3 = var1.getHeight();
+			int[] var4 = new int[var2 * var3];
+			PixelGrabber var5 = new PixelGrabber(var1, 0, 0, var2, var3, var4, 0, var2);
+			var5.grabPixels();
+			return new Sprite(var4, var2, var3);
+		} catch (IOException var7) {
+		} catch (InterruptedException var8) {
+		}
+
+		return new Sprite(0, 0);
 	}
 }

@@ -1,35 +1,34 @@
+import java.util.Iterator;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("en")
+@ObfuscatedName("dd")
 @Implements("VertexNormal")
 public class VertexNormal {
-	@ObfuscatedName("z")
-	public static short[][] field1764;
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = 1214687281
-	)
-	@Export("y")
-	int y;
-	@ObfuscatedName("m")
-	@ObfuscatedGetter(
-		intValue = -412976723
+		intValue = 741962059
 	)
 	@Export("x")
 	int x;
-	@ObfuscatedName("k")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = 1667952739
+		intValue = -1828551341
+	)
+	@Export("y")
+	int y;
+	@ObfuscatedName("e")
+	@ObfuscatedGetter(
+		intValue = 1911535461
 	)
 	@Export("z")
 	int z;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = 284274911
+		intValue = -171249661
 	)
 	@Export("magnitude")
 	int magnitude;
@@ -38,7 +37,7 @@ public class VertexNormal {
 	}
 
 	@ObfuscatedSignature(
-		signature = "(Len;)V"
+		signature = "(Ldd;)V"
 	)
 	VertexNormal(VertexNormal var1) {
 		this.x = var1.x;
@@ -47,34 +46,28 @@ public class VertexNormal {
 		this.magnitude = var1.magnitude;
 	}
 
-	@ObfuscatedName("p")
+	@ObfuscatedName("jz")
 	@ObfuscatedSignature(
-		signature = "([BI)Lkx;",
-		garbageValue = "-1694309156"
+		signature = "(B)V",
+		garbageValue = "6"
 	)
-	public static Font method3094(byte[] var0) {
-		if (var0 == null) {
-			return null;
-		} else {
-			Font var1 = new Font(var0, class335.SpriteBuffer_xOffsets, StructDefinition.SpriteBuffer_yOffsets, class335.SpriteBuffer_spriteWidths, class335.SpriteBuffer_spriteHeights, DefaultsGroup.SpriteBuffer_spritePalette, class4.SpriteBuffer_pixels);
-			Ignored.method5235();
-			return var1;
+	@Export("FriendSystem_invalidateFriends")
+	static final void FriendSystem_invalidateFriends() {
+		for (int var0 = 0; var0 < Players.Players_count; ++var0) {
+			Player var1 = Client.players[Players.Players_indices[var0]];
+			var1.clearIsFriend();
 		}
-	}
 
-	@ObfuscatedName("fu")
-	@ObfuscatedSignature(
-		signature = "(S)V",
-		garbageValue = "-399"
-	)
-	static final void method3093() {
-		if (Client.logoutTimer > 0) {
-			Huffman.logOut();
-		} else {
-			Client.timer.method5050();
-			MouseRecorder.updateGameState(40);
-			UrlRequester.field1960 = Client.packetWriter.getSocket();
-			Client.packetWriter.removeSocket();
+		Iterator var2 = Messages.Messages_hashTable.iterator();
+
+		while (var2.hasNext()) {
+			Message var3 = (Message)var2.next();
+			var3.clearIsFromFriend();
 		}
+
+		if (DevicePcmPlayerProvider.clanChat != null) {
+			DevicePcmPlayerProvider.clanChat.clearFriends();
+		}
+
 	}
 }

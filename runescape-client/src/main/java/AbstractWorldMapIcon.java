@@ -4,114 +4,78 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ax")
+@ObfuscatedName("az")
 @Implements("AbstractWorldMapIcon")
 public abstract class AbstractWorldMapIcon {
-	@ObfuscatedName("sq")
-	@ObfuscatedGetter(
-		intValue = -1106675929
-	)
-	@Export("foundItemIndex")
-	static int foundItemIndex;
-	@ObfuscatedName("dx")
+	@ObfuscatedName("b")
 	@ObfuscatedSignature(
-		signature = "Lih;"
-	)
-	@Export("archive6")
-	static Archive archive6;
-	@ObfuscatedName("dy")
-	@ObfuscatedSignature(
-		signature = "Lih;"
-	)
-	@Export("archive7")
-	static Archive archive7;
-	@ObfuscatedName("fp")
-	@ObfuscatedSignature(
-		signature = "Lfr;"
-	)
-	@Export("socketTask")
-	static Task socketTask;
-	@ObfuscatedName("la")
-	@ObfuscatedSignature(
-		signature = "Lci;"
-	)
-	@Export("tempMenuAction")
-	static MenuAction tempMenuAction;
-	@ObfuscatedName("my")
-	@ObfuscatedGetter(
-		intValue = 468589673
-	)
-	@Export("selectedSpellFlags")
-	static int selectedSpellFlags;
-	@ObfuscatedName("q")
-	@ObfuscatedSignature(
-		signature = "Lhj;"
+		signature = "Lhv;"
 	)
 	@Export("coord2")
 	public final Coord coord2;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
-		signature = "Lhj;"
+		signature = "Lhv;"
 	)
 	@Export("coord1")
 	public final Coord coord1;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedGetter(
-		intValue = -1506769643
+		intValue = 1277861537
 	)
 	@Export("screenX")
 	int screenX;
-	@ObfuscatedName("e")
+	@ObfuscatedName("f")
 	@ObfuscatedGetter(
-		intValue = -896182235
+		intValue = -946812135
 	)
 	@Export("screenY")
 	int screenY;
 
 	@ObfuscatedSignature(
-		signature = "(Lhj;Lhj;)V"
+		signature = "(Lhv;Lhv;)V"
 	)
 	AbstractWorldMapIcon(Coord var1, Coord var2) {
 		this.coord1 = var1;
 		this.coord2 = var2;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "16"
+		signature = "(I)I",
+		garbageValue = "-229566020"
 	)
 	@Export("getElement")
 	public abstract int getElement();
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(I)Lau;",
-		garbageValue = "2077771117"
+		signature = "(I)Las;",
+		garbageValue = "1426074195"
 	)
 	@Export("getLabel")
 	abstract WorldMapLabel getLabel();
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(I)I",
-		garbageValue = "650401890"
+		signature = "(B)I",
+		garbageValue = "14"
 	)
 	@Export("getSubWidth")
 	abstract int getSubWidth();
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(I)I",
-		garbageValue = "-1828864081"
+		signature = "(B)I",
+		garbageValue = "1"
 	)
 	@Export("getSubHeight")
 	abstract int getSubHeight();
 
-	@ObfuscatedName("a")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		signature = "(III)Z",
-		garbageValue = "-57056512"
+		signature = "(IIB)Z",
+		garbageValue = "-101"
 	)
 	@Export("fitsScreen")
 	boolean fitsScreen(int var1, int var2) {
@@ -122,32 +86,32 @@ public abstract class AbstractWorldMapIcon {
 		}
 	}
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("d")
 	@ObfuscatedSignature(
-		signature = "(S)Z",
-		garbageValue = "-32437"
+		signature = "(I)Z",
+		garbageValue = "-1274004046"
 	)
 	@Export("hasValidElement")
 	boolean hasValidElement() {
 		return this.getElement() >= 0;
 	}
 
-	@ObfuscatedName("c")
+	@ObfuscatedName("s")
 	@ObfuscatedSignature(
 		signature = "(III)Z",
-		garbageValue = "1127928990"
+		garbageValue = "406020312"
 	)
 	@Export("elementFitsScreen")
 	boolean elementFitsScreen(int var1, int var2) {
 		if (!this.hasValidElement()) {
 			return false;
 		} else {
-			WorldMapElement var3 = class25.WorldMapElement_get(this.getElement());
+			WorldMapElement var3 = class222.WorldMapElement_get(this.getElement());
 			int var4 = this.getSubWidth();
 			int var5 = this.getSubHeight();
 			switch(var3.horizontalAlignment.value) {
 			case 0:
-				if (var1 < this.screenX - var4 / 2 || var1 > var4 / 2 + this.screenX) {
+				if (var1 <= this.screenX - var4 || var1 > this.screenX) {
 					return false;
 				}
 				break;
@@ -158,19 +122,19 @@ public abstract class AbstractWorldMapIcon {
 
 				return false;
 			case 2:
-				if (var1 <= this.screenX - var4 || var1 > this.screenX) {
+				if (var1 < this.screenX - var4 / 2 || var1 > var4 / 2 + this.screenX) {
 					return false;
 				}
 			}
 
 			switch(var3.verticalAlignment.value) {
 			case 0:
-				if (var2 <= this.screenY - var5 || var2 > this.screenY) {
+				if (var2 < this.screenY - var5 / 2 || var2 > var5 / 2 + this.screenY) {
 					return false;
 				}
 				break;
 			case 1:
-				if (var2 < this.screenY - var5 / 2 || var2 > var5 / 2 + this.screenY) {
+				if (var2 <= this.screenY - var5 || var2 > this.screenY) {
 					return false;
 				}
 				break;
@@ -184,10 +148,10 @@ public abstract class AbstractWorldMapIcon {
 		}
 	}
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("z")
 	@ObfuscatedSignature(
 		signature = "(III)Z",
-		garbageValue = "-411865092"
+		garbageValue = "-1252480817"
 	)
 	@Export("labelFitsScreen")
 	boolean labelFitsScreen(int var1, int var2) {
@@ -201,13 +165,23 @@ public abstract class AbstractWorldMapIcon {
 		}
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("r")
 	@ObfuscatedSignature(
-		signature = "(CB)Z",
-		garbageValue = "0"
+		signature = "(I)V",
+		garbageValue = "1908697951"
 	)
-	@Export("isAlphaNumeric")
-	public static boolean isAlphaNumeric(char var0) {
-		return var0 >= '0' && var0 <= '9' || var0 >= 'A' && var0 <= 'Z' || var0 >= 'a' && var0 <= 'z';
+	public static void method599() {
+		NPCDefinition.NpcDefinition_cached.clear();
+		NPCDefinition.NpcDefinition_cachedModels.clear();
+	}
+
+	@ObfuscatedName("fb")
+	@ObfuscatedSignature(
+		signature = "(B)I",
+		garbageValue = "-108"
+	)
+	@Export("getWindowedMode")
+	static int getWindowedMode() {
+		return Client.isResizable ? 2 : 1;
 	}
 }

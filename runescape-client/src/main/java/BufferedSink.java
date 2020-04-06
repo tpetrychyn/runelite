@@ -6,40 +6,40 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("lo")
+@ObfuscatedName("kp")
 @Implements("BufferedSink")
 public class BufferedSink implements Runnable {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("thread")
 	Thread thread;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("outputStream")
 	OutputStream outputStream;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = -63285245
+		intValue = -273498913
 	)
 	@Export("capacity")
 	int capacity;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@Export("buffer")
 	byte[] buffer;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = 238793019
+		intValue = -173399327
 	)
 	@Export("position")
 	int position;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 1710004877
+		intValue = -1895147359
 	)
 	@Export("limit")
 	int limit;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@Export("exception")
 	IOException exception;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@Export("closed")
 	boolean closed;
 
@@ -54,10 +54,10 @@ public class BufferedSink implements Runnable {
 		this.thread.start();
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
 		signature = "(B)Z",
-		garbageValue = "86"
+		garbageValue = "-14"
 	)
 	@Export("isClosed")
 	boolean isClosed() {
@@ -79,10 +79,10 @@ public class BufferedSink implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "([BIIS)V",
-		garbageValue = "-5417"
+		signature = "([BIIB)V",
+		garbageValue = "37"
 	)
 	@Export("write")
 	void write(byte[] var1, int var2, int var3) throws IOException {
@@ -119,10 +119,10 @@ public class BufferedSink implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "1845686279"
+		garbageValue = "1881137071"
 	)
 	@Export("close")
 	void close() {

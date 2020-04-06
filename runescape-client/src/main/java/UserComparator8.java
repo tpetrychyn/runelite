@@ -3,10 +3,10 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("fo")
+@ObfuscatedName("ey")
 @Implements("UserComparator8")
 public class UserComparator8 extends AbstractUserComparator {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("reversed")
 	final boolean reversed;
 
@@ -14,10 +14,10 @@ public class UserComparator8 extends AbstractUserComparator {
 		this.reversed = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lke;Lke;I)I",
-		garbageValue = "-956709758"
+		signature = "(Ljz;Ljz;I)I",
+		garbageValue = "16711935"
 	)
 	@Export("compareBuddy")
 	int compareBuddy(Buddy var1, Buddy var2) {
@@ -36,127 +36,120 @@ public class UserComparator8 extends AbstractUserComparator {
 		return this.compareBuddy((Buddy)var1, (Buddy)var2);
 	}
 
-	@ObfuscatedName("gk")
+	@ObfuscatedName("gf")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "87"
+		signature = "(IIZI)V",
+		garbageValue = "240895507"
 	)
-	static final int method3503() {
-		if (GrandExchangeOfferOwnWorldComparator.clientPreferences.roofsHidden) {
-			return ScriptEvent.Client_plane;
-		} else {
-			int var0 = 3;
-			if (class74.cameraPitch < 310) {
-				int var1;
-				int var2;
-				if (Client.oculusOrbState == 1) {
-					var1 = SoundSystem.oculusOrbFocalPointX >> 7;
-					var2 = ServerPacket.oculusOrbFocalPointY >> 7;
-				} else {
-					var1 = ByteArrayPool.localPlayer.x >> 7;
-					var2 = ByteArrayPool.localPlayer.y >> 7;
-				}
+	static final void method3399(int var0, int var1, boolean var2) {
+		if (!var2 || var0 != Canvas.field418 || ViewportMouse.field1747 != var1) {
+			Canvas.field418 = var0;
+			ViewportMouse.field1747 = var1;
+			class96.updateGameState(25);
+			TriBool.drawLoadingMessage("Loading - please wait.", true);
+			int var3 = MusicPatchNode2.baseX;
+			int var4 = class1.baseY;
+			MusicPatchNode2.baseX = (var0 - 6) * 8;
+			class1.baseY = (var1 - 6) * 8;
+			int var5 = MusicPatchNode2.baseX - var3;
+			int var6 = class1.baseY - var4;
+			var3 = MusicPatchNode2.baseX;
+			var4 = class1.baseY;
 
-				int var3 = WorldMapRectangle.cameraX >> 7;
-				int var4 = class200.cameraZ >> 7;
-				if (var3 < 0 || var4 < 0 || var3 >= 104 || var4 >= 104) {
-					return ScriptEvent.Client_plane;
-				}
-
-				if (var1 < 0 || var2 < 0 || var1 >= 104 || var2 >= 104) {
-					return ScriptEvent.Client_plane;
-				}
-
-				if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
-					var0 = ScriptEvent.Client_plane;
-				}
-
-				int var5;
-				if (var1 > var3) {
-					var5 = var1 - var3;
-				} else {
-					var5 = var3 - var1;
-				}
-
-				int var6;
-				if (var2 > var4) {
-					var6 = var2 - var4;
-				} else {
-					var6 = var4 - var2;
-				}
-
-				int var7;
-				int var8;
-				if (var5 > var6) {
-					var7 = var6 * 65536 / var5;
-					var8 = 32768;
-
-					while (var1 != var3) {
-						if (var3 < var1) {
-							++var3;
-						} else if (var3 > var1) {
-							--var3;
-						}
-
-						if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
-							var0 = ScriptEvent.Client_plane;
-						}
-
-						var8 += var7;
-						if (var8 >= 65536) {
-							var8 -= 65536;
-							if (var4 < var2) {
-								++var4;
-							} else if (var4 > var2) {
-								--var4;
-							}
-
-							if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
-								var0 = ScriptEvent.Client_plane;
-							}
-						}
+			int var7;
+			int var9;
+			int[] var10000;
+			for (var7 = 0; var7 < 32768; ++var7) {
+				NPC var8 = Client.npcs[var7];
+				if (var8 != null) {
+					for (var9 = 0; var9 < 10; ++var9) {
+						var10000 = var8.pathX;
+						var10000[var9] -= var5;
+						var10000 = var8.pathY;
+						var10000[var9] -= var6;
 					}
-				} else if (var6 > 0) {
-					var7 = var5 * 65536 / var6;
-					var8 = 32768;
 
-					while (var4 != var2) {
-						if (var4 < var2) {
-							++var4;
-						} else if (var4 > var2) {
-							--var4;
-						}
+					var8.x -= var5 * 128;
+					var8.y -= var6 * 128;
+				}
+			}
 
-						if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
-							var0 = ScriptEvent.Client_plane;
-						}
+			for (var7 = 0; var7 < 2048; ++var7) {
+				Player var21 = Client.players[var7];
+				if (var21 != null) {
+					for (var9 = 0; var9 < 10; ++var9) {
+						var10000 = var21.pathX;
+						var10000[var9] -= var5;
+						var10000 = var21.pathY;
+						var10000[var9] -= var6;
+					}
 
-						var8 += var7;
-						if (var8 >= 65536) {
-							var8 -= 65536;
-							if (var3 < var1) {
-								++var3;
-							} else if (var3 > var1) {
-								--var3;
-							}
+					var21.x -= var5 * 128;
+					var21.y -= var6 * 128;
+				}
+			}
 
-							if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
-								var0 = ScriptEvent.Client_plane;
-							}
+			byte var20 = 0;
+			byte var18 = 104;
+			byte var22 = 1;
+			if (var5 < 0) {
+				var20 = 103;
+				var18 = -1;
+				var22 = -1;
+			}
+
+			byte var10 = 0;
+			byte var11 = 104;
+			byte var12 = 1;
+			if (var6 < 0) {
+				var10 = 103;
+				var11 = -1;
+				var12 = -1;
+			}
+
+			int var14;
+			for (int var13 = var20; var13 != var18; var13 += var22) {
+				for (var14 = var10; var11 != var14; var14 += var12) {
+					int var15 = var13 + var5;
+					int var16 = var6 + var14;
+
+					for (int var17 = 0; var17 < 4; ++var17) {
+						if (var15 >= 0 && var16 >= 0 && var15 < 104 && var16 < 104) {
+							Client.groundItems[var17][var13][var14] = Client.groundItems[var17][var15][var16];
+						} else {
+							Client.groundItems[var17][var13][var14] = null;
 						}
 					}
 				}
 			}
 
-			if (ByteArrayPool.localPlayer.x >= 0 && ByteArrayPool.localPlayer.y >= 0 && ByteArrayPool.localPlayer.x < 13312 && ByteArrayPool.localPlayer.y < 13312) {
-				if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][ByteArrayPool.localPlayer.x >> 7][ByteArrayPool.localPlayer.y >> 7] & 4) != 0) {
-					var0 = ScriptEvent.Client_plane;
+			for (PendingSpawn var19 = (PendingSpawn)Client.pendingSpawns.last(); var19 != null; var19 = (PendingSpawn)Client.pendingSpawns.previous()) {
+				var19.x -= var5;
+				var19.y -= var6;
+				if (var19.x < 0 || var19.y < 0 || var19.x >= 104 || var19.y >= 104) {
+					var19.remove();
 				}
-
-				return var0;
-			} else {
-				return ScriptEvent.Client_plane;
 			}
+
+			if (Client.destinationX != 0) {
+				Client.destinationX -= var5;
+				Client.destinationY -= var6;
+			}
+
+			Client.soundEffectCount = 0;
+			Client.isCameraLocked = false;
+			PacketBuffer.cameraX -= var5 << 7;
+			class1.cameraZ -= var6 << 7;
+			MouseHandler.oculusOrbFocalPointX -= var5 << 7;
+			WorldMapArea.oculusOrbFocalPointY -= var6 << 7;
+			Client.field747 = -1;
+			Client.graphicsObjects.clear();
+			Client.projectiles.clear();
+
+			for (var14 = 0; var14 < 4; ++var14) {
+				Client.collisionMaps[var14].clear();
+			}
+
 		}
 	}
 }

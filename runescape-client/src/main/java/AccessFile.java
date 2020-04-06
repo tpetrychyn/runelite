@@ -9,21 +9,21 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("mb")
+@ObfuscatedName("ma")
 @Implements("AccessFile")
 public final class AccessFile {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("file")
 	RandomAccessFile file;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		longValue = 1632378019072179927L
+		longValue = -4859377869140643535L
 	)
 	@Export("maxSize")
 	final long maxSize;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		longValue = 3271085237778542147L
+		longValue = -5982883315607554345L
 	)
 	@Export("offset")
 	long offset;
@@ -49,21 +49,21 @@ public final class AccessFile {
 		this.file.seek(0L);
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("seek")
 	final void seek(long var1) throws IOException {
 		this.file.seek(var1);
 		this.offset = var1;
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "([BIIB)V",
-		garbageValue = "47"
+		signature = "([BIII)V",
+		garbageValue = "793801547"
 	)
 	@Export("write")
 	public final void write(byte[] var1, int var2, int var3) throws IOException {
-		if (this.offset + (long)var3 > this.maxSize) {
+		if ((long)var3 + this.offset > this.maxSize) {
 			this.file.seek(this.maxSize);
 			this.file.write(1);
 			throw new EOFException();
@@ -73,20 +73,20 @@ public final class AccessFile {
 		}
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "10"
+		signature = "(I)V",
+		garbageValue = "-1602757440"
 	)
 	@Export("close")
 	public final void close() throws IOException {
 		this.closeSync(false);
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
 		signature = "(ZI)V",
-		garbageValue = "2141113619"
+		garbageValue = "978888846"
 	)
 	@Export("closeSync")
 	public final void closeSync(boolean var1) throws IOException {
@@ -104,20 +104,20 @@ public final class AccessFile {
 
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(B)J",
-		garbageValue = "74"
+		signature = "(I)J",
+		garbageValue = "1189798798"
 	)
 	@Export("length")
 	public final long length() throws IOException {
 		return this.file.length();
 	}
 
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
 		signature = "([BIII)I",
-		garbageValue = "-316484023"
+		garbageValue = "701557643"
 	)
 	@Export("read")
 	public final int read(byte[] var1, int var2, int var3) throws IOException {

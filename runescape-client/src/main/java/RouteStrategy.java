@@ -1,41 +1,39 @@
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.util.Iterator;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("gx")
+@ObfuscatedName("fl")
 @Implements("RouteStrategy")
 public abstract class RouteStrategy {
-	@ObfuscatedName("jz")
+	@ObfuscatedName("pi")
 	@ObfuscatedSignature(
-		signature = "Lhe;"
+		signature = "Lly;"
 	)
-	static Widget field2106;
-	@ObfuscatedName("x")
+	@Export("sceneMinimapSprite")
+	static Sprite sceneMinimapSprite;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = 326663409
+		intValue = 1876567169
 	)
 	@Export("approxDestinationX")
 	public int approxDestinationX;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = -1533837037
+		intValue = 1051805723
 	)
 	@Export("approxDestinationY")
 	public int approxDestinationY;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = 50701303
+		intValue = -1586804307
 	)
 	@Export("approxDestinationSizeX")
 	public int approxDestinationSizeX;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = 695146693
+		intValue = 775131021
 	)
 	@Export("approxDestinationSizeY")
 	public int approxDestinationSizeY;
@@ -43,53 +41,83 @@ public abstract class RouteStrategy {
 	protected RouteStrategy() {
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(IIILfm;B)Z",
-		garbageValue = "-112"
+		signature = "(IIILfv;I)Z",
+		garbageValue = "-1217489379"
 	)
 	@Export("hasArrived")
 	public abstract boolean hasArrived(int var1, int var2, int var3, CollisionMap var4);
 
-	@ObfuscatedName("ay")
+	@ObfuscatedName("ec")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "42"
+		signature = "(I)V",
+		garbageValue = "1403573360"
 	)
-	@Export("getGcDuration")
-	protected static int getGcDuration() {
-		int var0 = 0;
-		if (GameShell.garbageCollector == null || !GameShell.garbageCollector.isValid()) {
-			try {
-				Iterator var1 = ManagementFactory.getGarbageCollectorMXBeans().iterator();
+	@Export("logOut")
+	static final void logOut() {
+		Client.packetWriter.close();
+		class197.method3688();
+		FloorUnderlayDefinition.FloorUnderlayDefinition_cached.clear();
+		KitDefinition.KitDefinition_cached.clear();
+		TileItemPile.method2766();
+		AbstractWorldMapIcon.method599();
+		ItemDefinition.ItemDefinition_cached.clear();
+		ItemDefinition.ItemDefinition_cachedModels.clear();
+		ItemDefinition.ItemDefinition_cachedSprites.clear();
+		SequenceDefinition.SequenceDefinition_cached.clear();
+		SequenceDefinition.SequenceDefinition_cachedFrames.clear();
+		SpotAnimationDefinition.SpotAnimationDefinition_cached.clear();
+		SpotAnimationDefinition.SpotAnimationDefinition_cachedModels.clear();
+		MusicPatch.method3888();
+		SecureRandomCallable.method1093();
+		HitSplatDefinition.HitSplatDefinition_cached.clear();
+		HitSplatDefinition.HitSplatDefinition_cachedSprites.clear();
+		HitSplatDefinition.HitSplatDefinition_cachedFonts.clear();
+		WorldMapIcon_1.method286();
+		StructDefinition.StructDefinition_cached.clear();
+		Coord.method3989();
+		MouseRecorder.method1134();
+		PlayerAppearance.PlayerAppearance_cachedModels.clear();
+		Calendar.method3940();
+		((TextureProvider)Rasterizer3D.Rasterizer3D_textureLoader).clear();
+		Script.Script_cached.clear();
+		class197.archive0.clearFiles();
+		JagexCache.archive1.clearFiles();
+		class43.archive3.clearFiles();
+		class13.archive4.clearFiles();
+		WorldMapCacheName.archive5.clearFiles();
+		WorldMapRegion.archive6.clearFiles();
+		NPCDefinition.archive7.clearFiles();
+		Client.archive8.clearFiles();
+		class4.archive9.clearFiles();
+		WorldMapLabelSize.archive10.clearFiles();
+		class32.archive11.clearFiles();
+		UserComparator4.archive12.clearFiles();
+		GrandExchangeOfferWorldComparator.scene.clear();
 
-				while (var1.hasNext()) {
-					GarbageCollectorMXBean var2 = (GarbageCollectorMXBean)var1.next();
-					if (var2.isValid()) {
-						GameShell.garbageCollector = var2;
-						GameShell.garbageCollectorLastCheckTimeMs = -1L;
-						GameShell.garbageCollectorLastCollectionTime = -1L;
-					}
-				}
-			} catch (Throwable var11) {
+		for (int var0 = 0; var0 < 4; ++var0) {
+			Client.collisionMaps[var0].clear();
+		}
+
+		System.gc();
+		class40.method729(2);
+		Client.currentTrackGroupId = -1;
+		Client.field699 = false;
+
+		for (ObjectSound var1 = (ObjectSound)ObjectSound.objectSounds.last(); var1 != null; var1 = (ObjectSound)ObjectSound.objectSounds.previous()) {
+			if (var1.stream1 != null) {
+				SecureRandomCallable.pcmStreamMixer.removeSubStream(var1.stream1);
+				var1.stream1 = null;
+			}
+
+			if (var1.stream2 != null) {
+				SecureRandomCallable.pcmStreamMixer.removeSubStream(var1.stream2);
+				var1.stream2 = null;
 			}
 		}
 
-		if (GameShell.garbageCollector != null) {
-			long var9 = class217.currentTimeMillis();
-			long var3 = GameShell.garbageCollector.getCollectionTime();
-			if (-1L != GameShell.garbageCollectorLastCollectionTime) {
-				long var5 = var3 - GameShell.garbageCollectorLastCollectionTime;
-				long var7 = var9 - GameShell.garbageCollectorLastCheckTimeMs;
-				if (var7 != 0L) {
-					var0 = (int)(100L * var5 / var7);
-				}
-			}
-
-			GameShell.garbageCollectorLastCollectionTime = var3;
-			GameShell.garbageCollectorLastCheckTimeMs = var9;
-		}
-
-		return var0;
+		ObjectSound.objectSounds.clear();
+		class96.updateGameState(10);
 	}
 }

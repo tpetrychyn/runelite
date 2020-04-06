@@ -4,60 +4,72 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ch")
+@ObfuscatedName("bw")
 @Implements("World")
 public class World {
-	@ObfuscatedName("v")
+	@ObfuscatedName("k")
+	@ObfuscatedSignature(
+		signature = "[Lbw;"
+	)
+	@Export("World_worlds")
+	static World[] World_worlds;
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 1328454415
+		intValue = 774267173
 	)
 	@Export("World_count")
 	static int World_count;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedGetter(
-		intValue = 89189373
+		intValue = -2084454035
 	)
 	@Export("World_listCount")
 	static int World_listCount;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@Export("World_sortOption2")
 	static int[] World_sortOption2;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@Export("World_sortOption1")
 	static int[] World_sortOption1;
-	@ObfuscatedName("s")
+	@ObfuscatedName("f")
+	@ObfuscatedSignature(
+		signature = "Lex;"
+	)
+	@Export("World_request")
+	static UrlRequest World_request;
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = 1023289861
+		intValue = 790181133
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("p")
+	@ObfuscatedName("u")
 	@ObfuscatedGetter(
-		intValue = -522510299
+		intValue = 630491985
 	)
 	@Export("properties")
 	int properties;
-	@ObfuscatedName("n")
+	@ObfuscatedName("x")
 	@ObfuscatedGetter(
-		intValue = -1229908449
+		intValue = -432731733
 	)
 	@Export("population")
 	int population;
-	@ObfuscatedName("u")
+	@ObfuscatedName("r")
 	@Export("host")
 	String host;
-	@ObfuscatedName("h")
+	@ObfuscatedName("v")
 	@Export("activity")
 	String activity;
-	@ObfuscatedName("g")
+	@ObfuscatedName("y")
 	@ObfuscatedGetter(
-		intValue = -1299711201
+		intValue = 657222747
 	)
 	@Export("location")
 	int location;
-	@ObfuscatedName("i")
+	@ObfuscatedName("g")
 	@ObfuscatedGetter(
-		intValue = -281997857
+		intValue = -1014616139
 	)
 	@Export("index")
 	int index;
@@ -72,147 +84,154 @@ public class World {
 	World() {
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedSignature(
 		signature = "(B)Z",
-		garbageValue = "-87"
+		garbageValue = "0"
 	)
 	@Export("isMembersOnly")
 	boolean isMembersOnly() {
 		return (1 & this.properties) != 0;
 	}
 
-	@ObfuscatedName("e")
+	@ObfuscatedName("u")
 	@ObfuscatedSignature(
 		signature = "(I)Z",
-		garbageValue = "-1374980076"
+		garbageValue = "2029214211"
 	)
-	boolean method1869() {
+	boolean method1682() {
 		return (2 & this.properties) != 0;
 	}
 
-	@ObfuscatedName("s")
+	@ObfuscatedName("x")
 	@ObfuscatedSignature(
 		signature = "(I)Z",
-		garbageValue = "-1915504932"
+		garbageValue = "-1353649797"
 	)
 	@Export("isPvp")
 	boolean isPvp() {
 		return (4 & this.properties) != 0;
 	}
 
-	@ObfuscatedName("p")
+	@ObfuscatedName("r")
 	@ObfuscatedSignature(
-		signature = "(B)Z",
-		garbageValue = "53"
+		signature = "(I)Z",
+		garbageValue = "1749102436"
 	)
-	boolean method1871() {
+	boolean method1698() {
 		return (8 & this.properties) != 0;
 	}
 
-	@ObfuscatedName("n")
+	@ObfuscatedName("v")
 	@ObfuscatedSignature(
 		signature = "(I)Z",
-		garbageValue = "248561667"
+		garbageValue = "-2068007512"
 	)
 	@Export("isDeadman")
 	boolean isDeadman() {
 		return (536870912 & this.properties) != 0;
 	}
 
-	@ObfuscatedName("u")
+	@ObfuscatedName("y")
 	@ObfuscatedSignature(
 		signature = "(I)Z",
-		garbageValue = "-1399101886"
+		garbageValue = "1648546006"
 	)
 	@Export("isBeta")
 	boolean isBeta() {
 		return (33554432 & this.properties) != 0;
 	}
 
-	@ObfuscatedName("h")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(B)Z",
-		garbageValue = "20"
+		signature = "(Lkx;B)I",
+		garbageValue = "80"
 	)
-	boolean method1879() {
-		return (1073741824 & this.properties) != 0;
-	}
-
-	@ObfuscatedName("x")
-	@ObfuscatedSignature(
-		signature = "(Liy;Liy;Liy;Liy;S)V",
-		garbageValue = "-3755"
-	)
-	public static void method1908(AbstractArchive var0, AbstractArchive var1, AbstractArchive var2, AbstractArchive var3) {
-		Widget.Widget_archive = var0;
-		SoundSystem.Widget_modelsArchive = var1;
-		Varps.Widget_spritesArchive = var2;
-		Widget.Widget_fontsArchive = var3;
-		Widget.Widget_interfaceComponents = new Widget[Widget.Widget_archive.getGroupCount()][];
-		Widget.Widget_loadedInterfaces = new boolean[Widget.Widget_archive.getGroupCount()];
-	}
-
-	@ObfuscatedName("q")
-	@ObfuscatedSignature(
-		signature = "(CB)Z",
-		garbageValue = "34"
-	)
-	@Export("isCharAlphabetic")
-	public static boolean isCharAlphabetic(char var0) {
-		return var0 >= 'A' && var0 <= 'Z' || var0 >= 'a' && var0 <= 'z';
-	}
-
-	@ObfuscatedName("ht")
-	@ObfuscatedSignature(
-		signature = "(III)V",
-		garbageValue = "-1848249905"
-	)
-	@Export("updateItemPile")
-	static final void updateItemPile(int var0, int var1) {
-		NodeDeque var2 = Client.groundItems[ScriptEvent.Client_plane][var0][var1];
-		if (var2 == null) {
-			GrandExchangeOfferWorldComparator.scene.removeGroundItemPile(ScriptEvent.Client_plane, var0, var1);
+	static int method1686(PacketBuffer var0) {
+		int var1 = var0.readBits(2);
+		int var2;
+		if (var1 == 0) {
+			var2 = 0;
+		} else if (var1 == 1) {
+			var2 = var0.readBits(5);
+		} else if (var1 == 2) {
+			var2 = var0.readBits(8);
 		} else {
-			long var3 = -99999999L;
-			TileItem var5 = null;
+			var2 = var0.readBits(11);
+		}
 
-			TileItem var6;
-			for (var6 = (TileItem)var2.last(); var6 != null; var6 = (TileItem)var2.previous()) {
-				ItemDefinition var7 = AbstractWorldMapData.ItemDefinition_get(var6.id);
-				long var8 = (long)var7.price;
-				if (var7.isStackable == 1) {
-					var8 *= (long)(var6.quantity + 1);
+		return var2;
+	}
+
+	@ObfuscatedName("p")
+	@ObfuscatedSignature(
+		signature = "([BI)Lcx;",
+		garbageValue = "-75241458"
+	)
+	@Export("newScript")
+	static Script newScript(byte[] var0) {
+		Script var1 = new Script();
+		Buffer var2 = new Buffer(var0);
+		var2.offset = var2.array.length - 2;
+		int var3 = var2.readUnsignedShort();
+		int var4 = var2.array.length - 2 - var3 - 12;
+		var2.offset = var4;
+		int var5 = var2.readInt();
+		var1.localIntCount = var2.readUnsignedShort();
+		var1.localStringCount = var2.readUnsignedShort();
+		var1.intArgumentCount = var2.readUnsignedShort();
+		var1.stringArgumentCount = var2.readUnsignedShort();
+		int var6 = var2.readUnsignedByte();
+		int var7;
+		int var8;
+		if (var6 > 0) {
+			var1.switches = var1.newIterableNodeHashTable(var6);
+
+			for (var7 = 0; var7 < var6; ++var7) {
+				var8 = var2.readUnsignedShort();
+				int var9;
+				int var11;
+				if (var8 > 0) {
+					var11 = var8 - 1;
+					var11 |= var11 >>> 1;
+					var11 |= var11 >>> 2;
+					var11 |= var11 >>> 4;
+					var11 |= var11 >>> 8;
+					var11 |= var11 >>> 16;
+					int var10 = var11 + 1;
+					var9 = var10;
+				} else {
+					var9 = 1;
 				}
 
-				if (var8 > var3) {
-					var3 = var8;
-					var5 = var6;
+				IterableNodeHashTable var13 = new IterableNodeHashTable(var9);
+				var1.switches[var7] = var13;
+
+				while (var8-- > 0) {
+					var11 = var2.readInt();
+					int var12 = var2.readInt();
+					var13.put(new IntegerNode(var12), (long)var11);
 				}
-			}
-
-			if (var5 == null) {
-				GrandExchangeOfferWorldComparator.scene.removeGroundItemPile(ScriptEvent.Client_plane, var0, var1);
-			} else {
-				var2.addLast(var5);
-				TileItem var12 = null;
-				TileItem var11 = null;
-
-				for (var6 = (TileItem)var2.last(); var6 != null; var6 = (TileItem)var2.previous()) {
-					if (var6.id != var5.id) {
-						if (var12 == null) {
-							var12 = var6;
-						}
-
-						if (var12.id != var6.id && var11 == null) {
-							var11 = var6;
-						}
-					}
-				}
-
-				long var9 = IsaacCipher.calculateTag(var0, var1, 3, false, 0);
-				GrandExchangeOfferWorldComparator.scene.newGroundItemPile(ScriptEvent.Client_plane, var0, var1, class277.getTileHeight(var0 * 128 + 64, var1 * 128 + 64, ScriptEvent.Client_plane), var5, var9, var12, var11);
 			}
 		}
+
+		var2.offset = 0;
+		var2.readStringCp1252NullTerminatedOrNull();
+		var1.opcodes = new int[var5];
+		var1.intOperands = new int[var5];
+		var1.stringOperands = new String[var5];
+
+		for (var7 = 0; var2.offset < var4; var1.opcodes[var7++] = var8) {
+			var8 = var2.readUnsignedShort();
+			if (var8 == 3) {
+				var1.stringOperands[var7] = var2.readStringCp1252NullTerminated();
+			} else if (var8 < 100 && var8 != 21 && var8 != 38 && var8 != 39) {
+				var1.intOperands[var7] = var2.readInt();
+			} else {
+				var1.intOperands[var7] = var2.readUnsignedByte();
+			}
+		}
+
+		return var1;
 	}
 }

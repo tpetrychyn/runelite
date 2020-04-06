@@ -3,50 +3,56 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("ji")
+@ObfuscatedName("iv")
 @Implements("EnumDefinition")
 public class EnumDefinition extends DualNode {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Liy;"
+		signature = "Lhp;"
 	)
 	@Export("EnumDefinition_archive")
-	static AbstractArchive EnumDefinition_archive;
-	@ObfuscatedName("m")
+	public static AbstractArchive EnumDefinition_archive;
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Leg;"
+		signature = "Lel;"
 	)
 	@Export("EnumDefinition_cached")
 	static EvictingDualNodeHashTable EnumDefinition_cached;
-	@ObfuscatedName("k")
+	@ObfuscatedName("ez")
+	@ObfuscatedGetter(
+		intValue = -1722936721
+	)
+	static int field3324;
+	@ObfuscatedName("e")
 	@Export("inputType")
 	public char inputType;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@Export("outputType")
 	public char outputType;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@Export("defaultStr")
 	public String defaultStr;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 1168542031
+		intValue = -1879425987
 	)
 	@Export("defaultInt")
 	public int defaultInt;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedGetter(
-		intValue = 744835807
+		intValue = -1202748617
 	)
 	@Export("outputCount")
 	public int outputCount;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@Export("keys")
 	public int[] keys;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@Export("intVals")
 	public int[] intVals;
-	@ObfuscatedName("e")
+	@ObfuscatedName("f")
 	@Export("strVals")
 	public String[] strVals;
 
@@ -59,10 +65,10 @@ public class EnumDefinition extends DualNode {
 		this.outputCount = 0;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(Lkb;I)V",
-		garbageValue = "1803562371"
+		signature = "(Lkf;B)V",
+		garbageValue = "49"
 	)
 	@Export("decode")
 	void decode(Buffer var1) {
@@ -76,10 +82,10 @@ public class EnumDefinition extends DualNode {
 		}
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(Lkb;II)V",
-		garbageValue = "-1795608149"
+		signature = "(Lkf;IB)V",
+		garbageValue = "19"
 	)
 	@Export("decodeNext")
 	void decodeNext(Buffer var1, int var2) {
@@ -116,45 +122,182 @@ public class EnumDefinition extends DualNode {
 
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(I)I",
-		garbageValue = "1493924915"
+		signature = "(B)I",
+		garbageValue = "-54"
 	)
 	@Export("size")
 	public int size() {
 		return this.outputCount;
 	}
 
-	@ObfuscatedName("w")
-	@ObfuscatedSignature(
-		signature = "(II)V",
-		garbageValue = "-530273467"
-	)
-	public static void method4614(int var0) {
-		if (var0 != -1) {
-			if (Widget.Widget_loadedInterfaces[var0]) {
-				Widget.Widget_archive.clearFilesGroup(var0);
-				if (Widget.Widget_interfaceComponents[var0] != null) {
-					boolean var1 = true;
+	@ObfuscatedName("q")
+	public static final void method4550(long var0) {
+		if (var0 > 0L) {
+			if (0L == var0 % 10L) {
+				long var2 = var0 - 1L;
 
-					for (int var2 = 0; var2 < Widget.Widget_interfaceComponents[var0].length; ++var2) {
-						if (Widget.Widget_interfaceComponents[var0][var2] != null) {
-							if (Widget.Widget_interfaceComponents[var0][var2].type != 2) {
-								Widget.Widget_interfaceComponents[var0][var2] = null;
-							} else {
-								var1 = false;
-							}
-						}
-					}
+				try {
+					Thread.sleep(var2);
+				} catch (InterruptedException var8) {
+				}
 
-					if (var1) {
-						Widget.Widget_interfaceComponents[var0] = null;
-					}
-
-					Widget.Widget_loadedInterfaces[var0] = false;
+				try {
+					Thread.sleep(1L);
+				} catch (InterruptedException var7) {
+				}
+			} else {
+				try {
+					Thread.sleep(var0);
+				} catch (InterruptedException var6) {
 				}
 			}
+
+		}
+	}
+
+	@ObfuscatedName("ar")
+	@ObfuscatedSignature(
+		signature = "(ILcx;ZI)I",
+		garbageValue = "-2052329100"
+	)
+	static int method4532(int var0, Script var1, boolean var2) {
+		int var3;
+		int var4;
+		if (var0 == ScriptOpcodes.ADD) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var4 + var3;
+			return 1;
+		} else if (var0 == ScriptOpcodes.SUB) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 - var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.MULTIPLY) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 * var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.DIV) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 / var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.RANDOM) {
+			var3 = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)(Math.random() * (double)var3);
+			return 1;
+		} else if (var0 == ScriptOpcodes.RANDOMINC) {
+			var3 = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)(Math.random() * (double)(var3 + 1));
+			return 1;
+		} else if (var0 == ScriptOpcodes.INTERPOLATE) {
+			HealthBarUpdate.Interpreter_intStackSize -= 5;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			int var5 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 2];
+			int var6 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 3];
+			int var7 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 4];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 + (var7 - var5) * (var4 - var3) / (var6 - var5);
+			return 1;
+		} else if (var0 == ScriptOpcodes.ADDPERCENT) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 + var4 * var3 / 100;
+			return 1;
+		} else if (var0 == ScriptOpcodes.SETBIT) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 | 1 << var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.CLEARBIT) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 & -1 - (1 << var4);
+			return 1;
+		} else if (var0 == ScriptOpcodes.TESTBIT) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (var3 & 1 << var4) != 0 ? 1 : 0;
+			return 1;
+		} else if (var0 == ScriptOpcodes.MOD) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 % var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.POW) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			if (var3 == 0) {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = 0;
+			} else {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)Math.pow((double)var3, (double)var4);
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.INVPOW) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			if (var3 == 0) {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = 0;
+				return 1;
+			} else {
+				switch(var4) {
+				case 0:
+					Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Integer.MAX_VALUE;
+					break;
+				case 1:
+					Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3;
+					break;
+				case 2:
+					Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)Math.sqrt((double)var3);
+					break;
+				case 3:
+					Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)Math.cbrt((double)var3);
+					break;
+				case 4:
+					Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)Math.sqrt(Math.sqrt((double)var3));
+					break;
+				default:
+					Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)Math.pow((double)var3, 1.0D / (double)var4);
+				}
+
+				return 1;
+			}
+		} else if (var0 == ScriptOpcodes.AND) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 & var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.OR) {
+			HealthBarUpdate.Interpreter_intStackSize -= 2;
+			var3 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4 = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3 | var4;
+			return 1;
+		} else if (var0 == ScriptOpcodes.SCALE) {
+			HealthBarUpdate.Interpreter_intStackSize -= 3;
+			long var9 = (long)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			long var11 = (long)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			long var13 = (long)Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 2];
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = (int)(var13 * var9 / var11);
+			return 1;
+		} else {
+			return 2;
 		}
 	}
 }

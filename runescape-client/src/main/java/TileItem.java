@@ -4,24 +4,29 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("cf")
+@ObfuscatedName("ch")
 @Implements("TileItem")
 public final class TileItem extends Entity {
 	@ObfuscatedName("i")
-	@ObfuscatedSignature(
-		signature = "Lag;"
-	)
-	@Export("worldMapEvent")
-	static WorldMapEvent worldMapEvent;
-	@ObfuscatedName("x")
 	@ObfuscatedGetter(
-		intValue = 809859925
+		intValue = 1900937269
+	)
+	static int field1242;
+	@ObfuscatedName("c")
+	@ObfuscatedSignature(
+		signature = "Llx;"
+	)
+	@Export("logoSprite")
+	static IndexedSprite logoSprite;
+	@ObfuscatedName("q")
+	@ObfuscatedGetter(
+		intValue = 1946972179
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = -1293976509
+		intValue = -1304382567
 	)
 	@Export("quantity")
 	int quantity;
@@ -29,13 +34,56 @@ public final class TileItem extends Entity {
 	TileItem() {
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedSignature(
-		signature = "(I)Lel;",
-		garbageValue = "480835067"
+		signature = "(I)Ldm;",
+		garbageValue = "759381421"
 	)
 	@Export("getModel")
 	protected final Model getModel() {
-		return AbstractWorldMapData.ItemDefinition_get(this.id).getModel(this.quantity);
+		return WorldMapArea.ItemDefinition_get(this.id).getModel(this.quantity);
+	}
+
+	@ObfuscatedName("q")
+	@ObfuscatedSignature(
+		signature = "(Lhp;B)V",
+		garbageValue = "97"
+	)
+	public static void method2054(AbstractArchive var0) {
+		StructDefinition.StructDefinition_archive = var0;
+	}
+
+	@ObfuscatedName("p")
+	@ObfuscatedSignature(
+		signature = "(III)Lbj;",
+		garbageValue = "308740376"
+	)
+	@Export("Messages_getByChannelAndID")
+	static Message Messages_getByChannelAndID(int var0, int var1) {
+		ChatChannel var2 = (ChatChannel)Messages.Messages_channels.get(var0);
+		return var2.getMessage(var1);
+	}
+
+	@ObfuscatedName("hs")
+	@ObfuscatedSignature(
+		signature = "(IIIII)V",
+		garbageValue = "96373324"
+	)
+	@Export("selectSpell")
+	static void selectSpell(int var0, int var1, int var2, int var3) {
+		Widget var4 = Client.getWidgetChild(var0, var1);
+		if (var4 != null && var4.onTargetEnter != null) {
+			ScriptEvent var5 = new ScriptEvent();
+			var5.widget = var4;
+			var5.args = var4.onTargetEnter;
+			LoginPacket.runScriptEvent(var5);
+		}
+
+		Client.field812 = var3;
+		Client.isSpellSelected = true;
+		WorldMapEvent.selectedSpellWidget = var0;
+		Client.selectedSpellChildIndex = var1;
+		WorldMapCacheName.selectedSpellFlags = var2;
+		Strings.invalidateWidget(var4);
 	}
 }

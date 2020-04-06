@@ -1,17 +1,30 @@
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
+import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ho")
+@ObfuscatedName("hz")
 @Implements("Skills")
 public class Skills {
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("Skills_enabled")
 	public static final boolean[] Skills_enabled;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@Export("Skills_experienceTable")
 	public static int[] Skills_experienceTable;
+	@ObfuscatedName("f")
+	@ObfuscatedGetter(
+		intValue = 1622531909
+	)
+	@Export("Interpreter_stringStackSize")
+	static int Interpreter_stringStackSize;
+	@ObfuscatedName("gz")
+	@ObfuscatedSignature(
+		signature = "[Lly;"
+	)
+	@Export("mapDotSprites")
+	static Sprite[] mapDotSprites;
 
 	static {
 		Skills_enabled = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false};
@@ -27,27 +40,15 @@ public class Skills {
 
 	}
 
-	@ObfuscatedName("z")
+	@ObfuscatedName("iz")
 	@ObfuscatedSignature(
-		signature = "(I)[Lle;",
-		garbageValue = "1897656979"
+		signature = "(IIIIIIII)V",
+		garbageValue = "-1917255225"
 	)
-	public static IndexedSprite[] method4214() {
-		IndexedSprite[] var0 = new IndexedSprite[class335.SpriteBuffer_spriteCount];
-
-		for (int var1 = 0; var1 < class335.SpriteBuffer_spriteCount; ++var1) {
-			IndexedSprite var2 = var0[var1] = new IndexedSprite();
-			var2.width = class335.SpriteBuffer_spriteWidth;
-			var2.height = class335.SpriteBuffer_spriteHeight;
-			var2.xOffset = class335.SpriteBuffer_xOffsets[var1];
-			var2.yOffset = StructDefinition.SpriteBuffer_yOffsets[var1];
-			var2.subWidth = class335.SpriteBuffer_spriteWidths[var1];
-			var2.subHeight = class335.SpriteBuffer_spriteHeights[var1];
-			var2.palette = DefaultsGroup.SpriteBuffer_spritePalette;
-			var2.pixels = class4.SpriteBuffer_pixels[var1];
+	@Export("updateRootInterface")
+	static final void updateRootInterface(int var0, int var1, int var2, int var3, int var4, int var5, int var6) {
+		if (class162.loadInterface(var0)) {
+			class2.updateInterface(Widget.Widget_interfaceComponents[var0], -1, var1, var2, var3, var4, var5, var6);
 		}
-
-		Ignored.method5235();
-		return var0;
 	}
 }

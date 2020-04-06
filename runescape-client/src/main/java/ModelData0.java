@@ -1,103 +1,121 @@
+import java.io.IOException;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("ed")
+@ObfuscatedName("eu")
 @Implements("ModelData0")
 public class ModelData0 {
-	@ObfuscatedName("w")
-	@ObfuscatedSignature(
-		signature = "Lle;"
-	)
-	@Export("titleboxSprite")
-	static IndexedSprite titleboxSprite;
-	@ObfuscatedName("t")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -2057553867
+		intValue = 109358047
 	)
-	@Export("gameCyclesToDo")
-	protected static int gameCyclesToDo;
+	static int field1871;
+	@ObfuscatedName("b")
+	public static short[] field1870;
+	@ObfuscatedName("i")
+	@Export("ItemDefinition_inMembersWorld")
+	public static boolean ItemDefinition_inMembersWorld;
 
 	ModelData0() {
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(IIIZIZB)V",
-		garbageValue = "-80"
+		signature = "(I)Lbk;",
+		garbageValue = "1887842280"
 	)
-	@Export("doWorldSorting")
-	static void doWorldSorting(int var0, int var1, int var2, boolean var3, int var4, boolean var5) {
-		if (var0 < var1) {
-			int var6 = (var0 + var1) / 2;
-			int var7 = var0;
-			World var8 = UserComparator2.World_worlds[var6];
-			UserComparator2.World_worlds[var6] = UserComparator2.World_worlds[var1];
-			UserComparator2.World_worlds[var1] = var8;
+	static ClientPreferences method3249() {
+		AccessFile var0 = null;
+		ClientPreferences var1 = new ClientPreferences();
 
-			for (int var9 = var0; var9 < var1; ++var9) {
-				World var11 = UserComparator2.World_worlds[var9];
-				int var12 = DevicePcmPlayerProvider.compareWorlds(var11, var8, var2, var3);
-				int var10;
-				if (var12 != 0) {
-					if (var3) {
-						var10 = -var12;
-					} else {
-						var10 = var12;
-					}
-				} else if (var4 == -1) {
-					var10 = 0;
-				} else {
-					int var13 = DevicePcmPlayerProvider.compareWorlds(var11, var8, var4, var5);
-					if (var5) {
-						var10 = -var13;
-					} else {
-						var10 = var13;
-					}
-				}
+		try {
+			var0 = WorldMapIcon_0.getPreferencesFile("", WorldMapRegion.field248.name, false);
+			byte[] var2 = new byte[(int)var0.length()];
 
-				if (var10 <= 0) {
-					World var14 = UserComparator2.World_worlds[var9];
-					UserComparator2.World_worlds[var9] = UserComparator2.World_worlds[var7];
-					UserComparator2.World_worlds[var7++] = var14;
+			int var4;
+			for (int var3 = 0; var3 < var2.length; var3 += var4) {
+				var4 = var0.read(var2, var3, var2.length - var3);
+				if (var4 == -1) {
+					throw new IOException();
 				}
 			}
 
-			UserComparator2.World_worlds[var1] = UserComparator2.World_worlds[var7];
-			UserComparator2.World_worlds[var7] = var8;
-			doWorldSorting(var0, var7 - 1, var2, var3, var4, var5);
-			doWorldSorting(var7 + 1, var1, var2, var3, var4, var5);
+			var1 = new ClientPreferences(new Buffer(var2));
+		} catch (Exception var6) {
 		}
 
-	}
-
-	@ObfuscatedName("fs")
-	@ObfuscatedSignature(
-		signature = "(IIII)V",
-		garbageValue = "1566964636"
-	)
-	@Export("queueSoundEffect")
-	static void queueSoundEffect(int var0, int var1, int var2) {
-		if (Client.soundEffectVolume != 0 && var1 != 0 && Client.soundEffectCount < 50) {
-			Client.soundEffectIds[Client.soundEffectCount] = var0;
-			Client.queuedSoundEffectLoops[Client.soundEffectCount] = var1;
-			Client.queuedSoundEffectDelays[Client.soundEffectCount] = var2;
-			Client.soundEffects[Client.soundEffectCount] = null;
-			Client.soundLocations[Client.soundEffectCount] = 0;
-			++Client.soundEffectCount;
+		try {
+			if (var0 != null) {
+				var0.close();
+			}
+		} catch (Exception var5) {
 		}
 
+		return var1;
 	}
 
-	@ObfuscatedName("kb")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(Lkb;II)V",
-		garbageValue = "-1883187928"
+		signature = "(ILcx;ZB)I",
+		garbageValue = "-93"
 	)
-	static void method3362(Buffer var0, int var1) {
-		Interpreter.method2113(var0.array, var1);
-		WorldMapSprite.method510(var0, var1);
+	static int method3250(int var0, Script var1, boolean var2) {
+		int var3 = -1;
+		Widget var4;
+		if (var0 >= 2000) {
+			var0 -= 1000;
+			var3 = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize];
+			var4 = class80.getWidget(var3);
+		} else {
+			var4 = var2 ? Interpreter.field1111 : Calendar.field2507;
+		}
+
+		if (var0 == ScriptOpcodes.CC_SETPOSITION) {
+			HealthBarUpdate.Interpreter_intStackSize -= 4;
+			var4.rawX = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4.rawY = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			var4.xAlignment = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 2];
+			var4.yAlignment = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 3];
+			Strings.invalidateWidget(var4);
+			WorldMapSprite.client.alignWidget(var4);
+			if (var3 != -1 && var4.type == 0) {
+				WorldMapSprite.revalidateWidgetScroll(Widget.Widget_interfaceComponents[var3 >> 16], var4, false);
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.CC_SETSIZE) {
+			HealthBarUpdate.Interpreter_intStackSize -= 4;
+			var4.rawWidth = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize];
+			var4.rawHeight = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 1];
+			var4.widthAlignment = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 2];
+			var4.heightAlignment = Interpreter.Interpreter_intStack[HealthBarUpdate.Interpreter_intStackSize + 3];
+			Strings.invalidateWidget(var4);
+			WorldMapSprite.client.alignWidget(var4);
+			if (var3 != -1 && var4.type == 0) {
+				WorldMapSprite.revalidateWidgetScroll(Widget.Widget_interfaceComponents[var3 >> 16], var4, false);
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.CC_SETHIDE) {
+			boolean var5 = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize] == 1;
+			if (var5 != var4.isHidden) {
+				var4.isHidden = var5;
+				Strings.invalidateWidget(var4);
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.CC_SETNOCLICKTHROUGH) {
+			var4.noClickThrough = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize] == 1;
+			return 1;
+		} else if (var0 == ScriptOpcodes.CC_SETNOSCROLLTHROUGH) {
+			var4.noScrollThrough = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize] == 1;
+			return 1;
+		} else {
+			return 2;
+		}
 	}
 }

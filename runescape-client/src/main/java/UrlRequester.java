@@ -3,31 +3,25 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("ey")
+@ObfuscatedName("ez")
 @Implements("UrlRequester")
 public class UrlRequester implements Runnable {
-	@ObfuscatedName("fx")
-	@ObfuscatedSignature(
-		signature = "Llt;"
-	)
-	static AbstractSocket field1960;
-	@ObfuscatedName("gb")
-	@Export("xteaKeys")
-	static int[][] xteaKeys;
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("thread")
 	final Thread thread;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("isClosed")
 	volatile boolean isClosed;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@Export("requests")
 	Queue requests;
 
@@ -38,10 +32,10 @@ public class UrlRequester implements Runnable {
 		this.thread.start();
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Ljava/net/URL;B)Lew;",
-		garbageValue = "81"
+		signature = "(Ljava/net/URL;B)Lex;",
+		garbageValue = "78"
 	)
 	@Export("request")
 	public UrlRequest request(URL var1) {
@@ -53,10 +47,10 @@ public class UrlRequester implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
 		signature = "(B)V",
-		garbageValue = "0"
+		garbageValue = "78"
 	)
 	@Export("close")
 	public void close() {
@@ -119,9 +113,63 @@ public class UrlRequester implements Runnable {
 
 				}
 			} catch (Exception var17) {
-				WorldMapDecorationType.RunException_sendStackTrace((String)null, var17);
+				HitSplatDefinition.RunException_sendStackTrace((String)null, var17);
 			}
 		}
 
+	}
+
+	@ObfuscatedName("u")
+	@ObfuscatedSignature(
+		signature = "(I)Ljava/lang/String;",
+		garbageValue = "1670821408"
+	)
+	static String method3305() {
+		String var0 = "";
+
+		Message var2;
+		for (Iterator var1 = Messages.Messages_hashTable.iterator(); var1.hasNext(); var0 = var0 + var2.sender + ':' + var2.text + '\n') {
+			var2 = (Message)var1.next();
+		}
+
+		return var0;
+	}
+
+	@ObfuscatedName("s")
+	@ObfuscatedSignature(
+		signature = "(ILcx;ZI)I",
+		garbageValue = "337474973"
+	)
+	static int method3306(int var0, Script var1, boolean var2) {
+		Widget var3;
+		if (var0 == ScriptOpcodes.IF_GETINVOBJECT) {
+			var3 = class80.getWidget(Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize]);
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3.itemId;
+			return 1;
+		} else if (var0 == ScriptOpcodes.IF_GETINVCOUNT) {
+			var3 = class80.getWidget(Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize]);
+			if (var3.itemId != -1) {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3.itemQuantity;
+			} else {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = 0;
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.IF_HASSUB) {
+			int var5 = Interpreter.Interpreter_intStack[--HealthBarUpdate.Interpreter_intStackSize];
+			InterfaceParent var4 = (InterfaceParent)Client.interfaceParents.get((long)var5);
+			if (var4 != null) {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = 1;
+			} else {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = 0;
+			}
+
+			return 1;
+		} else if (var0 == ScriptOpcodes.IF_GETTOP) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = Client.rootInterface;
+			return 1;
+		} else {
+			return 2;
+		}
 	}
 }

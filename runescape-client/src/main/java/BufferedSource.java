@@ -7,37 +7,37 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("lm")
+@ObfuscatedName("ks")
 @Implements("BufferedSource")
 public class BufferedSource implements Runnable {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("thread")
 	Thread thread;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("inputStream")
 	InputStream inputStream;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = 1277158721
+		intValue = 491736021
 	)
 	@Export("capacity")
 	int capacity;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@Export("buffer")
 	byte[] buffer;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -555617543
+		intValue = -570790809
 	)
 	@Export("position")
 	int position;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 155508897
+		intValue = -902879681
 	)
 	@Export("limit")
 	int limit;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@Export("exception")
 	IOException exception;
 
@@ -52,10 +52,10 @@ public class BufferedSource implements Runnable {
 		this.thread.start();
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(IB)Z",
-		garbageValue = "-72"
+		signature = "(II)Z",
+		garbageValue = "-1294773775"
 	)
 	@Export("isAvailable")
 	boolean isAvailable(int var1) throws IOException {
@@ -86,10 +86,10 @@ public class BufferedSource implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "23"
+		signature = "(I)I",
+		garbageValue = "-72711599"
 	)
 	@Export("available")
 	int available() throws IOException {
@@ -110,15 +110,15 @@ public class BufferedSource implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "0"
+		signature = "(I)I",
+		garbageValue = "797723305"
 	)
 	@Export("readUnsignedByte")
 	int readUnsignedByte() throws IOException {
 		synchronized(this) {
-			if (this.position == this.limit) {
+			if (this.limit == this.position) {
 				if (this.exception != null) {
 					throw new IOException(this.exception.toString());
 				} else {
@@ -133,10 +133,10 @@ public class BufferedSource implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "([BIII)I",
-		garbageValue = "1983189445"
+		signature = "([BIIS)I",
+		garbageValue = "28253"
 	)
 	@Export("read")
 	int read(byte[] var1, int var2, int var3) throws IOException {
@@ -174,10 +174,10 @@ public class BufferedSource implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "-424049486"
+		garbageValue = "-1361407903"
 	)
 	@Export("close")
 	void close() {
@@ -241,6 +241,88 @@ public class BufferedSource implements Runnable {
 			synchronized(this) {
 				this.limit = (var7 + this.limit) % this.capacity;
 			}
+		}
+	}
+
+	@ObfuscatedName("w")
+	@ObfuscatedSignature(
+		signature = "(Lhp;Lhp;ZII)V",
+		garbageValue = "-273498913"
+	)
+	static void method5892(AbstractArchive var0, AbstractArchive var1, boolean var2, int var3) {
+		if (Login.field1179) {
+			if (var3 == 4) {
+				Login.loginIndex = 4;
+			}
+
+		} else {
+			Login.loginIndex = var3;
+			Rasterizer2D.Rasterizer2D_clear();
+			byte[] var4 = var0.takeFileByNames("title.jpg", "");
+			GrandExchangeOfferWorldComparator.leftTitleSprite = BuddyRankComparator.convertJpgToSprite(var4);
+			NPC.rightTitleSprite = GrandExchangeOfferWorldComparator.leftTitleSprite.mirrorHorizontally();
+			if ((Client.worldProperties & 536870912) != 0) {
+				TileItem.logoSprite = class215.SpriteBuffer_getIndexedSpriteByName(var1, "logo_deadman_mode", "");
+			} else {
+				TileItem.logoSprite = class215.SpriteBuffer_getIndexedSpriteByName(var1, "logo", "");
+			}
+
+			Login.titleboxSprite = class215.SpriteBuffer_getIndexedSpriteByName(var1, "titlebox", "");
+			VarpDefinition.titlebuttonSprite = class215.SpriteBuffer_getIndexedSpriteByName(var1, "titlebutton", "");
+			int var6 = var1.getGroupId("runes");
+			int var7 = var1.getFileId(var6, "");
+			IndexedSprite[] var5 = class289.method5281(var1, var6, var7);
+			Login.runesSprite = var5;
+			var7 = var1.getGroupId("title_mute");
+			int var8 = var1.getFileId(var7, "");
+			IndexedSprite[] var9 = class289.method5281(var1, var7, var8);
+			Login.title_muteSprite = var9;
+			Login.options_buttons_0Sprite = class215.SpriteBuffer_getIndexedSpriteByName(var1, "options_radio_buttons,0", "");
+			Message.field606 = class215.SpriteBuffer_getIndexedSpriteByName(var1, "options_radio_buttons,4", "");
+			Decimator.options_buttons_2Sprite = class215.SpriteBuffer_getIndexedSpriteByName(var1, "options_radio_buttons,2", "");
+			Login.field1185 = class215.SpriteBuffer_getIndexedSpriteByName(var1, "options_radio_buttons,6", "");
+			class237.field3191 = Login.options_buttons_0Sprite.subWidth;
+			WorldMapDecoration.field212 = Login.options_buttons_0Sprite.subHeight;
+			Ignored.loginScreenRunesAnimation = new LoginScreenAnimation(Login.runesSprite);
+			if (var2) {
+				Login.Login_username = "";
+				Login.Login_password = "";
+			}
+
+			GrandExchangeOffer.field65 = 0;
+			WorldMapManager.otp = "";
+			Login.field1201 = true;
+			Login.worldSelectOpen = false;
+			if (!WorldMapLabelSize.clientPreferences.titleMusicDisabled) {
+				WorldMapRegion.playMusicTrack(2, WorldMapRegion.archive6, "scape main", "", 255, false);
+			} else {
+				class40.method729(2);
+			}
+
+			if (NetCache.NetCache_socket != null) {
+				try {
+					Buffer var10 = new Buffer(4);
+					var10.writeByte(3);
+					var10.writeMedium(0);
+					NetCache.NetCache_socket.write(var10.array, 0, 4);
+				} catch (IOException var13) {
+					try {
+						NetCache.NetCache_socket.close();
+					} catch (Exception var12) {
+					}
+
+					++NetCache.NetCache_ioExceptions;
+					NetCache.NetCache_socket = null;
+				}
+			}
+
+			Login.field1179 = true;
+			Login.xPadding = (GrandExchangeEvent.canvasWidth - 765) / 2;
+			Login.loginBoxX = Login.xPadding + 202;
+			ScriptEvent.loginBoxCenter = Login.loginBoxX + 180;
+			GrandExchangeOfferWorldComparator.leftTitleSprite.drawAt(Login.xPadding, 0);
+			NPC.rightTitleSprite.drawAt(Login.xPadding + 382, 0);
+			TileItem.logoSprite.drawAt(Login.xPadding + 382 - TileItem.logoSprite.subWidth / 2, 18);
 		}
 	}
 }

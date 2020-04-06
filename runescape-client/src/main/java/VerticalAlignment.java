@@ -4,35 +4,41 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ie")
+@ObfuscatedName("if")
 @Implements("VerticalAlignment")
 public enum VerticalAlignment implements Enumerated {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Lie;"
+		signature = "Lif;"
 	)
-	field3193(0, 0),
-	@ObfuscatedName("m")
+	field3195(1, 0),
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "Lie;"
+		signature = "Lif;"
 	)
 	@Export("VerticalAlignment_centered")
-	VerticalAlignment_centered(1, 1),
-	@ObfuscatedName("k")
+	VerticalAlignment_centered(0, 1),
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "Lie;"
+		signature = "Lif;"
 	)
-	field3196(2, 2);
+	field3194(2, 2);
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("g")
 	@ObfuscatedGetter(
-		intValue = 1209420553
+		intValue = -899877695
+	)
+	@Export("graphicsTickTimeIdx")
+	static int graphicsTickTimeIdx;
+	@ObfuscatedName("p")
+	@ObfuscatedGetter(
+		intValue = -513284045
 	)
 	@Export("value")
 	public final int value;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -1378606847
+		intValue = -404264531
 	)
 	@Export("id")
 	final int id;
@@ -42,27 +48,13 @@ public enum VerticalAlignment implements Enumerated {
 		this.id = var4;
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "56"
+		signature = "(I)I",
+		garbageValue = "320353268"
 	)
 	@Export("rsOrdinal")
 	public int rsOrdinal() {
 		return this.id;
-	}
-
-	@ObfuscatedName("fq")
-	@ObfuscatedSignature(
-		signature = "(III)V",
-		garbageValue = "-738770564"
-	)
-	@Export("playSoundJingle")
-	static void playSoundJingle(int var0, int var1) {
-		if (Client.musicVolume != 0 && var0 != -1) {
-			class74.method1321(WorldMapRegion.archive11, var0, 0, Client.musicVolume, false);
-			Client.field915 = true;
-		}
-
 	}
 }

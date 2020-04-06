@@ -3,35 +3,36 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("hs")
+@ObfuscatedName("gq")
 @Implements("MusicPatchPcmStream")
 public class MusicPatchPcmStream extends PcmStream {
-	@ObfuscatedName("as")
+	@ObfuscatedName("ap")
 	@ObfuscatedSignature(
-		signature = "Lld;"
+		signature = "Llt;"
 	)
-	static Bounds field2495;
-	@ObfuscatedName("x")
+	@Export("rasterProvider")
+	public static AbstractRasterProvider rasterProvider;
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Lgi;"
+		signature = "Lga;"
 	)
 	@Export("superStream")
 	MidiPcmStream superStream;
-	@ObfuscatedName("m")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
 		signature = "Ljh;"
 	)
 	@Export("queue")
 	NodeDeque queue;
-	@ObfuscatedName("k")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "Ldz;"
+		signature = "Lcz;"
 	)
 	@Export("mixer")
 	PcmStreamMixer mixer;
 
 	@ObfuscatedSignature(
-		signature = "(Lgi;)V"
+		signature = "(Lga;)V"
 	)
 	MusicPatchPcmStream(MidiPcmStream var1) {
 		this.queue = new NodeDeque();
@@ -39,48 +40,48 @@ public class MusicPatchPcmStream extends PcmStream {
 		this.superStream = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lhz;[IIIIB)V",
-		garbageValue = "56"
+		signature = "(Lgi;[IIIII)V",
+		garbageValue = "1316254184"
 	)
-	void method3992(MusicPatchNode var1, int[] var2, int var3, int var4, int var5) {
-		if ((this.superStream.field2428[var1.field2452] & 4) != 0 && var1.field2459 < 0) {
-			int var6 = this.superStream.field2433[var1.field2452] / PcmPlayer.field1421;
+	void method3895(MusicPatchNode var1, int[] var2, int var3, int var4, int var5) {
+		if ((this.superStream.field2421[var1.field2440] & 4) != 0 && var1.field2436 < 0) {
+			int var6 = this.superStream.field2408[var1.field2440] / CollisionMap.field2078;
 
 			while (true) {
-				int var7 = (var6 + 1048575 - var1.field2462) / var6;
+				int var7 = (var6 + 1048575 - var1.field2444) / var6;
 				if (var7 > var4) {
-					var1.field2462 += var4 * var6;
+					var1.field2444 += var4 * var6;
 					break;
 				}
 
 				var1.stream.fill(var2, var3, var7);
 				var3 += var7;
 				var4 -= var7;
-				var1.field2462 += var7 * var6 - 1048576;
-				int var8 = PcmPlayer.field1421 / 100;
+				var1.field2444 += var6 * var7 - 1048576;
+				int var8 = CollisionMap.field2078 / 100;
 				int var9 = 262144 / var6;
 				if (var9 < var8) {
 					var8 = var9;
 				}
 
 				RawPcmStream var10 = var1.stream;
-				if (this.superStream.field2431[var1.field2452] == 0) {
-					var1.stream = RawPcmStream.method2685(var1.rawSound, var10.method2670(), var10.method2662(), var10.method2663());
+				if (this.superStream.field2410[var1.field2440] == 0) {
+					var1.stream = RawPcmStream.method2524(var1.rawSound, var10.method2539(), var10.method2531(), var10.method2541());
 				} else {
-					var1.stream = RawPcmStream.method2685(var1.rawSound, var10.method2670(), 0, var10.method2663());
-					this.superStream.method3852(var1, var1.patch.field2485[var1.field2464] < 0);
-					var1.stream.method2666(var8, var10.method2662());
+					var1.stream = RawPcmStream.method2524(var1.rawSound, var10.method2539(), 0, var10.method2541());
+					this.superStream.method3767(var1, var1.patch.field2482[var1.field2450] < 0);
+					var1.stream.method2535(var8, var10.method2531());
 				}
 
-				if (var1.patch.field2485[var1.field2464] < 0) {
+				if (var1.patch.field2482[var1.field2450] < 0) {
 					var1.stream.setNumLoops(-1);
 				}
 
-				var10.method2706(var8);
+				var10.method2540(var8);
 				var10.fill(var2, var3, var5 - var3);
-				if (var10.method2672()) {
+				if (var10.method2585()) {
 					this.mixer.addSubStream(var10);
 				}
 			}
@@ -89,38 +90,38 @@ public class MusicPatchPcmStream extends PcmStream {
 		var1.stream.fill(var2, var3, var4);
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(Lhz;II)V",
-		garbageValue = "2036025263"
+		signature = "(Lgi;II)V",
+		garbageValue = "1166888342"
 	)
-	void method3989(MusicPatchNode var1, int var2) {
-		if ((this.superStream.field2428[var1.field2452] & 4) != 0 && var1.field2459 < 0) {
-			int var3 = this.superStream.field2433[var1.field2452] / PcmPlayer.field1421;
-			int var4 = (var3 + 1048575 - var1.field2462) / var3;
-			var1.field2462 = var3 * var2 + var1.field2462 & 1048575;
+	void method3896(MusicPatchNode var1, int var2) {
+		if ((this.superStream.field2421[var1.field2440] & 4) != 0 && var1.field2436 < 0) {
+			int var3 = this.superStream.field2408[var1.field2440] / CollisionMap.field2078;
+			int var4 = (var3 + 1048575 - var1.field2444) / var3;
+			var1.field2444 = var3 * var2 + var1.field2444 & 1048575;
 			if (var4 <= var2) {
-				if (this.superStream.field2431[var1.field2452] == 0) {
-					var1.stream = RawPcmStream.method2685(var1.rawSound, var1.stream.method2670(), var1.stream.method2662(), var1.stream.method2663());
+				if (this.superStream.field2410[var1.field2440] == 0) {
+					var1.stream = RawPcmStream.method2524(var1.rawSound, var1.stream.method2539(), var1.stream.method2531(), var1.stream.method2541());
 				} else {
-					var1.stream = RawPcmStream.method2685(var1.rawSound, var1.stream.method2670(), 0, var1.stream.method2663());
-					this.superStream.method3852(var1, var1.patch.field2485[var1.field2464] < 0);
+					var1.stream = RawPcmStream.method2524(var1.rawSound, var1.stream.method2539(), 0, var1.stream.method2541());
+					this.superStream.method3767(var1, var1.patch.field2482[var1.field2450] < 0);
 				}
 
-				if (var1.patch.field2485[var1.field2464] < 0) {
+				if (var1.patch.field2482[var1.field2450] < 0) {
 					var1.stream.setNumLoops(-1);
 				}
 
-				var2 = var1.field2462 / var3;
+				var2 = var1.field2444 / var3;
 			}
 		}
 
 		var1.stream.skip(var2);
 	}
 
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "()Lds;"
+		signature = "()Ldx;"
 	)
 	@Export("firstSubStream")
 	protected PcmStream firstSubStream() {
@@ -132,9 +133,9 @@ public class MusicPatchPcmStream extends PcmStream {
 		}
 	}
 
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedSignature(
-		signature = "()Lds;"
+		signature = "()Ldx;"
 	)
 	@Export("nextSubStream")
 	protected PcmStream nextSubStream() {
@@ -149,173 +150,129 @@ public class MusicPatchPcmStream extends PcmStream {
 		return var1.stream;
 	}
 
-	@ObfuscatedName("z")
-	protected int vmethod3984() {
+	@ObfuscatedName("i")
+	protected int vmethod3892() {
 		return 0;
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@Export("fill")
 	protected void fill(int[] var1, int var2, int var3) {
 		this.mixer.fill(var1, var2, var3);
 
 		for (MusicPatchNode var6 = (MusicPatchNode)this.queue.last(); var6 != null; var6 = (MusicPatchNode)this.queue.previous()) {
-			if (!this.superStream.method3826(var6)) {
+			if (!this.superStream.method3739(var6)) {
 				int var4 = var2;
 				int var5 = var3;
 
 				do {
-					if (var5 <= var6.field2453) {
-						this.method3992(var6, var1, var4, var5, var4 + var5);
-						var6.field2453 -= var5;
+					if (var5 <= var6.field2455) {
+						this.method3895(var6, var1, var4, var5, var4 + var5);
+						var6.field2455 -= var5;
 						break;
 					}
 
-					this.method3992(var6, var1, var4, var6.field2453, var4 + var5);
-					var4 += var6.field2453;
-					var5 -= var6.field2453;
-				} while(!this.superStream.method3884(var6, var1, var4, var5));
+					this.method3895(var6, var1, var4, var6.field2455, var5 + var4);
+					var4 += var6.field2455;
+					var5 -= var6.field2455;
+				} while(!this.superStream.method3740(var6, var1, var4, var5));
 			}
 		}
 
 	}
 
-	@ObfuscatedName("s")
+	@ObfuscatedName("x")
 	@Export("skip")
 	protected void skip(int var1) {
 		this.mixer.skip(var1);
 
 		for (MusicPatchNode var3 = (MusicPatchNode)this.queue.last(); var3 != null; var3 = (MusicPatchNode)this.queue.previous()) {
-			if (!this.superStream.method3826(var3)) {
+			if (!this.superStream.method3739(var3)) {
 				int var2 = var1;
 
 				do {
-					if (var2 <= var3.field2453) {
-						this.method3989(var3, var2);
-						var3.field2453 -= var2;
+					if (var2 <= var3.field2455) {
+						this.method3896(var3, var2);
+						var3.field2455 -= var2;
 						break;
 					}
 
-					this.method3989(var3, var3.field2453);
-					var2 -= var3.field2453;
-				} while(!this.superStream.method3884(var3, (int[])null, 0, var2));
+					this.method3896(var3, var3.field2455);
+					var2 -= var3.field2455;
+				} while(!this.superStream.method3740(var3, (int[])null, 0, var2));
 			}
 		}
 
 	}
 
-	@ObfuscatedName("fv")
+	@ObfuscatedName("u")
 	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "-1600061666"
+		signature = "(Lbw;B)V",
+		garbageValue = "35"
 	)
-	static void method4004() {
-		Client.mouseLastLastPressedTimeMillis = -1L;
-		MidiPcmStream.mouseRecorder.index = 0;
-		GameShell.hasFocus = true;
-		Client.hadFocus = true;
-		Client.field904 = -1L;
-		class25.method277();
-		Client.packetWriter.clearBuffer();
-		Client.packetWriter.packetBuffer.offset = 0;
-		Client.packetWriter.serverPacket = null;
-		Client.packetWriter.field1334 = null;
-		Client.packetWriter.field1329 = null;
-		Client.packetWriter.field1339 = null;
-		Client.packetWriter.serverPacketLength = 0;
-		Client.packetWriter.field1338 = 0;
-		Client.rebootTimer = 0;
-		Client.logoutTimer = 0;
-		Client.hintArrowType = 0;
-		AbstractByteArrayCopier.method4023();
-		ServerPacket.method3684(0);
-		Interpreter.method2112();
-		Client.isItemSelected = 0;
-		Client.isSpellSelected = false;
-		Client.soundEffectCount = 0;
-		Client.camAngleY = 0;
-		Client.oculusOrbState = 0;
-		WorldMapRectangle.field222 = null;
-		Client.minimapState = 0;
-		Client.field695 = -1;
-		Client.destinationX = 0;
-		Client.destinationY = 0;
-		Client.playerAttackOption = AttackOption.AttackOption_hidden;
-		Client.npcAttackOption = AttackOption.AttackOption_hidden;
-		Client.npcCount = 0;
-		Player.method1383();
-
-		int var0;
-		for (var0 = 0; var0 < 2048; ++var0) {
-			Client.players[var0] = null;
-		}
-
-		for (var0 = 0; var0 < 32768; ++var0) {
-			Client.npcs[var0] = null;
-		}
-
-		Client.combatTargetPlayerIndex = -1;
-		Client.projectiles.clear();
-		Client.graphicsObjects.clear();
-
-		for (var0 = 0; var0 < 4; ++var0) {
-			for (int var1 = 0; var1 < 104; ++var1) {
-				for (int var2 = 0; var2 < 104; ++var2) {
-					Client.groundItems[var0][var1][var2] = null;
-				}
+	@Export("changeWorld")
+	static void changeWorld(World var0) {
+		if (var0.isMembersOnly() != Client.isMembersWorld) {
+			Client.isMembersWorld = var0.isMembersOnly();
+			boolean var1 = var0.isMembersOnly();
+			if (var1 != ModelData0.ItemDefinition_inMembersWorld) {
+				ItemDefinition.ItemDefinition_cached.clear();
+				ItemDefinition.ItemDefinition_cachedModels.clear();
+				ItemDefinition.ItemDefinition_cachedSprites.clear();
+				ModelData0.ItemDefinition_inMembersWorld = var1;
 			}
 		}
 
-		Client.pendingSpawns = new NodeDeque();
-		Projectile.friendSystem.clear();
+		ClientPreferences.worldHost = var0.host;
+		Client.worldId = var0.id;
+		Client.worldProperties = var0.properties;
+		Language.port1 = Client.gameBuild == 0 ? 43594 : var0.id + 40000;
+		Skeleton.port2 = Client.gameBuild == 0 ? 443 : var0.id + 50000;
+		Varcs.port3 = Language.port1;
+	}
 
-		for (var0 = 0; var0 < VarpDefinition.VarpDefinition_fileCount; ++var0) {
-			VarpDefinition var3 = class228.VarpDefinition_get(var0);
-			if (var3 != null) {
-				Varps.Varps_temp[var0] = 0;
-				Varps.Varps_main[var0] = 0;
+	@ObfuscatedName("ih")
+	@ObfuscatedSignature(
+		signature = "(IIIIIII)V",
+		garbageValue = "2095922546"
+	)
+	static final void method3912(int var0, int var1, int var2, int var3, int var4, int var5) {
+		int var6 = var2 - var0;
+		int var7 = var3 - var1;
+		int var8 = var6 >= 0 ? var6 : -var6;
+		int var9 = var7 >= 0 ? var7 : -var7;
+		int var10 = var8;
+		if (var8 < var9) {
+			var10 = var9;
+		}
+
+		if (var10 != 0) {
+			int var11 = (var6 << 16) / var10;
+			int var12 = (var7 << 16) / var10;
+			if (var12 <= var11) {
+				var11 = -var11;
+			} else {
+				var12 = -var12;
 			}
+
+			int var13 = var5 * var12 >> 17;
+			int var14 = var5 * var12 + 1 >> 17;
+			int var15 = var5 * var11 >> 17;
+			int var16 = var5 * var11 + 1 >> 17;
+			var0 -= Rasterizer2D.Rasterizer2D_xClipStart;
+			var1 -= Rasterizer2D.Rasterizer2D_yClipStart;
+			int var17 = var0 + var13;
+			int var18 = var0 - var14;
+			int var19 = var0 + var6 - var14;
+			int var20 = var0 + var6 + var13;
+			int var21 = var15 + var1;
+			int var22 = var1 - var16;
+			int var23 = var7 + var1 - var16;
+			int var24 = var7 + var15 + var1;
+			Rasterizer3D.method2981(var17, var18, var19);
+			Rasterizer3D.method3007(var21, var22, var23, var17, var18, var19, var4);
+			Rasterizer3D.method2981(var17, var19, var20);
+			Rasterizer3D.method3007(var21, var23, var24, var17, var19, var20, var4);
 		}
-
-		UserComparator4.varcs.clearTransient();
-		Client.followerIndex = -1;
-		if (Client.rootInterface != -1) {
-			EnumDefinition.method4614(Client.rootInterface);
-		}
-
-		for (InterfaceParent var4 = (InterfaceParent)Client.interfaceParents.first(); var4 != null; var4 = (InterfaceParent)Client.interfaceParents.next()) {
-			class41.closeInterface(var4, true);
-		}
-
-		Client.rootInterface = -1;
-		Client.interfaceParents = new NodeHashTable(8);
-		Client.meslayerContinueWidget = null;
-		AbstractByteArrayCopier.method4023();
-		Client.playerAppearance.update((int[])null, new int[]{0, 0, 0, 0, 0}, false, -1);
-
-		for (var0 = 0; var0 < 8; ++var0) {
-			Client.playerMenuActions[var0] = null;
-			Client.playerOptionsPriorities[var0] = false;
-		}
-
-		ItemContainer.itemContainers = new NodeHashTable(32);
-		Client.isLoading = true;
-
-		for (var0 = 0; var0 < 100; ++var0) {
-			Client.field679[var0] = true;
-		}
-
-		PacketBufferNode var5 = FaceNormal.getPacketBufferNode(ClientPacket.field2257, Client.packetWriter.isaacCipher);
-		var5.packetBuffer.writeByte(class74.getWindowedMode());
-		var5.packetBuffer.writeShort(WorldMapLabel.canvasWidth);
-		var5.packetBuffer.writeShort(Varps.canvasHeight);
-		Client.packetWriter.addNode(var5);
-		InterfaceParent.clanChat = null;
-
-		for (var0 = 0; var0 < 8; ++var0) {
-			Client.grandExchangeOffers[var0] = new GrandExchangeOffer();
-		}
-
-		GrandExchangeEvent.grandExchangeEvents = null;
 	}
 }

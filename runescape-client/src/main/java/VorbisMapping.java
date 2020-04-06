@@ -2,19 +2,19 @@ import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 
-@ObfuscatedName("dt")
+@ObfuscatedName("dp")
 @Implements("VorbisMapping")
 public class VorbisMapping {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("submaps")
 	int submaps;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("mappingMux")
 	int mappingMux;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@Export("submapFloor")
 	int[] submapFloor;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@Export("submapResidue")
 	int[] submapResidue;
 

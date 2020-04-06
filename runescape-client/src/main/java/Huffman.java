@@ -1,21 +1,18 @@
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("hb")
+@ObfuscatedName("hk")
 @Implements("Huffman")
 public class Huffman {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("masks")
 	int[] masks;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("bits")
 	byte[] bits;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@Export("keys")
 	int[] keys;
 
@@ -102,10 +99,10 @@ public class Huffman {
 
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "([BII[BIB)I",
-		garbageValue = "77"
+		signature = "([BII[BII)I",
+		garbageValue = "-1706453276"
 	)
 	@Export("compress")
 	int compress(byte[] var1, int var2, int var3, byte[] var4, int var5) {
@@ -123,7 +120,7 @@ public class Huffman {
 			int var11 = var7 >> 3;
 			int var12 = var7 & 7;
 			var6 &= -var12 >> 31;
-			int var13 = (var10 + var12 - 1 >> 3) + var11;
+			int var13 = (var12 + var10 - 1 >> 3) + var11;
 			var12 += 24;
 			var4[var11] = (byte)(var6 |= var9 >>> var12);
 			if (var11 < var13) {
@@ -153,10 +150,10 @@ public class Huffman {
 		return (var7 + 7 >> 3) - var5;
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "([BI[BIIB)I",
-		garbageValue = "-45"
+		signature = "([BI[BIII)I",
+		garbageValue = "2122202814"
 	)
 	@Export("decompress")
 	int decompress(byte[] var1, int var2, byte[] var3, int var4, int var5) {
@@ -297,221 +294,81 @@ public class Huffman {
 		}
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(Ljava/lang/CharSequence;Ljava/lang/CharSequence;Lgl;I)I",
-		garbageValue = "1131255315"
+		signature = "(IIB)I",
+		garbageValue = "5"
 	)
-	@Export("compareStrings")
-	public static int compareStrings(CharSequence var0, CharSequence var1, Language var2) {
-		int var3 = var0.length();
-		int var4 = var1.length();
-		int var5 = 0;
-		int var6 = 0;
-		byte var7 = 0;
-		byte var8 = 0;
-
-		while (var5 - var7 < var3 || var6 - var8 < var4) {
-			if (var5 - var7 >= var3) {
-				return -1;
-			}
-
-			if (var6 - var8 >= var4) {
-				return 1;
-			}
-
-			char var9;
-			if (var7 != 0) {
-				var9 = (char)var7;
-				boolean var14 = false;
-			} else {
-				var9 = var0.charAt(var5++);
-			}
-
-			char var10;
-			if (var8 != 0) {
-				var10 = (char)var8;
-				boolean var15 = false;
-			} else {
-				var10 = var1.charAt(var6++);
-			}
-
-			byte var11;
-			if (var9 == 198) {
-				var11 = 69;
-			} else if (var9 == 230) {
-				var11 = 101;
-			} else if (var9 == 223) {
-				var11 = 115;
-			} else if (var9 == 338) {
-				var11 = 69;
-			} else if (var9 == 339) {
-				var11 = 101;
-			} else {
-				var11 = 0;
-			}
-
-			var7 = var11;
-			byte var12;
-			if (var10 == 198) {
-				var12 = 69;
-			} else if (var10 == 230) {
-				var12 = 101;
-			} else if (var10 == 223) {
-				var12 = 115;
-			} else if (var10 == 338) {
-				var12 = 69;
-			} else if (var10 == 339) {
-				var12 = 101;
-			} else {
-				var12 = 0;
-			}
-
-			var8 = var12;
-			var9 = FaceNormal.standardizeChar(var9, var2);
-			var10 = FaceNormal.standardizeChar(var10, var2);
-			if (var9 != var10 && Character.toUpperCase(var9) != Character.toUpperCase(var10)) {
-				var9 = Character.toLowerCase(var9);
-				var10 = Character.toLowerCase(var10);
-				if (var9 != var10) {
-					return lowercaseChar(var9, var2) - lowercaseChar(var10, var2);
-				}
-			}
-		}
-
-		int var16 = Math.min(var3, var4);
-
-		int var17;
-		char var20;
-		for (var17 = 0; var17 < var16; ++var17) {
-			if (var2 == Language.Language_FR) {
-				var5 = var3 - 1 - var17;
-				var6 = var4 - 1 - var17;
-			} else {
-				var6 = var17;
-				var5 = var17;
-			}
-
-			char var18 = var0.charAt(var5);
-			var20 = var1.charAt(var6);
-			if (var18 != var20 && Character.toUpperCase(var18) != Character.toUpperCase(var20)) {
-				var18 = Character.toLowerCase(var18);
-				var20 = Character.toLowerCase(var20);
-				if (var18 != var20) {
-					return lowercaseChar(var18, var2) - lowercaseChar(var20, var2);
-				}
-			}
-		}
-
-		var17 = var3 - var4;
-		if (var17 != 0) {
-			return var17;
-		} else {
-			for (int var19 = 0; var19 < var16; ++var19) {
-				var20 = var0.charAt(var19);
-				char var13 = var1.charAt(var19);
-				if (var20 != var13) {
-					return lowercaseChar(var20, var2) - lowercaseChar(var13, var2);
-				}
-			}
-
-			return 0;
-		}
+	static int method3948(int var0, int var1) {
+		long var2 = (long)((var0 << 16) + var1);
+		return class226.NetCache_currentResponse != null && class226.NetCache_currentResponse.key == var2 ? VarpDefinition.NetCache_responseArchiveBuffer.offset * 99 / (VarpDefinition.NetCache_responseArchiveBuffer.array.length - class226.NetCache_currentResponse.padding) + 1 : 0;
 	}
 
 	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "1338498163"
+		signature = "([BIII)Z",
+		garbageValue = "-1212406127"
 	)
-	public static void method4045() {
-		try {
-			File var0 = new File(AbstractWorldMapData.userHomeDirectory, "random.dat");
-			int var2;
-			if (var0.exists()) {
-				JagexCache.JagexCache_randomDat = new BufferedFile(new AccessFile(var0, "rw", 25L), 24, 0);
-			} else {
-				label35:
-				for (int var1 = 0; var1 < AbstractRasterProvider.field3871.length; ++var1) {
-					for (var2 = 0; var2 < Varps.field2522.length; ++var2) {
-						File var3 = new File(Varps.field2522[var2] + AbstractRasterProvider.field3871[var1] + File.separatorChar + "random.dat");
-						if (var3.exists()) {
-							JagexCache.JagexCache_randomDat = new BufferedFile(new AccessFile(var3, "rw", 25L), 24, 0);
-							break label35;
+	static final boolean method3947(byte[] var0, int var1, int var2) {
+		boolean var3 = true;
+		Buffer var4 = new Buffer(var0);
+		int var5 = -1;
+
+		label71:
+		while (true) {
+			int var6 = var4.method5509();
+			if (var6 == 0) {
+				return var3;
+			}
+
+			var5 += var6;
+			int var7 = 0;
+			boolean var8 = false;
+
+			while (true) {
+				int var9;
+				while (!var8) {
+					var9 = var4.readUShortSmart();
+					if (var9 == 0) {
+						continue label71;
+					}
+
+					var7 += var9 - 1;
+					int var10 = var7 & 63;
+					int var11 = var7 >> 6 & 63;
+					int var12 = var4.readUnsignedByte() >> 2;
+					int var13 = var11 + var1;
+					int var14 = var10 + var2;
+					if (var13 > 0 && var14 > 0 && var13 < 103 && var14 < 103) {
+						ObjectDefinition var15 = ViewportMouse.getObjectDefinition(var5);
+						if (var12 != 22 || !Client.isLowDetail || var15.int1 != 0 || var15.interactType == 1 || var15.boolean2) {
+							if (!var15.needsModelFiles()) {
+								++Client.field707;
+								var3 = false;
+							}
+
+							var8 = true;
 						}
 					}
 				}
+
+				var9 = var4.readUShortSmart();
+				if (var9 == 0) {
+					break;
+				}
+
+				var4.readUnsignedByte();
 			}
-
-			if (JagexCache.JagexCache_randomDat == null) {
-				RandomAccessFile var4 = new RandomAccessFile(var0, "rw");
-				var2 = var4.read();
-				var4.seek(0L);
-				var4.write(var2);
-				var4.seek(0L);
-				var4.close();
-				JagexCache.JagexCache_randomDat = new BufferedFile(new AccessFile(var0, "rw", 25L), 24, 0);
-			}
-		} catch (IOException var5) {
 		}
-
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("bp")
 	@ObfuscatedSignature(
-		signature = "(CLgl;I)I",
-		garbageValue = "1882549296"
+		signature = "(Ljava/lang/String;I)I",
+		garbageValue = "350180445"
 	)
-	@Export("lowercaseChar")
-	static int lowercaseChar(char var0, Language var1) {
-		int var2 = var0 << 4;
-		if (Character.isUpperCase(var0) || Character.isTitleCase(var0)) {
-			var0 = Character.toLowerCase(var0);
-			var2 = (var0 << 4) + 1;
-		}
-
-		if (var0 == 241 && var1 == Language.Language_ES) {
-			var2 = 1762;
-		}
-
-		return var2;
-	}
-
-	@ObfuscatedName("e")
-	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "-1258139515"
-	)
-	public static void method4048() {
-		PlayerAppearance.PlayerAppearance_cachedModels.clear();
-	}
-
-	@ObfuscatedName("fp")
-	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "-1871725154"
-	)
-	@Export("logOut")
-	static final void logOut() {
-		Client.packetWriter.close();
-		GrandExchangeEvents.method155();
-		GrandExchangeOfferWorldComparator.scene.clear();
-
-		for (int var0 = 0; var0 < 4; ++var0) {
-			Client.collisionMaps[var0].clear();
-		}
-
-		System.gc();
-		class206.field2406 = 1;
-		class206.musicTrackArchive = null;
-		class206.musicTrackGroupId = -1;
-		class206.musicTrackFileId = -1;
-		class219.musicTrackVolume = 0;
-		GrandExchangeOfferUnitPriceComparator.musicTrackBoolean = false;
-		AttackOption.field1187 = 2;
-		Client.currentTrackGroupId = -1;
-		Client.field915 = false;
-		TriBool.method5249();
-		MouseRecorder.updateGameState(10);
+	@Export("stringCp1252NullTerminatedByteSize")
+	public static int stringCp1252NullTerminatedByteSize(String var0) {
+		return var0.length() + 1;
 	}
 }

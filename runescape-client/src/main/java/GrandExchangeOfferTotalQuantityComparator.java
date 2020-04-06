@@ -1,27 +1,16 @@
-import java.awt.Component;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Comparator;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
-import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
-import net.runelite.rs.Reflection;
 
-@ObfuscatedName("a")
+@ObfuscatedName("c")
 @Implements("GrandExchangeOfferTotalQuantityComparator")
 final class GrandExchangeOfferTotalQuantityComparator implements Comparator {
-	@ObfuscatedName("gy")
-	@ObfuscatedGetter(
-		intValue = -591154231
-	)
-	static int field91;
-
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Li;Li;B)I",
-		garbageValue = "-105"
+		signature = "(Li;Li;I)I",
+		garbageValue = "-918016039"
 	)
 	@Export("compare_bridged")
 	int compare_bridged(GrandExchangeEvent var1, GrandExchangeEvent var2) {
@@ -36,150 +25,121 @@ final class GrandExchangeOfferTotalQuantityComparator implements Comparator {
 		return super.equals(var1);
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("ft")
 	@ObfuscatedSignature(
-		signature = "(Ljava/awt/Component;I)V",
-		garbageValue = "-1200132301"
+		signature = "(II)V",
+		garbageValue = "1523306949"
 	)
-	static void method179(Component var0) {
-		var0.addMouseListener(MouseHandler.MouseHandler_instance);
-		var0.addMouseMotionListener(MouseHandler.MouseHandler_instance);
-		var0.addFocusListener(MouseHandler.MouseHandler_instance);
+	@Export("playSong")
+	static void playSong(int var0) {
+		if (var0 == -1 && !Client.field699) {
+			NetSocket.method3553();
+		} else if (var0 != -1 && var0 != Client.currentTrackGroupId && Client.musicVolume != 0 && !Client.field699) {
+			Archive var1 = WorldMapRegion.archive6;
+			int var2 = Client.musicVolume;
+			class197.field2402 = 1;
+			GrandExchangeOfferNameComparator.musicTrackArchive = var1;
+			class197.musicTrackGroupId = var0;
+			class197.musicTrackFileId = 0;
+			ScriptFrame.musicTrackVolume = var2;
+			BuddyRankComparator.musicTrackBoolean = false;
+			class197.field2404 = 2;
+		}
+
+		Client.currentTrackGroupId = var0;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("if")
 	@ObfuscatedSignature(
-		signature = "(Lkb;IS)V",
-		garbageValue = "-19565"
+		signature = "(Ljava/lang/String;Lhj;I)Ljava/lang/String;",
+		garbageValue = "16777215"
 	)
-	@Export("readReflectionCheck")
-	public static void readReflectionCheck(Buffer var0, int var1) {
-		ReflectionCheck var2 = new ReflectionCheck();
-		var2.size = var0.readUnsignedByte();
-		var2.id = var0.readInt();
-		var2.operations = new int[var2.size];
-		var2.creationErrors = new int[var2.size];
-		var2.fields = new Field[var2.size];
-		var2.intReplaceValues = new int[var2.size];
-		var2.methods = new Method[var2.size];
-		var2.arguments = new byte[var2.size][][];
-
-		for (int var3 = 0; var3 < var2.size; ++var3) {
-			try {
-				int var4 = var0.readUnsignedByte();
-				String var5;
-				String var6;
-				int var7;
-				if (var4 != 0 && var4 != 1 && var4 != 2) {
-					if (var4 == 3 || var4 == 4) {
-						var5 = var0.readStringCp1252NullTerminated();
-						var6 = var0.readStringCp1252NullTerminated();
-						var7 = var0.readUnsignedByte();
-						String[] var8 = new String[var7];
-
-						for (int var9 = 0; var9 < var7; ++var9) {
-							var8[var9] = var0.readStringCp1252NullTerminated();
-						}
-
-						String var20 = var0.readStringCp1252NullTerminated();
-						byte[][] var10 = new byte[var7][];
-						int var12;
-						if (var4 == 3) {
-							for (int var11 = 0; var11 < var7; ++var11) {
-								var12 = var0.readInt();
-								var10[var11] = new byte[var12];
-								var0.readBytes(var10[var11], 0, var12);
-							}
-						}
-
-						var2.operations[var3] = var4;
-						Class[] var21 = new Class[var7];
-
-						for (var12 = 0; var12 < var7; ++var12) {
-							var21[var12] = class2.loadClassFromDescriptor(var8[var12]);
-						}
-
-						Class var22 = class2.loadClassFromDescriptor(var20);
-						if (class2.loadClassFromDescriptor(var5).getClassLoader() == null) {
-							throw new SecurityException();
-						}
-
-						Method[] var13 = class2.loadClassFromDescriptor(var5).getDeclaredMethods();
-						Method[] var14 = var13;
-
-						for (int var15 = 0; var15 < var14.length; ++var15) {
-							Method var16 = var14[var15];
-							if (Reflection.getMethodName(var16).equals(var6)) {
-								Class[] var17 = Reflection.getParameterTypes(var16);
-								if (var21.length == var17.length) {
-									boolean var18 = true;
-
-									for (int var19 = 0; var19 < var21.length; ++var19) {
-										if (var17[var19] != var21[var19]) {
-											var18 = false;
-											break;
-										}
-									}
-
-									if (var18 && var22 == var16.getReturnType()) {
-										var2.methods[var3] = var16;
-									}
-								}
-							}
-						}
-
-						var2.arguments[var3] = var10;
-					}
-				} else {
-					var5 = var0.readStringCp1252NullTerminated();
-					var6 = var0.readStringCp1252NullTerminated();
-					var7 = 0;
-					if (var4 == 1) {
-						var7 = var0.readInt();
+	static String method92(String var0, Widget var1) {
+		if (var0.indexOf("%") != -1) {
+			for (int var2 = 1; var2 <= 5; ++var2) {
+				while (true) {
+					int var3 = var0.indexOf("%" + var2);
+					if (var3 == -1) {
+						break;
 					}
 
-					var2.operations[var3] = var4;
-					var2.intReplaceValues[var3] = var7;
-					if (class2.loadClassFromDescriptor(var5).getClassLoader() == null) {
-						throw new SecurityException();
+					String var4 = var0.substring(0, var3);
+					int var6 = Varps.method3969(var1, var2 - 1);
+					String var5;
+					if (var6 < 999999999) {
+						var5 = Integer.toString(var6);
+					} else {
+						var5 = "*";
 					}
 
-					var2.fields[var3] = Reflection.findField(class2.loadClassFromDescriptor(var5), var6);
+					var0 = var4 + var5 + var0.substring(var3 + 2);
 				}
-			} catch (ClassNotFoundException var24) {
-				var2.creationErrors[var3] = -1;
-			} catch (SecurityException var25) {
-				var2.creationErrors[var3] = -2;
-			} catch (NullPointerException var26) {
-				var2.creationErrors[var3] = -3;
-			} catch (Exception var27) {
-				var2.creationErrors[var3] = -4;
-			} catch (Throwable var28) {
-				var2.creationErrors[var3] = -5;
 			}
 		}
 
-		class105.reflectionChecks.addFirst(var2);
+		return var0;
 	}
 
-	@ObfuscatedName("ka")
+	@ObfuscatedName("jm")
 	@ObfuscatedSignature(
-		signature = "(Lhe;B)Lhe;",
-		garbageValue = "-16"
+		signature = "(Lhj;I)V",
+		garbageValue = "-1619270893"
 	)
-	static Widget method181(Widget var0) {
-		int var1 = Canvas.method958(ScriptEvent.getWidgetClickMask(var0));
-		if (var1 == 0) {
-			return null;
-		} else {
-			for (int var2 = 0; var2 < var1; ++var2) {
-				var0 = MusicPatchNode.getWidget(var0.parentId);
-				if (var0 == null) {
-					return null;
-				}
+	static final void method85(Widget var0) {
+		int var1 = var0.contentType;
+		if (var1 == 324) {
+			if (Client.field919 == -1) {
+				Client.field919 = var0.spriteId2;
+				Client.field920 = var0.spriteId;
 			}
 
-			return var0;
+			if (Client.playerAppearance.isFemale) {
+				var0.spriteId2 = Client.field919;
+			} else {
+				var0.spriteId2 = Client.field920;
+			}
+
+		} else if (var1 == 325) {
+			if (Client.field919 == -1) {
+				Client.field919 = var0.spriteId2;
+				Client.field920 = var0.spriteId;
+			}
+
+			if (Client.playerAppearance.isFemale) {
+				var0.spriteId2 = Client.field920;
+			} else {
+				var0.spriteId2 = Client.field919;
+			}
+
+		} else if (var1 == 327) {
+			var0.modelAngleX = 150;
+			var0.modelAngleY = (int)(Math.sin((double)Client.cycle / 40.0D) * 256.0D) & 2047;
+			var0.modelType = 5;
+			var0.modelId = 0;
+		} else if (var1 == 328) {
+			var0.modelAngleX = 150;
+			var0.modelAngleY = (int)(Math.sin((double)Client.cycle / 40.0D) * 256.0D) & 2047;
+			var0.modelType = 5;
+			var0.modelId = 1;
 		}
+	}
+
+	@ObfuscatedName("kx")
+	@ObfuscatedSignature(
+		signature = "(Ljava/lang/String;I)Ljava/lang/String;",
+		garbageValue = "-282995090"
+	)
+	static String method94(String var0) {
+		PlayerType[] var1 = UserComparator5.PlayerType_values();
+
+		for (int var2 = 0; var2 < var1.length; ++var2) {
+			PlayerType var3 = var1[var2];
+			if (var3.modIcon != -1 && var0.startsWith(WorldMapSection1.method556(var3.modIcon))) {
+				var0 = var0.substring(6 + Integer.toString(var3.modIcon).length());
+				break;
+			}
+		}
+
+		return var0;
 	}
 }

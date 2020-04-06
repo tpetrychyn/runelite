@@ -1,56 +1,68 @@
-import java.io.File;
-import java.io.RandomAccessFile;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ei")
+@ObfuscatedName("di")
 @Implements("ViewportMouse")
 public class ViewportMouse {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("ViewportMouse_isInViewport")
-	static boolean ViewportMouse_isInViewport;
-	@ObfuscatedName("m")
-	@ObfuscatedGetter(
-		intValue = -3434347
-	)
-	@Export("ViewportMouse_x")
-	static int ViewportMouse_x;
-	@ObfuscatedName("k")
-	@ObfuscatedGetter(
-		intValue = -1088872185
-	)
-	@Export("ViewportMouse_y")
-	static int ViewportMouse_y;
-	@ObfuscatedName("d")
-	@Export("ViewportMouse_false0")
-	static boolean ViewportMouse_false0;
+	public static boolean ViewportMouse_isInViewport;
 	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = 1287512303
+		intValue = 284050525
 	)
-	static int field1756;
-	@ObfuscatedName("z")
+	@Export("ViewportMouse_x")
+	public static int ViewportMouse_x;
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = -128272745
+		intValue = -245246371
 	)
-	static int field1753;
+	@Export("ViewportMouse_y")
+	public static int ViewportMouse_y;
 	@ObfuscatedName("p")
+	@Export("ViewportMouse_false0")
+	public static boolean ViewportMouse_false0;
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 2142328087
+		intValue = -933115495
 	)
-	static int field1758;
+	static int field1745;
+	@ObfuscatedName("b")
+	@ObfuscatedGetter(
+		intValue = -401508143
+	)
+	static int field1746;
+	@ObfuscatedName("i")
+	@Export("Widget_loadedInterfaces")
+	public static boolean[] Widget_loadedInterfaces;
+	@ObfuscatedName("f")
+	@ObfuscatedSignature(
+		signature = "Lhp;"
+	)
+	@Export("Widget_modelsArchive")
+	static AbstractArchive Widget_modelsArchive;
 	@ObfuscatedName("u")
 	@ObfuscatedGetter(
-		intValue = 148493353
+		intValue = -900084985
+	)
+	static int field1741;
+	@ObfuscatedName("r")
+	@ObfuscatedGetter(
+		intValue = -1866489791
 	)
 	@Export("ViewportMouse_entityCount")
-	static int ViewportMouse_entityCount;
-	@ObfuscatedName("h")
+	public static int ViewportMouse_entityCount;
+	@ObfuscatedName("v")
 	@Export("ViewportMouse_entityTags")
-	static long[] ViewportMouse_entityTags;
+	public static long[] ViewportMouse_entityTags;
+	@ObfuscatedName("fq")
+	@ObfuscatedGetter(
+		intValue = -572146471
+	)
+	static int field1747;
 
 	static {
 		ViewportMouse_isInViewport = false;
@@ -61,117 +73,117 @@ public class ViewportMouse {
 		ViewportMouse_entityTags = new long[1000];
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Ljava/lang/String;I)Ljava/io/File;",
-		garbageValue = "-880025172"
+		signature = "(IS)Liy;",
+		garbageValue = "4095"
 	)
-	@Export("getFile")
-	public static File getFile(String var0) {
-		if (!FileSystem.FileSystem_hasPermissions) {
-			throw new RuntimeException("");
+	@Export("getObjectDefinition")
+	public static ObjectDefinition getObjectDefinition(int var0) {
+		ObjectDefinition var1 = (ObjectDefinition)ObjectDefinition.ObjectDefinition_cached.get((long)var0);
+		if (var1 != null) {
+			return var1;
 		} else {
-			File var1 = (File)FileSystem.FileSystem_cacheFiles.get(var0);
-			if (var1 != null) {
-				return var1;
+			byte[] var2 = ObjectDefinition.ObjectDefinition_archive.takeFile(6, var0);
+			var1 = new ObjectDefinition();
+			var1.id = var0;
+			if (var2 != null) {
+				var1.decode(new Buffer(var2));
+			}
+
+			var1.postDecode();
+			if (var1.isSolid) {
+				var1.interactType = 0;
+				var1.boolean1 = false;
+			}
+
+			ObjectDefinition.ObjectDefinition_cached.put(var1, (long)var0);
+			return var1;
+		}
+	}
+
+	@ObfuscatedName("q")
+	@ObfuscatedSignature(
+		signature = "(IB)Lcx;",
+		garbageValue = "1"
+	)
+	@Export("getScript")
+	static Script getScript(int var0) {
+		Script var1 = (Script)Script.Script_cached.get((long)var0);
+		if (var1 != null) {
+			return var1;
+		} else {
+			byte[] var2 = UserComparator4.archive12.takeFile(var0, 0);
+			if (var2 == null) {
+				return null;
 			} else {
-				File var2 = new File(FileSystem.FileSystem_cacheDir, var0);
-				RandomAccessFile var3 = null;
+				var1 = World.newScript(var2);
+				Script.Script_cached.put(var1, (long)var0);
+				return var1;
+			}
+		}
+	}
 
-				try {
-					File var4 = new File(var2.getParent());
-					if (!var4.exists()) {
-						throw new RuntimeException("");
-					} else {
-						var3 = new RandomAccessFile(var2, "rw");
-						int var5 = var3.read();
-						var3.seek(0L);
-						var3.write(var5);
-						var3.seek(0L);
-						var3.close();
-						FileSystem.FileSystem_cacheFiles.put(var0, var2);
-						return var2;
+	@ObfuscatedName("e")
+	@ObfuscatedSignature(
+		signature = "(Liu;IIIBZI)V",
+		garbageValue = "-913325342"
+	)
+	@Export("requestNetFile")
+	static void requestNetFile(Archive var0, int var1, int var2, int var3, byte var4, boolean var5) {
+		long var6 = (long)((var1 << 16) + var2);
+		NetFileRequest var8 = (NetFileRequest)NetCache.NetCache_pendingPriorityWrites.get(var6);
+		if (var8 == null) {
+			var8 = (NetFileRequest)NetCache.NetCache_pendingPriorityResponses.get(var6);
+			if (var8 == null) {
+				var8 = (NetFileRequest)NetCache.NetCache_pendingWrites.get(var6);
+				if (var8 != null) {
+					if (var5) {
+						var8.removeDual();
+						NetCache.NetCache_pendingPriorityWrites.put(var8, var6);
+						--NetCache.NetCache_pendingWritesCount;
+						++NetCache.NetCache_pendingPriorityWritesCount;
 					}
-				} catch (Exception var8) {
-					try {
-						if (var3 != null) {
-							var3.close();
-							var3 = null;
+
+				} else {
+					if (!var5) {
+						var8 = (NetFileRequest)NetCache.NetCache_pendingResponses.get(var6);
+						if (var8 != null) {
+							return;
 						}
-					} catch (Exception var7) {
 					}
 
-					throw new RuntimeException();
+					var8 = new NetFileRequest();
+					var8.archive = var0;
+					var8.crc = var3;
+					var8.padding = var4;
+					if (var5) {
+						NetCache.NetCache_pendingPriorityWrites.put(var8, var6);
+						++NetCache.NetCache_pendingPriorityWritesCount;
+					} else {
+						NetCache.NetCache_pendingWritesQueue.addFirst(var8);
+						NetCache.NetCache_pendingWrites.put(var8, var6);
+						++NetCache.NetCache_pendingWritesCount;
+					}
+
 				}
 			}
 		}
 	}
 
-	@ObfuscatedName("gp")
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
-		signature = "(S)V",
-		garbageValue = "-3489"
+		signature = "(Ljava/lang/CharSequence;I)I",
+		garbageValue = "-1418597327"
 	)
-	static final void method3091() {
-		Client.field794 = 0;
-		int var0 = (ByteArrayPool.localPlayer.x >> 7) + class69.baseX;
-		int var1 = (ByteArrayPool.localPlayer.y >> 7) + class89.baseY;
-		if (var0 >= 3053 && var0 <= 3156 && var1 >= 3056 && var1 <= 3136) {
-			Client.field794 = 1;
+	public static int method2971(CharSequence var0) {
+		int var1 = var0.length();
+		int var2 = 0;
+
+		for (int var3 = 0; var3 < var1; ++var3) {
+			var2 = (var2 << 5) - var2 + var0.charAt(var3);
 		}
 
-		if (var0 >= 3072 && var0 <= 3118 && var1 >= 9492 && var1 <= 9535) {
-			Client.field794 = 1;
-		}
-
-		if (Client.field794 == 1 && var0 >= 3139 && var0 <= 3199 && var1 >= 3008 && var1 <= 3062) {
-			Client.field794 = 0;
-		}
-
-	}
-
-	@ObfuscatedName("ji")
-	@ObfuscatedSignature(
-		signature = "(Lhe;IIIIIII)V",
-		garbageValue = "-1829231425"
-	)
-	static final void method3092(Widget var0, int var1, int var2, int var3, int var4, int var5, int var6) {
-		if (Client.field746) {
-			Client.alternativeScrollbarWidth = 32;
-		} else {
-			Client.alternativeScrollbarWidth = 0;
-		}
-
-		Client.field746 = false;
-		int var7;
-		if (MouseHandler.MouseHandler_currentButton == 1 || !class217.mouseCam && MouseHandler.MouseHandler_currentButton == 4) {
-			if (var5 >= var1 && var5 < var1 + 16 && var6 >= var2 && var6 < var2 + 16) {
-				var0.scrollY -= 4;
-				ItemContainer.invalidateWidget(var0);
-			} else if (var5 >= var1 && var5 < var1 + 16 && var6 >= var3 + var2 - 16 && var6 < var3 + var2) {
-				var0.scrollY += 4;
-				ItemContainer.invalidateWidget(var0);
-			} else if (var5 >= var1 - Client.alternativeScrollbarWidth && var5 < Client.alternativeScrollbarWidth + var1 + 16 && var6 >= var2 + 16 && var6 < var3 + var2 - 16) {
-				var7 = var3 * (var3 - 32) / var4;
-				if (var7 < 8) {
-					var7 = 8;
-				}
-
-				int var8 = var6 - var2 - 16 - var7 / 2;
-				int var9 = var3 - 32 - var7;
-				var0.scrollY = var8 * (var4 - var3) / var9;
-				ItemContainer.invalidateWidget(var0);
-				Client.field746 = true;
-			}
-		}
-
-		if (Client.mouseWheelRotation != 0) {
-			var7 = var0.width;
-			if (var5 >= var1 - var7 && var6 >= var2 && var5 < var1 + 16 && var6 <= var3 + var2) {
-				var0.scrollY += Client.mouseWheelRotation * 45;
-				ItemContainer.invalidateWidget(var0);
-			}
-		}
-
+		return var2;
 	}
 }

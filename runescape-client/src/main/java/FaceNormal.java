@@ -4,30 +4,26 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("er")
+@ObfuscatedName("en")
 @Implements("FaceNormal")
 public class FaceNormal {
-	@ObfuscatedName("iz")
+	@ObfuscatedName("v")
+	static int[][][] field1887;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -98471287
-	)
-	@Export("selectedItemId")
-	static int selectedItemId;
-	@ObfuscatedName("x")
-	@ObfuscatedGetter(
-		intValue = 62688093
-	)
-	@Export("y")
-	int y;
-	@ObfuscatedName("m")
-	@ObfuscatedGetter(
-		intValue = 152436141
+		intValue = 2130535467
 	)
 	@Export("x")
 	int x;
-	@ObfuscatedName("k")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = 567855277
+		intValue = 522108407
+	)
+	@Export("y")
+	int y;
+	@ObfuscatedName("e")
+	@ObfuscatedGetter(
+		intValue = -1566565487
 	)
 	@Export("z")
 	int z;
@@ -35,142 +31,188 @@ public class FaceNormal {
 	FaceNormal() {
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lgn;Llp;I)Lgq;",
-		garbageValue = "-1746993437"
+		signature = "(I)[Ljj;",
+		garbageValue = "1137342160"
 	)
-	@Export("getPacketBufferNode")
-	public static PacketBufferNode getPacketBufferNode(ClientPacket var0, IsaacCipher var1) {
-		PacketBufferNode var2 = UserComparator9.method3496();
-		var2.clientPacket = var0;
-		var2.clientPacketLength = var0.length;
-		if (var2.clientPacketLength == -1) {
-			var2.packetBuffer = new PacketBuffer(260);
-		} else if (var2.clientPacketLength == -2) {
-			var2.packetBuffer = new PacketBuffer(10000);
-		} else if (var2.clientPacketLength <= 18) {
-			var2.packetBuffer = new PacketBuffer(20);
-		} else if (var2.clientPacketLength <= 98) {
-			var2.packetBuffer = new PacketBuffer(100);
+	public static class271[] method3265() {
+		return new class271[]{class271.field3593, class271.field3589, class271.field3594, class271.field3591, class271.field3600, class271.field3599, class271.field3592, class271.field3595, class271.field3585, class271.field3587, class271.field3582, class271.field3586, class271.field3581, class271.field3598, class271.field3590, class271.field3588, class271.field3584, class271.field3596, class271.field3583};
+	}
+
+	@ObfuscatedName("q")
+	@ObfuscatedSignature(
+		signature = "(Lhp;Lhp;B)V",
+		garbageValue = "-92"
+	)
+	public static void method3263(AbstractArchive var0, AbstractArchive var1) {
+		NPCDefinition.NpcDefinition_archive = var0;
+		NPCDefinition.NpcDefinition_modelArchive = var1;
+	}
+
+	@ObfuscatedName("k")
+	@ObfuscatedSignature(
+		signature = "(ZI)V",
+		garbageValue = "-545171198"
+	)
+	@Export("Login_promptCredentials")
+	static void Login_promptCredentials(boolean var0) {
+		Login.Login_response1 = "";
+		Login.Login_response2 = "Enter your username/email & password.";
+		Login.Login_response3 = "";
+		Login.loginIndex = 2;
+		if (var0) {
+			Login.Login_password = "";
+		}
+
+		class49.method815();
+		if (Client.Login_isUsernameRemembered && Login.Login_username != null && Login.Login_username.length() > 0) {
+			Login.currentLoginField = 1;
 		} else {
-			var2.packetBuffer = new PacketBuffer(260);
+			Login.currentLoginField = 0;
 		}
 
-		var2.packetBuffer.setIsaacCipher(var1);
-		var2.packetBuffer.writeByteIsaac(var2.clientPacket.id);
-		var2.index = 0;
-		return var2;
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("eh")
 	@ObfuscatedSignature(
-		signature = "(CLgl;B)C",
-		garbageValue = "-64"
+		signature = "(I)V",
+		garbageValue = "-1702335616"
 	)
-	@Export("standardizeChar")
-	static char standardizeChar(char var0, Language var1) {
-		if (var0 >= 192 && var0 <= 255) {
-			if (var0 >= 192 && var0 <= 198) {
-				return 'A';
-			}
+	static void method3264() {
+		Client.mouseLastLastPressedTimeMillis = -1L;
+		class40.mouseRecorder.index = 0;
+		class267.hasFocus = true;
+		Client.hadFocus = true;
+		Client.field879 = -1L;
+		class192.method3678();
+		Client.packetWriter.clearBuffer();
+		Client.packetWriter.packetBuffer.offset = 0;
+		Client.packetWriter.serverPacket = null;
+		Client.packetWriter.field1309 = null;
+		Client.packetWriter.field1321 = null;
+		Client.packetWriter.field1317 = null;
+		Client.packetWriter.serverPacketLength = 0;
+		Client.packetWriter.field1318 = 0;
+		Client.rebootTimer = 0;
+		Client.logoutTimer = 0;
+		Client.hintArrowType = 0;
+		Strings.method4121();
+		MouseHandler.MouseHandler_idleCycles = 0;
+		Messages.Messages_channels.clear();
+		Messages.Messages_hashTable.clear();
+		Messages.Messages_queue.clear();
+		Messages.Messages_count = 0;
+		Client.isItemSelected = 0;
+		Client.isSpellSelected = false;
+		Client.soundEffectCount = 0;
+		Client.camAngleY = 0;
+		Client.oculusOrbState = 0;
+		PendingSpawn.field944 = null;
+		Client.minimapState = 0;
+		Client.field747 = -1;
+		Client.destinationX = 0;
+		Client.destinationY = 0;
+		Client.playerAttackOption = AttackOption.AttackOption_hidden;
+		Client.npcAttackOption = AttackOption.AttackOption_hidden;
+		Client.npcCount = 0;
+		Players.Players_count = 0;
 
-			if (var0 == 199) {
-				return 'C';
-			}
+		int var0;
+		for (var0 = 0; var0 < 2048; ++var0) {
+			Players.field1254[var0] = null;
+			Players.field1250[var0] = 1;
+		}
 
-			if (var0 >= 200 && var0 <= 203) {
-				return 'E';
-			}
+		for (var0 = 0; var0 < 2048; ++var0) {
+			Client.players[var0] = null;
+		}
 
-			if (var0 >= 204 && var0 <= 207) {
-				return 'I';
-			}
+		for (var0 = 0; var0 < 32768; ++var0) {
+			Client.npcs[var0] = null;
+		}
 
-			if (var0 == 209 && var1 != Language.Language_ES) {
-				return 'N';
-			}
+		Client.combatTargetPlayerIndex = -1;
+		Client.projectiles.clear();
+		Client.graphicsObjects.clear();
 
-			if (var0 >= 210 && var0 <= 214) {
-				return 'O';
-			}
-
-			if (var0 >= 217 && var0 <= 220) {
-				return 'U';
-			}
-
-			if (var0 == 221) {
-				return 'Y';
-			}
-
-			if (var0 == 223) {
-				return 's';
-			}
-
-			if (var0 >= 224 && var0 <= 230) {
-				return 'a';
-			}
-
-			if (var0 == 231) {
-				return 'c';
-			}
-
-			if (var0 >= 232 && var0 <= 235) {
-				return 'e';
-			}
-
-			if (var0 >= 236 && var0 <= 239) {
-				return 'i';
-			}
-
-			if (var0 == 241 && var1 != Language.Language_ES) {
-				return 'n';
-			}
-
-			if (var0 >= 242 && var0 <= 246) {
-				return 'o';
-			}
-
-			if (var0 >= 249 && var0 <= 252) {
-				return 'u';
-			}
-
-			if (var0 == 253 || var0 == 255) {
-				return 'y';
+		int var2;
+		for (var0 = 0; var0 < 4; ++var0) {
+			for (int var1 = 0; var1 < 104; ++var1) {
+				for (var2 = 0; var2 < 104; ++var2) {
+					Client.groundItems[var0][var1][var2] = null;
+				}
 			}
 		}
 
-		if (var0 == 338) {
-			return 'O';
-		} else if (var0 == 339) {
-			return 'o';
-		} else {
-			return var0 == 376 ? 'Y' : var0;
+		Client.pendingSpawns = new NodeDeque();
+		ArchiveLoader.friendSystem.clear();
+
+		for (var0 = 0; var0 < VarpDefinition.VarpDefinition_fileCount; ++var0) {
+			VarpDefinition var3 = GrandExchangeOfferWorldComparator.VarpDefinition_get(var0);
+			if (var3 != null) {
+				Varps.Varps_temp[var0] = 0;
+				Varps.Varps_main[var0] = 0;
+			}
 		}
-	}
 
-	@ObfuscatedName("v")
-	@ObfuscatedSignature(
-		signature = "(ILiy;IIIZB)V",
-		garbageValue = "-88"
-	)
-	@Export("playMusicTrack")
-	public static void playMusicTrack(int var0, AbstractArchive var1, int var2, int var3, int var4, boolean var5) {
-		class206.field2406 = 1;
-		class206.musicTrackArchive = var1;
-		class206.musicTrackGroupId = var2;
-		class206.musicTrackFileId = var3;
-		class219.musicTrackVolume = var4;
-		GrandExchangeOfferUnitPriceComparator.musicTrackBoolean = var5;
-		AttackOption.field1187 = var0;
-	}
+		Clock.varcs.clearTransient();
+		Client.followerIndex = -1;
+		if (Client.rootInterface != -1) {
+			var0 = Client.rootInterface;
+			if (var0 != -1 && ViewportMouse.Widget_loadedInterfaces[var0]) {
+				Widget.Widget_archive.clearFilesGroup(var0);
+				if (Widget.Widget_interfaceComponents[var0] != null) {
+					boolean var5 = true;
 
-	@ObfuscatedName("lk")
-	@ObfuscatedSignature(
-		signature = "(I)Z",
-		garbageValue = "2112938441"
-	)
-	public static boolean method3379() {
-		return Client.staffModLevel >= 2;
+					for (var2 = 0; var2 < Widget.Widget_interfaceComponents[var0].length; ++var2) {
+						if (Widget.Widget_interfaceComponents[var0][var2] != null) {
+							if (Widget.Widget_interfaceComponents[var0][var2].type != 2) {
+								Widget.Widget_interfaceComponents[var0][var2] = null;
+							} else {
+								var5 = false;
+							}
+						}
+					}
+
+					if (var5) {
+						Widget.Widget_interfaceComponents[var0] = null;
+					}
+
+					ViewportMouse.Widget_loadedInterfaces[var0] = false;
+				}
+			}
+		}
+
+		for (InterfaceParent var4 = (InterfaceParent)Client.interfaceParents.first(); var4 != null; var4 = (InterfaceParent)Client.interfaceParents.next()) {
+			class197.closeInterface(var4, true);
+		}
+
+		Client.rootInterface = -1;
+		Client.interfaceParents = new NodeHashTable(8);
+		Client.meslayerContinueWidget = null;
+		Strings.method4121();
+		Client.playerAppearance.update((int[])null, new int[]{0, 0, 0, 0, 0}, false, -1);
+
+		for (var0 = 0; var0 < 8; ++var0) {
+			Client.playerMenuActions[var0] = null;
+			Client.playerOptionsPriorities[var0] = false;
+		}
+
+		ItemContainer.itemContainers = new NodeHashTable(32);
+		Client.isLoading = true;
+
+		for (var0 = 0; var0 < 100; ++var0) {
+			Client.field843[var0] = true;
+		}
+
+		HealthBarUpdate.method1677();
+		DevicePcmPlayerProvider.clanChat = null;
+
+		for (var0 = 0; var0 < 8; ++var0) {
+			Client.grandExchangeOffers[var0] = new GrandExchangeOffer();
+		}
+
+		PendingSpawn.grandExchangeEvents = null;
 	}
 }

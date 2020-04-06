@@ -7,33 +7,39 @@ import net.runelite.mapping.ObfuscatedSignature;
 @ObfuscatedName("ik")
 @Implements("VarpDefinition")
 public class VarpDefinition extends DualNode {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Liy;"
+		signature = "Lhp;"
 	)
 	@Export("VarpDefinition_archive")
-	public static AbstractArchive VarpDefinition_archive;
-	@ObfuscatedName("m")
+	static AbstractArchive VarpDefinition_archive;
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = 701979543
+		intValue = -2051999343
 	)
 	@Export("VarpDefinition_fileCount")
 	public static int VarpDefinition_fileCount;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "Leg;"
+		signature = "Lel;"
 	)
 	@Export("VarpDefinition_cached")
-	public static EvictingDualNodeHashTable VarpDefinition_cached;
-	@ObfuscatedName("hs")
+	static EvictingDualNodeHashTable VarpDefinition_cached;
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "[Lla;"
+		signature = "Llx;"
 	)
-	@Export("mapDotSprites")
-	static Sprite[] mapDotSprites;
-	@ObfuscatedName("d")
+	@Export("titlebuttonSprite")
+	static IndexedSprite titlebuttonSprite;
+	@ObfuscatedName("y")
+	@ObfuscatedSignature(
+		signature = "Lkf;"
+	)
+	@Export("NetCache_responseArchiveBuffer")
+	static Buffer NetCache_responseArchiveBuffer;
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = -2041406857
+		intValue = 1809591211
 	)
 	@Export("type")
 	public int type;
@@ -46,10 +52,10 @@ public class VarpDefinition extends DualNode {
 		this.type = 0;
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(Lkb;I)V",
-		garbageValue = "888817873"
+		signature = "(Lkf;I)V",
+		garbageValue = "-927981442"
 	)
 	@Export("decode")
 	void decode(Buffer var1) {
@@ -63,10 +69,10 @@ public class VarpDefinition extends DualNode {
 		}
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(Lkb;II)V",
-		garbageValue = "-478549548"
+		signature = "(Lkf;II)V",
+		garbageValue = "-1780799047"
 	)
 	@Export("decodeNext")
 	void decodeNext(Buffer var1, int var2) {
@@ -76,18 +82,27 @@ public class VarpDefinition extends DualNode {
 
 	}
 
-	@ObfuscatedName("v")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(IIB)I",
-		garbageValue = "42"
+		signature = "(CI)Z",
+		garbageValue = "-17259877"
 	)
-	public static int method4453(int var0, int var1) {
-		int var2;
-		for (var2 = 0; var1 > 0; --var1) {
-			var2 = var2 << 1 | var0 & 1;
-			var0 >>>= 1;
-		}
+	public static boolean method4366(char var0) {
+		if ((var0 <= 0 || var0 >= 128) && (var0 < 160 || var0 > 255)) {
+			if (var0 != 0) {
+				char[] var1 = class288.cp1252AsciiExtension;
 
-		return var2;
+				for (int var2 = 0; var2 < var1.length; ++var2) {
+					char var3 = var1[var2];
+					if (var0 == var3) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

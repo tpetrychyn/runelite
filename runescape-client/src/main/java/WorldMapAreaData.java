@@ -6,32 +6,31 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ad")
+@ObfuscatedName("at")
 @Implements("WorldMapAreaData")
 public class WorldMapAreaData extends WorldMapArea {
-	@ObfuscatedName("hc")
+	@ObfuscatedName("ae")
 	@ObfuscatedSignature(
-		signature = "[Lla;"
+		signature = "Lls;"
 	)
-	@Export("mapMarkerSprites")
-	static Sprite[] mapMarkerSprites;
-	@ObfuscatedName("n")
+	static Bounds field332;
+	@ObfuscatedName("x")
 	@Export("worldMapData0Set")
 	HashSet worldMapData0Set;
-	@ObfuscatedName("u")
+	@ObfuscatedName("r")
 	@Export("worldMapData1Set")
 	HashSet worldMapData1Set;
-	@ObfuscatedName("h")
+	@ObfuscatedName("v")
 	@Export("iconList")
 	List iconList;
 
 	WorldMapAreaData() {
 	}
 
-	@ObfuscatedName("by")
+	@ObfuscatedName("cy")
 	@ObfuscatedSignature(
-		signature = "(Lkb;Lkb;IZI)V",
-		garbageValue = "-661163942"
+		signature = "(Lkf;Lkf;IZB)V",
+		garbageValue = "-52"
 	)
 	@Export("init")
 	void init(Buffer var1, Buffer var2, int var3, boolean var4) {
@@ -70,10 +69,10 @@ public class WorldMapAreaData extends WorldMapArea {
 		this.initIconsList(var2, var4);
 	}
 
-	@ObfuscatedName("bj")
+	@ObfuscatedName("ct")
 	@ObfuscatedSignature(
-		signature = "(Lkb;ZI)V",
-		garbageValue = "1078269638"
+		signature = "(Lkf;ZI)V",
+		garbageValue = "2146657354"
 	)
 	@Export("initIconsList")
 	void initIconsList(Buffer var1, boolean var2) {
@@ -81,7 +80,7 @@ public class WorldMapAreaData extends WorldMapArea {
 		int var3 = var1.readUnsignedShort();
 
 		for (int var4 = 0; var4 < var3; ++var4) {
-			int var5 = var1.method5591();
+			int var5 = var1.method5511();
 			Coord var6 = new Coord(var1.readInt());
 			boolean var7 = var1.readUnsignedByte() == 1;
 			if (var2 || !var7) {
@@ -91,49 +90,16 @@ public class WorldMapAreaData extends WorldMapArea {
 
 	}
 
-	@ObfuscatedName("is")
+	@ObfuscatedName("hu")
 	@ObfuscatedSignature(
-		signature = "(Lhe;IIZS)V",
-		garbageValue = "11869"
+		signature = "(III)Lfl;",
+		garbageValue = "2134464513"
 	)
-	@Export("alignWidgetSize")
-	static void alignWidgetSize(Widget var0, int var1, int var2, boolean var3) {
-		int var4 = var0.width;
-		int var5 = var0.height;
-		if (var0.widthAlignment == 0) {
-			var0.width = var0.rawWidth;
-		} else if (var0.widthAlignment == 1) {
-			var0.width = var1 - var0.rawWidth;
-		} else if (var0.widthAlignment == 2) {
-			var0.width = var0.rawWidth * var1 >> 14;
-		}
-
-		if (var0.heightAlignment == 0) {
-			var0.height = var0.rawHeight;
-		} else if (var0.heightAlignment == 1) {
-			var0.height = var2 - var0.rawHeight;
-		} else if (var0.heightAlignment == 2) {
-			var0.height = var2 * var0.rawHeight >> 14;
-		}
-
-		if (var0.widthAlignment == 4) {
-			var0.width = var0.field2584 * var0.height / var0.field2585;
-		}
-
-		if (var0.heightAlignment == 4) {
-			var0.height = var0.field2585 * var0.width / var0.field2584;
-		}
-
-		if (var0.contentType == 1337) {
-			Client.viewportWidget = var0;
-		}
-
-		if (var3 && var0.onResize != null && (var4 != var0.width || var5 != var0.height)) {
-			ScriptEvent var6 = new ScriptEvent();
-			var6.widget = var0;
-			var6.args = var0.onResize;
-			Client.scriptEvents.addFirst(var6);
-		}
-
+	static RouteStrategy method667(int var0, int var1) {
+		Client.field735.approxDestinationX = var0;
+		Client.field735.approxDestinationY = var1;
+		Client.field735.approxDestinationSizeX = 1;
+		Client.field735.approxDestinationSizeY = 1;
+		return Client.field735;
 	}
 }

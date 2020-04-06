@@ -4,16 +4,22 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ff")
+@ObfuscatedName("ea")
 @Implements("UserComparator4")
 public class UserComparator4 implements Comparator {
-	@ObfuscatedName("ot")
+	@ObfuscatedName("db")
 	@ObfuscatedSignature(
-		signature = "Lcp;"
+		signature = "Liu;"
 	)
-	@Export("varcs")
-	static Varcs varcs;
-	@ObfuscatedName("x")
+	@Export("archive12")
+	static Archive archive12;
+	@ObfuscatedName("ga")
+	@ObfuscatedSignature(
+		signature = "Lly;"
+	)
+	@Export("redHintArrowSprite")
+	static Sprite redHintArrowSprite;
+	@ObfuscatedName("q")
 	@Export("reversed")
 	final boolean reversed;
 
@@ -21,45 +27,30 @@ public class UserComparator4 implements Comparator {
 		this.reversed = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lke;Lke;I)I",
-		garbageValue = "1812606392"
+		signature = "(Ljz;Ljz;I)I",
+		garbageValue = "2005097552"
 	)
 	@Export("compare_bridged")
 	int compare_bridged(Buddy var1, Buddy var2) {
 		return this.reversed ? var1.int2 - var2.int2 : var2.int2 - var1.int2;
 	}
 
-	public boolean equals(Object var1) {
-		return super.equals(var1);
-	}
-
 	public int compare(Object var1, Object var2) {
 		return this.compare_bridged((Buddy)var1, (Buddy)var2);
 	}
 
-	@ObfuscatedName("fy")
-	@ObfuscatedSignature(
-		signature = "(IB)I",
-		garbageValue = "120"
-	)
-	static int method3482(int var0) {
-		return var0 * 3 + 600;
+	public boolean equals(Object var1) {
+		return super.equals(var1);
 	}
 
-	@ObfuscatedName("gy")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "(III)V",
-		garbageValue = "1975650180"
+		signature = "(II)Z",
+		garbageValue = "1492423821"
 	)
-	static final void method3490(int var0, int var1) {
-		if (Client.hintArrowType == 2) {
-			WorldMapSection0.worldToScreen((Client.hintArrowX - class69.baseX << 7) + Client.hintArrowSubX, (Client.hintArrowY - class89.baseY << 7) + Client.hintArrowSubY, Client.hintArrowHeight * 2);
-			if (Client.viewportTempX > -1 && Client.cycle % 20 < 10) {
-				class4.headIconHintSprites[0].drawTransBgAt(var0 + Client.viewportTempX - 12, Client.viewportTempY + var1 - 28);
-			}
-
-		}
+	public static boolean method3382(int var0) {
+		return (var0 >> 29 & 1) != 0;
 	}
 }

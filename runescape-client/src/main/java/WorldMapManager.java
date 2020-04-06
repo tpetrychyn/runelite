@@ -8,111 +8,107 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
-import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("aj")
+@ObfuscatedName("ao")
 @Implements("WorldMapManager")
 public final class WorldMapManager {
-	@ObfuscatedName("qd")
+	@ObfuscatedName("oe")
 	@ObfuscatedSignature(
-		signature = "Ldw;"
+		signature = "Lfj;"
 	)
-	@Export("pcmPlayer0")
-	static PcmPlayer pcmPlayer0;
-	@ObfuscatedName("dj")
-	@ObfuscatedSignature(
-		signature = "Lfr;"
-	)
-	@Export("js5SocketTask")
-	static Task js5SocketTask;
-	@ObfuscatedName("x")
+	@Export("mouseWheel")
+	static MouseWheel mouseWheel;
+	@ObfuscatedName("bp")
+	@Export("otp")
+	static String otp;
+	@ObfuscatedName("q")
 	@Export("loaded")
 	boolean loaded;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@Export("loadStarted")
 	boolean loadStarted;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "Lad;"
+		signature = "Lat;"
 	)
 	@Export("mapAreaData")
 	WorldMapAreaData mapAreaData;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "Lla;"
+		signature = "Lly;"
 	)
 	@Export("compositeTextureSprite")
 	Sprite compositeTextureSprite;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@Export("icons")
 	HashMap icons;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "[[Lao;"
+		signature = "[[Law;"
 	)
 	@Export("regions")
 	WorldMapRegion[][] regions;
-	@ObfuscatedName("q")
-	HashMap field359;
-	@ObfuscatedName("z")
+	@ObfuscatedName("b")
+	HashMap field317;
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
-		signature = "[Lle;"
+		signature = "[Llx;"
 	)
 	@Export("mapSceneSprites")
 	IndexedSprite[] mapSceneSprites;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedSignature(
-		signature = "Liy;"
+		signature = "Lhp;"
 	)
 	@Export("geographyArchive")
 	final AbstractArchive geographyArchive;
-	@ObfuscatedName("e")
+	@ObfuscatedName("f")
 	@ObfuscatedSignature(
-		signature = "Liy;"
+		signature = "Lhp;"
 	)
 	@Export("groundArchive")
 	final AbstractArchive groundArchive;
-	@ObfuscatedName("s")
+	@ObfuscatedName("m")
 	@Export("fonts")
 	final HashMap fonts;
-	@ObfuscatedName("p")
+	@ObfuscatedName("u")
 	@ObfuscatedGetter(
-		intValue = -1440050247
+		intValue = -1940287293
 	)
 	@Export("tileX")
 	int tileX;
-	@ObfuscatedName("n")
+	@ObfuscatedName("x")
 	@ObfuscatedGetter(
-		intValue = 2084338799
+		intValue = 947949829
 	)
 	@Export("tileY")
 	int tileY;
-	@ObfuscatedName("u")
+	@ObfuscatedName("r")
 	@ObfuscatedGetter(
-		intValue = 1804049707
+		intValue = 1083051021
 	)
 	@Export("tileWidth")
 	int tileWidth;
-	@ObfuscatedName("h")
+	@ObfuscatedName("v")
 	@ObfuscatedGetter(
-		intValue = 793863639
+		intValue = -1040231251
 	)
 	@Export("tileHeight")
 	int tileHeight;
-	@ObfuscatedName("g")
+	@ObfuscatedName("y")
 	@ObfuscatedGetter(
-		intValue = 1333710855
+		intValue = 1989621743
 	)
 	@Export("pixelsPerTile")
 	public int pixelsPerTile;
 
 	@ObfuscatedSignature(
-		signature = "([Lle;Ljava/util/HashMap;Liy;Liy;)V"
+		signature = "([Llx;Ljava/util/HashMap;Lhp;Lhp;)V"
 	)
 	public WorldMapManager(IndexedSprite[] var1, HashMap var2, AbstractArchive var3, AbstractArchive var4) {
 		this.loaded = false;
 		this.loadStarted = false;
-		this.field359 = new HashMap();
+		this.field317 = new HashMap();
 		this.pixelsPerTile = 0;
 		this.mapSceneSprites = var1;
 		this.fonts = var2;
@@ -120,10 +116,10 @@ public final class WorldMapManager {
 		this.groundArchive = var4;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Liy;Ljava/lang/String;ZI)V",
-		garbageValue = "1660505626"
+		signature = "(Lhp;Ljava/lang/String;ZB)V",
+		garbageValue = "1"
 	)
 	@Export("load")
 	public void load(AbstractArchive var1, String var2, boolean var3) {
@@ -131,10 +127,10 @@ public final class WorldMapManager {
 			this.loaded = false;
 			this.loadStarted = true;
 			System.nanoTime();
-			int var4 = var1.getGroupId(WorldMapCacheName.field339.name);
+			int var4 = var1.getGroupId(WorldMapCacheName.field308.name);
 			int var5 = var1.getFileId(var4, var2);
-			Buffer var6 = new Buffer(var1.takeFileByNames(WorldMapCacheName.field339.name, var2));
-			Buffer var7 = new Buffer(var1.takeFileByNames(WorldMapCacheName.field340.name, var2));
+			Buffer var6 = new Buffer(var1.takeFileByNames(WorldMapCacheName.field308.name, var2));
+			Buffer var7 = new Buffer(var1.takeFileByNames(WorldMapCacheName.field302.name, var2));
 			System.nanoTime();
 			System.nanoTime();
 			this.mapAreaData = new WorldMapAreaData();
@@ -156,7 +152,7 @@ public final class WorldMapManager {
 			int var9 = this.mapAreaData.getRegionHighY() - this.mapAreaData.getRegionLowY() + 1;
 			System.nanoTime();
 			System.nanoTime();
-			PendingSpawn.method1840();
+			SecureRandomFuture.method2069();
 			this.regions = new WorldMapRegion[var16][var9];
 			Iterator var10 = this.mapAreaData.worldMapData0Set.iterator();
 
@@ -181,9 +177,9 @@ public final class WorldMapManager {
 
 			System.nanoTime();
 			System.nanoTime();
-			if (var1.isValidFileName(WorldMapCacheName.field341.name, var2)) {
-				byte[] var20 = var1.takeFileByNames(WorldMapCacheName.field341.name, var2);
-				this.compositeTextureSprite = class200.convertJpgToSprite(var20);
+			if (var1.isValidFileName(WorldMapCacheName.field303.name, var2)) {
+				byte[] var20 = var1.takeFileByNames(WorldMapCacheName.field303.name, var2);
+				this.compositeTextureSprite = BuddyRankComparator.convertJpgToSprite(var20);
 			}
 
 			System.nanoTime();
@@ -193,20 +189,20 @@ public final class WorldMapManager {
 		}
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "2062651870"
+		garbageValue = "-715602432"
 	)
 	@Export("clearIcons")
 	public final void clearIcons() {
 		this.icons = null;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
 		signature = "(IIIIIIIIB)V",
-		garbageValue = "8"
+		garbageValue = "36"
 	)
 	@Export("drawTiles")
 	public final void drawTiles(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8) {
@@ -219,20 +215,20 @@ public final class WorldMapManager {
 		float var14 = this.getPixelsPerTile(var7 - var5, var3 - var1);
 		int var15 = (int)Math.ceil((double)var14);
 		this.pixelsPerTile = var15;
-		if (!this.field359.containsKey(var15)) {
-			class49 var16 = new class49(var15);
+		if (!this.field317.containsKey(var15)) {
+			class40 var16 = new class40(var15);
 			var16.init();
-			this.field359.put(var15, var16);
+			this.field317.put(var15, var16);
 		}
 
 		int var23 = var13.width + var13.x - 1;
-		int var17 = var13.height + var13.y - 1;
+		int var17 = var13.y + var13.height - 1;
 
 		int var18;
 		int var19;
 		for (var18 = var13.x; var18 <= var23; ++var18) {
 			for (var19 = var13.y; var19 <= var17; ++var19) {
-				this.regions[var18][var19].drawTile(var15, (class49)this.field359.get(var15), this.mapSceneSprites, this.geographyArchive, this.groundArchive);
+				this.regions[var18][var19].drawTile(var15, (class40)this.field317.get(var15), this.mapSceneSprites, this.geographyArchive, this.groundArchive);
 			}
 		}
 
@@ -242,18 +238,18 @@ public final class WorldMapManager {
 		var19 = this.tileX + var1;
 		int var20 = var2 + this.tileY;
 
-		for (int var21 = var13.x; var21 < var13.width + var13.x; ++var21) {
-			for (int var22 = var13.y; var22 < var13.height + var13.y; ++var22) {
-				this.regions[var21][var22].method519(var5 + (this.regions[var21][var22].regionX * 64 - var19) * var18 / 64, var8 - (this.regions[var21][var22].regionY * 64 - var20 + 64) * var18 / 64, var18);
+		for (int var21 = var13.x; var21 < var13.x + var13.width; ++var21) {
+			for (int var22 = var13.y; var22 < var13.y + var13.height; ++var22) {
+				this.regions[var21][var22].method506(var5 + (this.regions[var21][var22].regionX * 64 - var19) * var18 / 64, var8 - (this.regions[var21][var22].regionY * 64 - var20 + 64) * var18 / 64, var18);
 			}
 		}
 
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(IIIIIIIILjava/util/HashSet;Ljava/util/HashSet;IIZB)V",
-		garbageValue = "18"
+		signature = "(IIIIIIIILjava/util/HashSet;Ljava/util/HashSet;IIZI)V",
+		garbageValue = "-855095363"
 	)
 	@Export("drawElements")
 	public final void drawElements(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, HashSet var9, HashSet var10, int var11, int var12, boolean var13) {
@@ -271,7 +267,7 @@ public final class WorldMapManager {
 					this.regions[var19][var20].initWorldMapIcon1s();
 				}
 
-				this.regions[var19][var20].method529(var5 + (this.regions[var19][var20].regionX * 64 - var17) * var16 / 64, var8 - (this.regions[var19][var20].regionY * 64 - var18 + 64) * var16 / 64, var16, var9);
+				this.regions[var19][var20].method432(var5 + (this.regions[var19][var20].regionX * 64 - var17) * var16 / 64, var8 - (this.regions[var19][var20].regionY * 64 - var18 + 64) * var16 / 64, var16, var9);
 			}
 		}
 
@@ -285,10 +281,10 @@ public final class WorldMapManager {
 
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(IIIILjava/util/HashSet;IIB)V",
-		garbageValue = "73"
+		signature = "(IIIILjava/util/HashSet;III)V",
+		garbageValue = "-1827079020"
 	)
 	@Export("drawOverview")
 	public void drawOverview(int var1, int var2, int var3, int var4, HashSet var5, int var6, int var7) {
@@ -325,25 +321,25 @@ public final class WorldMapManager {
 		}
 	}
 
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
 		signature = "(IIIIIIIIIII)Ljava/util/List;",
-		garbageValue = "1400578411"
+		garbageValue = "286331893"
 	)
-	public List method722(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
+	public List method607(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
 		LinkedList var11 = new LinkedList();
 		if (!this.loaded) {
 			return var11;
 		} else {
 			WorldMapRectangle var12 = this.createWorldMapRectangle(var1, var2, var3, var4);
 			float var13 = this.getPixelsPerTile(var7, var3 - var1);
-			int var14 = (int)(var13 * 64.0F);
+			int var14 = (int)(64.0F * var13);
 			int var15 = this.tileX + var1;
 			int var16 = var2 + this.tileY;
 
 			for (int var17 = var12.x; var17 < var12.width + var12.x; ++var17) {
-				for (int var18 = var12.y; var18 < var12.height + var12.y; ++var18) {
-					List var19 = this.regions[var17][var18].method606(var5 + (this.regions[var17][var18].regionX * 64 - var15) * var14 / 64, var8 + var6 - (this.regions[var17][var18].regionY * 64 - var16 + 64) * var14 / 64, var14, var9, var10);
+				for (int var18 = var12.y; var18 < var12.y + var12.height; ++var18) {
+					List var19 = this.regions[var17][var18].method440(var5 + (this.regions[var17][var18].regionX * 64 - var15) * var14 / 64, var8 + var6 - (this.regions[var17][var18].regionY * 64 - var16 + 64) * var14 / 64, var14, var9, var10);
 					if (!var19.isEmpty()) {
 						var11.addAll(var19);
 					}
@@ -354,10 +350,10 @@ public final class WorldMapManager {
 		}
 	}
 
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedSignature(
-		signature = "(IIIII)Lar;",
-		garbageValue = "-1850062895"
+		signature = "(IIIII)Ln;",
+		garbageValue = "-849608506"
 	)
 	@Export("createWorldMapRectangle")
 	WorldMapRectangle createWorldMapRectangle(int var1, int var2, int var3, int var4) {
@@ -397,20 +393,20 @@ public final class WorldMapManager {
 		return var5;
 	}
 
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
-		signature = "(B)Z",
-		garbageValue = "8"
+		signature = "(I)Z",
+		garbageValue = "1588270336"
 	)
 	@Export("isLoaded")
 	public boolean isLoaded() {
 		return this.loaded;
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedSignature(
-		signature = "(B)Ljava/util/HashMap;",
-		garbageValue = "-55"
+		signature = "(I)Ljava/util/HashMap;",
+		garbageValue = "1662606206"
 	)
 	@Export("buildIcons")
 	public HashMap buildIcons() {
@@ -418,10 +414,10 @@ public final class WorldMapManager {
 		return this.icons;
 	}
 
-	@ObfuscatedName("e")
+	@ObfuscatedName("u")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "1203186095"
+		garbageValue = "-1110146603"
 	)
 	@Export("buildIcons0")
 	void buildIcons0() {
@@ -455,10 +451,10 @@ public final class WorldMapManager {
 
 	}
 
-	@ObfuscatedName("s")
+	@ObfuscatedName("x")
 	@ObfuscatedSignature(
 		signature = "(III)F",
-		garbageValue = "-1899828753"
+		garbageValue = "-131172900"
 	)
 	@Export("getPixelsPerTile")
 	float getPixelsPerTile(int var1, int var2) {
@@ -473,33 +469,122 @@ public final class WorldMapManager {
 		}
 	}
 
-	@ObfuscatedName("a")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(ILce;ZI)I",
-		garbageValue = "345752229"
+		signature = "(IIII)I",
+		garbageValue = "1091225216"
 	)
-	static int method750(int var0, Script var1, boolean var2) {
-		Widget var3 = MusicPatchNode.getWidget(Interpreter.Interpreter_intStack[--Interpreter.Interpreter_intStackSize]);
-		if (var0 == ScriptOpcodes.IF_GETX) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = var3.x;
-			return 1;
-		} else if (var0 == ScriptOpcodes.IF_GETY) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = var3.y;
-			return 1;
-		} else if (var0 == ScriptOpcodes.IF_GETWIDTH) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = var3.width;
-			return 1;
-		} else if (var0 == ScriptOpcodes.IF_GETHEIGHT) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = var3.height;
-			return 1;
-		} else if (var0 == ScriptOpcodes.IF_GETHIDE) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = var3.isHidden ? 1 : 0;
-			return 1;
-		} else if (var0 == ScriptOpcodes.IF_GETLAYER) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = var3.parentId;
-			return 1;
+	public static int method625(int var0, int var1, int var2) {
+		var2 &= 3;
+		if (var2 == 0) {
+			return var1;
+		} else if (var2 == 1) {
+			return 7 - var0;
 		} else {
-			return 2;
+			return var2 == 2 ? 7 - var1 : var0;
+		}
+	}
+
+	@ObfuscatedName("u")
+	@ObfuscatedSignature(
+		signature = "(Ljava/lang/String;I)V",
+		garbageValue = "-1454512266"
+	)
+	static final void method633(String var0) {
+		StringBuilder var10000 = (new StringBuilder()).append(var0);
+		Object var10001 = null;
+		String var1 = var10000.append(" is already on your friend list").toString();
+		ScriptEvent.addGameMessage(30, "", var1);
+	}
+
+	@ObfuscatedName("ir")
+	@ObfuscatedSignature(
+		signature = "(Lbd;IIIB)V",
+		garbageValue = "-54"
+	)
+	@Export("addPlayerToMenu")
+	static final void addPlayerToMenu(Player var0, int var1, int var2, int var3) {
+		if (Client.localPlayer != var0) {
+			if (Client.menuOptionsCount < 400) {
+				String var4;
+				int var7;
+				if (var0.skillLevel == 0) {
+					String var5 = var0.actions[0] + var0.username + var0.actions[1];
+					var7 = var0.combatLevel;
+					int var8 = Client.localPlayer.combatLevel;
+					int var9 = var8 - var7;
+					String var6;
+					if (var9 < -9) {
+						var6 = ClientPreferences.colorStartTag(16711680);
+					} else if (var9 < -6) {
+						var6 = ClientPreferences.colorStartTag(16723968);
+					} else if (var9 < -3) {
+						var6 = ClientPreferences.colorStartTag(16740352);
+					} else if (var9 < 0) {
+						var6 = ClientPreferences.colorStartTag(16756736);
+					} else if (var9 > 9) {
+						var6 = ClientPreferences.colorStartTag(65280);
+					} else if (var9 > 6) {
+						var6 = ClientPreferences.colorStartTag(4259584);
+					} else if (var9 > 3) {
+						var6 = ClientPreferences.colorStartTag(8453888);
+					} else if (var9 > 0) {
+						var6 = ClientPreferences.colorStartTag(12648192);
+					} else {
+						var6 = ClientPreferences.colorStartTag(16776960);
+					}
+
+					var4 = var5 + var6 + " " + " (" + "level-" + var0.combatLevel + ")" + var0.actions[2];
+				} else {
+					var4 = var0.actions[0] + var0.username + var0.actions[1] + " " + " (" + "skill-" + var0.skillLevel + ")" + var0.actions[2];
+				}
+
+				int var10;
+				if (Client.isItemSelected == 1) {
+					class188.insertMenuItemNoShift("Use", Client.selectedItemName + " " + "->" + " " + ClientPreferences.colorStartTag(16777215) + var4, 14, var1, var2, var3);
+				} else if (Client.isSpellSelected) {
+					if ((WorldMapCacheName.selectedSpellFlags & 8) == 8) {
+						class188.insertMenuItemNoShift(Client.selectedSpellActionName, Client.selectedSpellName + " " + "->" + " " + ClientPreferences.colorStartTag(16777215) + var4, 15, var1, var2, var3);
+					}
+				} else {
+					for (var10 = 7; var10 >= 0; --var10) {
+						if (Client.playerMenuActions[var10] != null) {
+							short var11 = 0;
+							if (Client.playerMenuActions[var10].equalsIgnoreCase("Attack")) {
+								if (Client.playerAttackOption == AttackOption.AttackOption_hidden) {
+									continue;
+								}
+
+								if (AttackOption.AttackOption_alwaysRightClick == Client.playerAttackOption || AttackOption.AttackOption_dependsOnCombatLevels == Client.playerAttackOption && var0.combatLevel > Client.localPlayer.combatLevel) {
+									var11 = 2000;
+								}
+
+								if (Client.localPlayer.team != 0 && var0.team != 0) {
+									if (var0.team == Client.localPlayer.team) {
+										var11 = 2000;
+									} else {
+										var11 = 0;
+									}
+								}
+							} else if (Client.playerOptionsPriorities[var10]) {
+								var11 = 2000;
+							}
+
+							boolean var12 = false;
+							var7 = Client.playerMenuOpcodes[var10] + var11;
+							class188.insertMenuItemNoShift(Client.playerMenuActions[var10], ClientPreferences.colorStartTag(16777215) + var4, var7, var1, var2, var3);
+						}
+					}
+				}
+
+				for (var10 = 0; var10 < Client.menuOptionsCount; ++var10) {
+					if (Client.menuOpcodes[var10] == 23) {
+						Client.menuTargets[var10] = ClientPreferences.colorStartTag(16777215) + var4;
+						break;
+					}
+				}
+
+			}
 		}
 	}
 }

@@ -3,16 +3,22 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("am")
+@ObfuscatedName("av")
 @Implements("WorldMapSprite")
 public final class WorldMapSprite {
-	@ObfuscatedName("da")
+	@ObfuscatedName("af")
+	@Export("client")
 	@ObfuscatedSignature(
-		signature = "Lih;"
+		signature = "Lclient;"
 	)
-	@Export("archive3")
-	static Archive archive3;
-	@ObfuscatedName("m")
+	static Client client;
+	@ObfuscatedName("et")
+	@ObfuscatedSignature(
+		signature = "Liu;"
+	)
+	@Export("archive17")
+	static Archive archive17;
+	@ObfuscatedName("w")
 	@Export("tileColors")
 	final int[] tileColors;
 
@@ -24,116 +30,106 @@ public final class WorldMapSprite {
 		this.tileColors = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(III)I",
-		garbageValue = "1469556779"
+		signature = "(IIB)I",
+		garbageValue = "-97"
 	)
 	@Export("getTileColor")
 	final int getTileColor(int var1, int var2) {
-		return this.tileColors[var1 + var2 * 64];
+		return this.tileColors[var2 * 64 + var1];
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(II)Lce;",
-		garbageValue = "1891668899"
+		signature = "(Lhp;I)V",
+		garbageValue = "-2096884458"
 	)
-	@Export("getScript")
-	static Script getScript(int var0) {
-		Script var1 = (Script)Script.Script_cached.get((long)var0);
-		if (var1 != null) {
-			return var1;
-		} else {
-			byte[] var2 = class41.archive12.takeFile(var0, 0);
-			if (var2 == null) {
-				return null;
-			} else {
-				var1 = SecureRandomCallable.newScript(var2);
-				Script.Script_cached.put(var1, (long)var0);
-				return var1;
-			}
-		}
+	public static void method414(AbstractArchive var0) {
+		FloorUnderlayDefinition.FloorUnderlayDefinition_archive = var0;
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("hv")
 	@ObfuscatedSignature(
-		signature = "(IIIII)V",
-		garbageValue = "-173221436"
+		signature = "(III)V",
+		garbageValue = "1522656478"
 	)
-	static final void method514(int var0, int var1, int var2, int var3) {
-		for (int var4 = var1; var4 <= var3 + var1; ++var4) {
-			for (int var5 = var0; var5 <= var0 + var2; ++var5) {
-				if (var5 >= 0 && var5 < 104 && var4 >= 0 && var4 < 104) {
-					SoundCache.field1462[0][var5][var4] = 127;
-					if (var0 == var5 && var5 > 0) {
-						Tiles.Tiles_heights[0][var5][var4] = Tiles.Tiles_heights[0][var5 - 1][var4];
-					}
-
-					if (var0 + var2 == var5 && var5 < 103) {
-						Tiles.Tiles_heights[0][var5][var4] = Tiles.Tiles_heights[0][var5 + 1][var4];
-					}
-
-					if (var4 == var1 && var4 > 0) {
-						Tiles.Tiles_heights[0][var5][var4] = Tiles.Tiles_heights[0][var5][var4 - 1];
-					}
-
-					if (var3 + var1 == var4 && var4 < 103) {
-						Tiles.Tiles_heights[0][var5][var4] = Tiles.Tiles_heights[0][var5][var4 + 1];
-					}
+	static final void method412(int var0, int var1) {
+		if (Client.menuOptionsCount >= 2 || Client.isItemSelected != 0 || Client.isSpellSelected) {
+			if (Client.showMouseOverText) {
+				int var2 = class13.method151();
+				String var3;
+				if (Client.isItemSelected == 1 && Client.menuOptionsCount < 2) {
+					var3 = "Use" + " " + Client.selectedItemName + " " + "->";
+				} else if (Client.isSpellSelected && Client.menuOptionsCount < 2) {
+					var3 = Client.selectedSpellActionName + " " + Client.selectedSpellName + " " + "->";
+				} else {
+					var3 = WorldMapLabel.method417(var2);
 				}
+
+				if (Client.menuOptionsCount > 2) {
+					var3 = var3 + ClientPreferences.colorStartTag(16777215) + " " + '/' + " " + (Client.menuOptionsCount - 2) + " more options";
+				}
+
+				WorldMapIcon_1.fontBold12.drawRandomAlphaAndSpacing(var3, var0 + 4, var1 + 15, 16777215, 0, Client.cycle / 1000);
 			}
+		}
+	}
+
+	@ObfuscatedName("id")
+	@ObfuscatedSignature(
+		signature = "([Lhj;Lhj;ZI)V",
+		garbageValue = "280712117"
+	)
+	@Export("revalidateWidgetScroll")
+	static void revalidateWidgetScroll(Widget[] var0, Widget var1, boolean var2) {
+		int var3 = var1.scrollWidth != 0 ? var1.scrollWidth * -1472977599 * 1233349313 : var1.width * -633249123 * -207604811;
+		int var4 = var1.scrollHeight != 0 ? var1.scrollHeight * -794847893 * 527953731 : var1.height * 605689375 * 652469727;
+		class13.resizeInterface(var0, var1.id, var3, var4, var2);
+		if (var1.children != null) {
+			class13.resizeInterface(var1.children, var1.id, var3, var4, var2);
+		}
+
+		InterfaceParent var5 = (InterfaceParent)Client.interfaceParents.get((long)var1.id);
+		if (var5 != null) {
+			method416(var5.group, var3, var4, var2);
+		}
+
+		if (var1.contentType == 1337) {
 		}
 
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("ib")
 	@ObfuscatedSignature(
-		signature = "(Lkb;II)V",
-		garbageValue = "-1583850141"
+		signature = "(IIIZI)V",
+		garbageValue = "-2115353122"
 	)
-	public static void method510(Buffer var0, int var1) {
+	static final void method416(int var0, int var1, int var2, boolean var3) {
+		if (class162.loadInterface(var0)) {
+			class13.resizeInterface(Widget.Widget_interfaceComponents[var0], -1, var1, var2, var3);
+		}
+	}
+
+	@ObfuscatedName("kd")
+	@ObfuscatedSignature(
+		signature = "(Lkf;II)V",
+		garbageValue = "291436994"
+	)
+	static void method407(Buffer var0, int var1) {
+		byte[] var2 = var0.array;
+		if (Client.randomDatData == null) {
+			Client.randomDatData = new byte[24];
+		}
+
+		class301.writeRandomDat(var2, var1, Client.randomDatData, 0, 24);
 		if (JagexCache.JagexCache_randomDat != null) {
 			try {
 				JagexCache.JagexCache_randomDat.seek(0L);
 				JagexCache.JagexCache_randomDat.write(var0.array, var1, 24);
-			} catch (Exception var3) {
+			} catch (Exception var4) {
 			}
 		}
 
-	}
-
-	@ObfuscatedName("e")
-	@ObfuscatedSignature(
-		signature = "(B)[Lla;",
-		garbageValue = "10"
-	)
-	static Sprite[] method516() {
-		Sprite[] var0 = new Sprite[class335.SpriteBuffer_spriteCount];
-
-		for (int var1 = 0; var1 < class335.SpriteBuffer_spriteCount; ++var1) {
-			Sprite var2 = var0[var1] = new Sprite();
-			var2.width = class335.SpriteBuffer_spriteWidth;
-			var2.height = class335.SpriteBuffer_spriteHeight;
-			var2.xOffset = class335.SpriteBuffer_xOffsets[var1];
-			var2.yOffset = StructDefinition.SpriteBuffer_yOffsets[var1];
-			var2.subWidth = class335.SpriteBuffer_spriteWidths[var1];
-			var2.subHeight = class335.SpriteBuffer_spriteHeights[var1];
-			int var3 = var2.subHeight * var2.subWidth;
-			byte[] var4 = class4.SpriteBuffer_pixels[var1];
-			var2.pixels = new int[var3];
-
-			for (int var5 = 0; var5 < var3; ++var5) {
-				var2.pixels[var5] = DefaultsGroup.SpriteBuffer_spritePalette[var4[var5] & 255];
-			}
-		}
-
-		class335.SpriteBuffer_xOffsets = null;
-		StructDefinition.SpriteBuffer_yOffsets = null;
-		class335.SpriteBuffer_spriteWidths = null;
-		class335.SpriteBuffer_spriteHeights = null;
-		DefaultsGroup.SpriteBuffer_spritePalette = null;
-		class4.SpriteBuffer_pixels = null;
-		return var0;
 	}
 }

@@ -4,58 +4,79 @@ import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("fe")
+@ObfuscatedName("fy")
 @Implements("FileSystem")
 public class FileSystem {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@Export("FileSystem_hasPermissions")
-	public static boolean FileSystem_hasPermissions;
-	@ObfuscatedName("m")
+	static boolean FileSystem_hasPermissions;
+	@ObfuscatedName("w")
 	@Export("FileSystem_cacheDir")
-	public static File FileSystem_cacheDir;
-	@ObfuscatedName("k")
+	static File FileSystem_cacheDir;
+	@ObfuscatedName("e")
 	@Export("FileSystem_cacheFiles")
 	static Hashtable FileSystem_cacheFiles;
+	@ObfuscatedName("l")
+	@Export("PcmPlayer_stereo")
+	protected static boolean PcmPlayer_stereo;
+	@ObfuscatedName("fj")
+	@ObfuscatedSignature(
+		signature = "Lku;"
+	)
+	@Export("WorldMapElement_fonts")
+	static Fonts WorldMapElement_fonts;
+	@ObfuscatedName("fu")
+	@ObfuscatedSignature(
+		signature = "Lke;"
+	)
+	@Export("fontPlain12")
+	static Font fontPlain12;
 
 	static {
 		FileSystem_hasPermissions = false;
 		FileSystem_cacheFiles = new Hashtable(16);
 	}
 
-	@ObfuscatedName("h")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(IIB)Z",
-		garbageValue = "-28"
+		signature = "(Lhp;IIIZI)V",
+		garbageValue = "1090882543"
 	)
-	static final boolean method3588(int var0, int var1) {
-		ObjectDefinition var2 = WorldMapSection2.getObjectDefinition(var0);
-		if (var1 == 11) {
-			var1 = 10;
-		}
-
-		if (var1 >= 5 && var1 <= 8) {
-			var1 = 4;
-		}
-
-		return var2.method4661(var1);
+	public static void method3503(AbstractArchive var0, int var1, int var2, int var3, boolean var4) {
+		class197.field2402 = 1;
+		GrandExchangeOfferNameComparator.musicTrackArchive = var0;
+		class197.musicTrackGroupId = var1;
+		class197.musicTrackFileId = var2;
+		ScriptFrame.musicTrackVolume = var3;
+		BuddyRankComparator.musicTrackBoolean = var4;
+		class197.field2404 = 10000;
 	}
 
-	@ObfuscatedName("ao")
+	@ObfuscatedName("g")
 	@ObfuscatedSignature(
-		signature = "(Lds;S)V",
-		garbageValue = "4477"
+		signature = "(ILcx;ZI)I",
+		garbageValue = "-786180451"
 	)
-	@Export("PcmStream_disable")
-	static final void PcmStream_disable(PcmStream var0) {
-		var0.active = false;
-		if (var0.sound != null) {
-			var0.sound.position = 0;
-		}
+	static int method3501(int var0, Script var1, boolean var2) {
+		Widget var3 = var2 ? Interpreter.field1111 : Calendar.field2507;
+		if (var0 == ScriptOpcodes.CC_GETINVOBJECT) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3.itemId;
+			return 1;
+		} else if (var0 == ScriptOpcodes.CC_GETINVCOUNT) {
+			if (var3.itemId != -1) {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3.itemQuantity;
+			} else {
+				Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = 0;
+			}
 
-		for (PcmStream var1 = var0.firstSubStream(); var1 != null; var1 = var0.nextSubStream()) {
-			PcmStream_disable(var1);
+			return 1;
+		} else if (var0 == ScriptOpcodes.CC_GETID) {
+			Interpreter.Interpreter_intStack[++HealthBarUpdate.Interpreter_intStackSize - 1] = var3.childIndex;
+			return 1;
+		} else {
+			return 2;
 		}
-
 	}
 }

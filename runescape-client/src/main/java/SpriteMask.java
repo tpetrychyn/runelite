@@ -7,22 +7,22 @@ import net.runelite.mapping.ObfuscatedSignature;
 @ObfuscatedName("hg")
 @Implements("SpriteMask")
 public class SpriteMask extends DualNode {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -1355900291
+		intValue = 874767191
 	)
 	@Export("width")
 	public final int width;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = 1444758519
+		intValue = -918185267
 	)
 	@Export("height")
 	public final int height;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@Export("xWidths")
 	public final int[] xWidths;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@Export("xStarts")
 	public final int[] xStarts;
 
@@ -33,10 +33,10 @@ public class SpriteMask extends DualNode {
 		this.xStarts = var4;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(III)Z",
-		garbageValue = "-822552656"
+		signature = "(IIS)Z",
+		garbageValue = "25393"
 	)
 	@Export("contains")
 	public boolean contains(int var1, int var2) {
@@ -48,26 +48,5 @@ public class SpriteMask extends DualNode {
 		}
 
 		return false;
-	}
-
-	@ObfuscatedName("x")
-	@ObfuscatedSignature(
-		signature = "(IS)Liu;",
-		garbageValue = "14194"
-	)
-	public static VarbitDefinition method4061(int var0) {
-		VarbitDefinition var1 = (VarbitDefinition)VarbitDefinition.VarbitDefinition_cached.get((long)var0);
-		if (var1 != null) {
-			return var1;
-		} else {
-			byte[] var2 = VarbitDefinition.VarbitDefinition_archive.takeFile(14, var0);
-			var1 = new VarbitDefinition();
-			if (var2 != null) {
-				var1.decode(new Buffer(var2));
-			}
-
-			VarbitDefinition.VarbitDefinition_cached.put(var1, (long)var0);
-			return var1;
-		}
 	}
 }

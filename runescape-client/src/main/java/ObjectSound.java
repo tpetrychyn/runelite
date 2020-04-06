@@ -4,90 +4,96 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("cm")
+@ObfuscatedName("bv")
 @Implements("ObjectSound")
 public final class ObjectSound extends Node {
-	@ObfuscatedName("m")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
 		signature = "Ljh;"
 	)
 	@Export("objectSounds")
 	static NodeDeque objectSounds;
-	@ObfuscatedName("x")
+	@ObfuscatedName("kt")
 	@ObfuscatedGetter(
-		intValue = 1413400591
+		intValue = -1438835767
+	)
+	@Export("menuHeight")
+	static int menuHeight;
+	@ObfuscatedName("w")
+	@ObfuscatedGetter(
+		intValue = 621824935
+	)
+	@Export("plane")
+	int plane;
+	@ObfuscatedName("e")
+	@ObfuscatedGetter(
+		intValue = 1620734975
+	)
+	@Export("x")
+	int x;
+	@ObfuscatedName("p")
+	@ObfuscatedGetter(
+		intValue = 2033101779
 	)
 	@Export("y")
 	int y;
 	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = 1795590701
+		intValue = -1610020141
 	)
-	@Export("plane")
-	int plane;
-	@ObfuscatedName("d")
+	int field1077;
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = -877292205
+		intValue = -1668169571
 	)
-	@Export("x")
-	int x;
-	@ObfuscatedName("w")
+	int field1082;
+	@ObfuscatedName("b")
 	@ObfuscatedGetter(
-		intValue = 1466364365
+		intValue = 526073997
 	)
-	int field1110;
-	@ObfuscatedName("v")
+	int field1091;
+	@ObfuscatedName("i")
 	@ObfuscatedGetter(
-		intValue = -878503687
-	)
-	int field1100;
-	@ObfuscatedName("q")
-	@ObfuscatedGetter(
-		intValue = 2082519321
-	)
-	int field1106;
-	@ObfuscatedName("z")
-	@ObfuscatedGetter(
-		intValue = -1984124175
+		intValue = -675228961
 	)
 	@Export("soundEffectId")
 	int soundEffectId;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@ObfuscatedSignature(
-		signature = "Ldy;"
+		signature = "Ldh;"
 	)
 	@Export("stream1")
 	RawPcmStream stream1;
-	@ObfuscatedName("e")
+	@ObfuscatedName("f")
 	@ObfuscatedGetter(
-		intValue = -240636841
+		intValue = 1323025429
 	)
-	int field1104;
-	@ObfuscatedName("s")
+	int field1086;
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = -901475347
+		intValue = -1728328017
 	)
-	int field1105;
-	@ObfuscatedName("p")
+	int field1081;
+	@ObfuscatedName("u")
 	@Export("soundEffectIds")
 	int[] soundEffectIds;
-	@ObfuscatedName("n")
+	@ObfuscatedName("x")
 	@ObfuscatedGetter(
-		intValue = -1043802301
+		intValue = 398204327
 	)
-	int field1107;
-	@ObfuscatedName("u")
+	int field1089;
+	@ObfuscatedName("r")
 	@ObfuscatedSignature(
-		signature = "Ldy;"
-	)
-	@Export("stream2")
-	RawPcmStream stream2;
-	@ObfuscatedName("h")
-	@ObfuscatedSignature(
-		signature = "Ljw;"
+		signature = "Liy;"
 	)
 	@Export("obj")
 	ObjectDefinition obj;
+	@ObfuscatedName("v")
+	@ObfuscatedSignature(
+		signature = "Ldh;"
+	)
+	@Export("stream2")
+	RawPcmStream stream2;
 
 	static {
 		objectSounds = new NodeDeque();
@@ -96,10 +102,10 @@ public final class ObjectSound extends Node {
 	ObjectSound() {
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "29"
+		signature = "(I)V",
+		garbageValue = "-2146253621"
 	)
 	@Export("set")
 	void set() {
@@ -107,37 +113,96 @@ public final class ObjectSound extends Node {
 		ObjectDefinition var2 = this.obj.transform();
 		if (var2 != null) {
 			this.soundEffectId = var2.ambientSoundId;
-			this.field1106 = var2.int4 * 128;
-			this.field1104 = var2.int5;
-			this.field1105 = var2.int6;
+			this.field1091 = var2.int4 * 128;
+			this.field1086 = var2.int5;
+			this.field1081 = var2.int6;
 			this.soundEffectIds = var2.soundEffectIds;
 		} else {
 			this.soundEffectId = -1;
-			this.field1106 = 0;
-			this.field1104 = 0;
-			this.field1105 = 0;
+			this.field1091 = 0;
+			this.field1086 = 0;
+			this.field1081 = 0;
 			this.soundEffectIds = null;
 		}
 
 		if (var1 != this.soundEffectId && this.stream1 != null) {
-			Tiles.pcmStreamMixer.removeSubStream(this.stream1);
+			SecureRandomCallable.pcmStreamMixer.removeSubStream(this.stream1);
 			this.stream1 = null;
 		}
 
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
-		signature = "(II)I",
-		garbageValue = "-1791981608"
+		signature = "(IIIS)Lcx;",
+		garbageValue = "17061"
 	)
-	@Export("Messages_getNextChatID")
-	static int Messages_getNextChatID(int var0) {
-		Message var1 = (Message)Messages.Messages_hashTable.get((long)var0);
-		if (var1 == null) {
-			return -1;
+	@Export("getWorldMapScript")
+	static Script getWorldMapScript(int var0, int var1, int var2) {
+		int var3 = (var1 << 8) + var0;
+		Script var5 = class49.method821(var3, var0);
+		if (var5 != null) {
+			return var5;
 		} else {
-			return var1.previousDual == Messages.Messages_queue.sentinel ? -1 : ((Message)var1.previousDual).count;
+			int var4 = GraphicsDefaults.method5899(var2, var0);
+			var5 = class49.method821(var4, var0);
+			return var5 != null ? var5 : null;
 		}
+	}
+
+	@ObfuscatedName("ai")
+	@ObfuscatedSignature(
+		signature = "(ILhv;ZB)V",
+		garbageValue = "22"
+	)
+	static void method1824(int var0, Coord var1, boolean var2) {
+		WorldMapArea var3 = WorldMapID.getWorldMap().getMapArea(var0);
+		int var4 = Client.localPlayer.plane;
+		int var5 = (Client.localPlayer.x >> 7) + MusicPatchNode2.baseX;
+		int var6 = (Client.localPlayer.y >> 7) + class1.baseY;
+		Coord var7 = new Coord(var4, var5, var6);
+		WorldMapID.getWorldMap().method6315(var3, var7, var1, var2);
+	}
+
+	@ObfuscatedName("gu")
+	@ObfuscatedSignature(
+		signature = "(I)V",
+		garbageValue = "1435918510"
+	)
+	static final void method1826() {
+		Client.field767 = 0;
+		int var0 = (Client.localPlayer.x >> 7) + MusicPatchNode2.baseX;
+		int var1 = (Client.localPlayer.y >> 7) + class1.baseY;
+		if (var0 >= 3053 && var0 <= 3156 && var1 >= 3056 && var1 <= 3136) {
+			Client.field767 = 1;
+		}
+
+		if (var0 >= 3072 && var0 <= 3118 && var1 >= 9492 && var1 <= 9535) {
+			Client.field767 = 1;
+		}
+
+		if (Client.field767 == 1 && var0 >= 3139 && var0 <= 3199 && var1 >= 3008 && var1 <= 3062) {
+			Client.field767 = 0;
+		}
+
+	}
+
+	@ObfuscatedName("kf")
+	@ObfuscatedSignature(
+		signature = "(I)V",
+		garbageValue = "-472154636"
+	)
+	static void method1827() {
+		if (PendingSpawn.field944 != null) {
+			Client.field924 = Client.cycle;
+			PendingSpawn.field944.method4320();
+
+			for (int var0 = 0; var0 < Client.players.length; ++var0) {
+				if (Client.players[var0] != null) {
+					PendingSpawn.field944.method4316((Client.players[var0].x >> 7) + MusicPatchNode2.baseX, (Client.players[var0].y >> 7) + class1.baseY);
+				}
+			}
+		}
+
 	}
 }

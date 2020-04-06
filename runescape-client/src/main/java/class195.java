@@ -1,43 +1,62 @@
+import java.util.HashMap;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("gm")
+@ObfuscatedName("gr")
 public class class195 {
-	@ObfuscatedName("t")
-	@ObfuscatedSignature(
-		signature = "(IIIIB)I",
-		garbageValue = "90"
-	)
-	static final int method3695(int var0, int var1, int var2, int var3) {
-		int var4 = 65536 - Rasterizer3D.Rasterizer3D_cosine[var2 * 1024 / var3] >> 1;
-		return ((65536 - var4) * var0 >> 16) + (var4 * var1 >> 16);
+	static {
+		new HashMap();
 	}
 
-	@ObfuscatedName("s")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "(Lhe;IS)V",
-		garbageValue = "-23676"
+		signature = "(IZI)Ljava/lang/String;",
+		garbageValue = "-808579598"
 	)
-	@Export("Widget_setKeyIgnoreHeld")
-	static final void Widget_setKeyIgnoreHeld(Widget var0, int var1) {
-		if (var0.field2555 == null) {
-			throw new RuntimeException();
-		} else {
-			if (var0.field2706 == null) {
-				var0.field2706 = new int[var0.field2555.length];
+	@Export("intToString")
+	public static String intToString(int var0, boolean var1) {
+		if (var1 && var0 >= 0) {
+			int var3 = var0;
+			String var2;
+			if (var1 && var0 >= 0) {
+				int var4 = 2;
+
+				for (int var5 = var0 / 10; var5 != 0; ++var4) {
+					var5 /= 10;
+				}
+
+				char[] var6 = new char[var4];
+				var6[0] = '+';
+
+				for (int var7 = var4 - 1; var7 > 0; --var7) {
+					int var8 = var3;
+					var3 /= 10;
+					int var9 = var8 - var3 * 10;
+					if (var9 >= 10) {
+						var6[var7] = (char)(var9 + 87);
+					} else {
+						var6[var7] = (char)(var9 + 48);
+					}
+				}
+
+				var2 = new String(var6);
+			} else {
+				var2 = Integer.toString(var0, 10);
 			}
 
-			var0.field2706[var1] = Integer.MAX_VALUE;
+			return var2;
+		} else {
+			return Integer.toString(var0);
 		}
 	}
 
-	@ObfuscatedName("h")
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
-		signature = "(Ljava/lang/String;I)V",
-		garbageValue = "2095745244"
+		signature = "(IB)Z",
+		garbageValue = "-18"
 	)
-	static final void method3696(String var0) {
-		GrandExchangeEvent.method165("Please remove " + var0 + " from your friend list first");
+	public static boolean method3685(int var0) {
+		return (var0 >> 31 & 1) != 0;
 	}
 }

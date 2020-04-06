@@ -3,56 +3,66 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
-import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("by")
+@ObfuscatedName("bj")
 @Implements("Message")
 public class Message extends DualNode {
-	@ObfuscatedName("at")
-	static String field633;
-	@ObfuscatedName("x")
+	@ObfuscatedName("f")
+	public static short[][] field604;
+	@ObfuscatedName("u")
+	@ObfuscatedSignature(
+		signature = "Llx;"
+	)
+	static IndexedSprite field606;
+	@ObfuscatedName("gf")
+	@ObfuscatedSignature(
+		signature = "Lly;"
+	)
+	@Export("compass")
+	static Sprite compass;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = 659624387
+		intValue = -235508607
 	)
 	@Export("count")
 	int count;
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = -1682037485
+		intValue = 468304279
 	)
 	@Export("cycle")
 	int cycle;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = -1650269491
+		intValue = -1991230871
 	)
 	@Export("type")
 	int type;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@Export("sender")
 	String sender;
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "Lku;"
+		signature = "Ljv;"
 	)
 	@Export("senderUsername")
 	Username senderUsername;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "Lkv;"
+		signature = "Ljy;"
 	)
 	@Export("isFromFriend0")
 	TriBool isFromFriend0;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedSignature(
-		signature = "Lkv;"
+		signature = "Ljy;"
 	)
 	@Export("isFromIgnored0")
 	TriBool isFromIgnored0;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@Export("prefix")
 	String prefix;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@Export("text")
 	String text;
 
@@ -62,14 +72,14 @@ public class Message extends DualNode {
 		this.set(var1, var2, var3, var4);
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V",
-		garbageValue = "1398956437"
+		signature = "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;B)V",
+		garbageValue = "-46"
 	)
 	@Export("set")
 	void set(int var1, String var2, String var3, String var4) {
-		this.count = Player.method1342();
+		this.count = HorizontalAlignment.method4701();
 		this.cycle = Client.cycle;
 		this.type = var1;
 		this.sender = var2;
@@ -80,20 +90,20 @@ public class Message extends DualNode {
 		this.clearIsFromIgnored();
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("w")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "-1417196149"
+		garbageValue = "1828914917"
 	)
 	@Export("clearIsFromFriend")
 	void clearIsFromFriend() {
 		this.isFromFriend0 = TriBool.TriBool_unknown;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)Z",
-		garbageValue = "1"
+		signature = "(I)Z",
+		garbageValue = "1322141944"
 	)
 	@Export("isFromFriend")
 	final boolean isFromFriend() {
@@ -104,30 +114,30 @@ public class Message extends DualNode {
 		return this.isFromFriend0 == TriBool.TriBool_true;
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "-1598313930"
+		garbageValue = "-728879206"
 	)
 	@Export("fillIsFromFriend")
 	void fillIsFromFriend() {
-		this.isFromFriend0 = Projectile.friendSystem.friendsList.contains(this.senderUsername) ? TriBool.TriBool_true : TriBool.TriBool_false;
+		this.isFromFriend0 = ArchiveLoader.friendSystem.friendsList.contains(this.senderUsername) ? TriBool.TriBool_true : TriBool.TriBool_false;
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(B)V",
-		garbageValue = "14"
+		signature = "(I)V",
+		garbageValue = "-391302038"
 	)
 	@Export("clearIsFromIgnored")
 	void clearIsFromIgnored() {
 		this.isFromIgnored0 = TriBool.TriBool_unknown;
 	}
 
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "(B)Z",
-		garbageValue = "-9"
+		signature = "(I)Z",
+		garbageValue = "1146765519"
 	)
 	@Export("isFromIgnored")
 	final boolean isFromIgnored() {
@@ -138,152 +148,28 @@ public class Message extends DualNode {
 		return this.isFromIgnored0 == TriBool.TriBool_true;
 	}
 
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "-929873231"
+		garbageValue = "1299937735"
 	)
 	@Export("fillIsFromIgnored")
 	void fillIsFromIgnored() {
-		this.isFromIgnored0 = Projectile.friendSystem.ignoreList.contains(this.senderUsername) ? TriBool.TriBool_true : TriBool.TriBool_false;
+		this.isFromIgnored0 = ArchiveLoader.friendSystem.ignoreList.contains(this.senderUsername) ? TriBool.TriBool_true : TriBool.TriBool_false;
 	}
 
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
 		signature = "(I)V",
-		garbageValue = "-2096124823"
+		garbageValue = "-1250059182"
 	)
 	@Export("fillSenderUsername")
 	final void fillSenderUsername() {
 		if (this.sender != null) {
-			this.senderUsername = new Username(Occluder.method3400(this.sender), WorldMapIcon_0.loginType);
+			this.senderUsername = new Username(GrandExchangeOfferTotalQuantityComparator.method94(this.sender), class40.loginType);
 		} else {
 			this.senderUsername = null;
 		}
 
-	}
-
-	@ObfuscatedName("x")
-	@ObfuscatedSignature(
-		signature = "(Liy;Liy;I)V",
-		garbageValue = "1388306890"
-	)
-	public static void method1319(AbstractArchive var0, AbstractArchive var1) {
-		KitDefinition.KitDefinition_archive = var0;
-		KitDefinition.KitDefinition_modelsArchive = var1;
-		KitDefinition.KitDefinition_fileCount = KitDefinition.KitDefinition_archive.getGroupFileCount(3);
-	}
-
-	@ObfuscatedName("k")
-	@ObfuscatedSignature(
-		signature = "(IIIII)V",
-		garbageValue = "2024763142"
-	)
-	static void method1300(int var0, int var1, int var2, int var3) {
-		for (ObjectSound var4 = (ObjectSound)ObjectSound.objectSounds.last(); var4 != null; var4 = (ObjectSound)ObjectSound.objectSounds.previous()) {
-			if (var4.soundEffectId != -1 || var4.soundEffectIds != null) {
-				int var5 = 0;
-				if (var1 > var4.field1110) {
-					var5 += var1 - var4.field1110;
-				} else if (var1 < var4.x) {
-					var5 += var4.x - var1;
-				}
-
-				if (var2 > var4.field1100) {
-					var5 += var2 - var4.field1100;
-				} else if (var2 < var4.y) {
-					var5 += var4.y - var2;
-				}
-
-				if (var5 - 64 <= var4.field1106 && Client.areaSoundEffectVolume != 0 && var0 == var4.plane) {
-					var5 -= 64;
-					if (var5 < 0) {
-						var5 = 0;
-					}
-
-					int var6 = (var4.field1106 - var5) * Client.areaSoundEffectVolume / var4.field1106;
-					if (var4.stream1 == null) {
-						if (var4.soundEffectId >= 0) {
-							SoundEffect var7 = SoundEffect.readSoundEffect(FontName.archive4, var4.soundEffectId, 0);
-							if (var7 != null) {
-								RawSound var8 = var7.toRawSound().resample(class25.decimator);
-								RawPcmStream var9 = RawPcmStream.createRawPcmStream(var8, 100, var6);
-								var9.setNumLoops(-1);
-								Tiles.pcmStreamMixer.addSubStream(var9);
-								var4.stream1 = var9;
-							}
-						}
-					} else {
-						var4.stream1.method2659(var6);
-					}
-
-					if (var4.stream2 == null) {
-						if (var4.soundEffectIds != null && (var4.field1107 -= var3) <= 0) {
-							int var11 = (int)(Math.random() * (double)var4.soundEffectIds.length);
-							SoundEffect var12 = SoundEffect.readSoundEffect(FontName.archive4, var4.soundEffectIds[var11], 0);
-							if (var12 != null) {
-								RawSound var13 = var12.toRawSound().resample(class25.decimator);
-								RawPcmStream var10 = RawPcmStream.createRawPcmStream(var13, 100, var6);
-								var10.setNumLoops(0);
-								Tiles.pcmStreamMixer.addSubStream(var10);
-								var4.stream2 = var10;
-								var4.field1107 = var4.field1104 + (int)(Math.random() * (double)(var4.field1105 - var4.field1104));
-							}
-						}
-					} else {
-						var4.stream2.method2659(var6);
-						if (!var4.stream2.hasNext()) {
-							var4.stream2 = null;
-						}
-					}
-				} else {
-					if (var4.stream1 != null) {
-						Tiles.pcmStreamMixer.removeSubStream(var4.stream1);
-						var4.stream1 = null;
-					}
-
-					if (var4.stream2 != null) {
-						Tiles.pcmStreamMixer.removeSubStream(var4.stream2);
-						var4.stream2 = null;
-					}
-				}
-			}
-		}
-
-	}
-
-	@ObfuscatedName("f")
-	@ObfuscatedSignature(
-		signature = "(ILce;ZI)I",
-		garbageValue = "1301536744"
-	)
-	static int method1318(int var0, Script var1, boolean var2) {
-		Widget var3 = MusicPatchNode.getWidget(Interpreter.Interpreter_intStack[--Interpreter.Interpreter_intStackSize]);
-		if (var0 == ScriptOpcodes.IF_GETTARGETMASK) {
-			Interpreter.Interpreter_intStack[++Interpreter.Interpreter_intStackSize - 1] = WorldMapRectangle.method388(ScriptEvent.getWidgetClickMask(var3));
-			return 1;
-		} else if (var0 != ScriptOpcodes.IF_GETOP) {
-			if (var0 == ScriptOpcodes.IF_GETOPBASE) {
-				if (var3.dataText == null) {
-					Interpreter.Interpreter_stringStack[++Interpreter.Interpreter_stringStackSize - 1] = "";
-				} else {
-					Interpreter.Interpreter_stringStack[++Interpreter.Interpreter_stringStackSize - 1] = var3.dataText;
-				}
-
-				return 1;
-			} else {
-				return 2;
-			}
-		} else {
-			int var4 = Interpreter.Interpreter_intStack[--Interpreter.Interpreter_intStackSize];
-			--var4;
-			if (var3.actions != null && var4 < var3.actions.length && var3.actions[var4] != null) {
-				Interpreter.Interpreter_stringStack[++Interpreter.Interpreter_stringStackSize - 1] = var3.actions[var4];
-			} else {
-				Interpreter.Interpreter_stringStack[++Interpreter.Interpreter_stringStackSize - 1] = "";
-			}
-
-			return 1;
-		}
 	}
 }

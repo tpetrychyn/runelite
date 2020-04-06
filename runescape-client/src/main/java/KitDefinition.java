@@ -4,63 +4,52 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ib")
+@ObfuscatedName("im")
 @Implements("KitDefinition")
 public class KitDefinition extends DualNode {
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "Liy;"
+		signature = "Lhp;"
 	)
 	@Export("KitDefinition_archive")
 	static AbstractArchive KitDefinition_archive;
-	@ObfuscatedName("m")
-	@ObfuscatedSignature(
-		signature = "Liy;"
-	)
-	@Export("KitDefinition_modelsArchive")
-	static AbstractArchive KitDefinition_modelsArchive;
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedGetter(
-		intValue = -1436575363
+		intValue = -2099754999
 	)
 	@Export("KitDefinition_fileCount")
 	public static int KitDefinition_fileCount;
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "Leg;"
+		signature = "Lel;"
 	)
 	@Export("KitDefinition_cached")
-	static EvictingDualNodeHashTable KitDefinition_cached;
-	@ObfuscatedName("bq")
+	public static EvictingDualNodeHashTable KitDefinition_cached;
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -724929863
-	)
-	static int field3271;
-	@ObfuscatedName("w")
-	@ObfuscatedGetter(
-		intValue = -1932693097
+		intValue = 603181695
 	)
 	@Export("bodypartID")
 	public int bodypartID;
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@Export("models2")
 	int[] models2;
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@Export("recolorFrom")
 	short[] recolorFrom;
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@Export("recolorTo")
 	short[] recolorTo;
-	@ObfuscatedName("t")
+	@ObfuscatedName("c")
 	@Export("retextureFrom")
 	short[] retextureFrom;
-	@ObfuscatedName("e")
+	@ObfuscatedName("f")
 	@Export("retextureTo")
 	short[] retextureTo;
-	@ObfuscatedName("s")
+	@ObfuscatedName("m")
 	@Export("models")
 	int[] models;
-	@ObfuscatedName("p")
+	@ObfuscatedName("u")
 	@Export("nonSelectable")
 	public boolean nonSelectable;
 
@@ -74,10 +63,10 @@ public class KitDefinition extends DualNode {
 		this.nonSelectable = false;
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(Lkb;I)V",
-		garbageValue = "1401612766"
+		signature = "(Lkf;I)V",
+		garbageValue = "517161236"
 	)
 	@Export("decode")
 	void decode(Buffer var1) {
@@ -91,10 +80,10 @@ public class KitDefinition extends DualNode {
 		}
 	}
 
-	@ObfuscatedName("d")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		signature = "(Lkb;IB)V",
-		garbageValue = "53"
+		signature = "(Lkf;II)V",
+		garbageValue = "-1946344058"
 	)
 	@Export("decodeNext")
 	void decodeNext(Buffer var1, int var2) {
@@ -137,10 +126,10 @@ public class KitDefinition extends DualNode {
 
 	}
 
-	@ObfuscatedName("w")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		signature = "(B)Z",
-		garbageValue = "1"
+		signature = "(I)Z",
+		garbageValue = "-1807295410"
 	)
 	@Export("ready")
 	public boolean ready() {
@@ -150,7 +139,7 @@ public class KitDefinition extends DualNode {
 			boolean var1 = true;
 
 			for (int var2 = 0; var2 < this.models2.length; ++var2) {
-				if (!KitDefinition_modelsArchive.tryLoadFile(this.models2[var2], 0)) {
+				if (!class288.KitDefinition_modelsArchive.tryLoadFile(this.models2[var2], 0)) {
 					var1 = false;
 				}
 			}
@@ -159,10 +148,10 @@ public class KitDefinition extends DualNode {
 		}
 	}
 
-	@ObfuscatedName("v")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		signature = "(I)Lea;",
-		garbageValue = "-898584179"
+		signature = "(I)Lds;",
+		garbageValue = "-1043358409"
 	)
 	@Export("getModelData")
 	public ModelData getModelData() {
@@ -172,7 +161,7 @@ public class KitDefinition extends DualNode {
 			ModelData[] var1 = new ModelData[this.models2.length];
 
 			for (int var2 = 0; var2 < this.models2.length; ++var2) {
-				var1[var2] = ModelData.ModelData_get(KitDefinition_modelsArchive, this.models2[var2], 0);
+				var1[var2] = ModelData.ModelData_get(class288.KitDefinition_modelsArchive, this.models2[var2], 0);
 			}
 
 			ModelData var4;
@@ -199,16 +188,16 @@ public class KitDefinition extends DualNode {
 		}
 	}
 
-	@ObfuscatedName("q")
+	@ObfuscatedName("b")
 	@ObfuscatedSignature(
 		signature = "(I)Z",
-		garbageValue = "1856166332"
+		garbageValue = "1439364369"
 	)
-	public boolean method4523() {
+	public boolean method4445() {
 		boolean var1 = true;
 
 		for (int var2 = 0; var2 < 5; ++var2) {
-			if (this.models[var2] != -1 && !KitDefinition_modelsArchive.tryLoadFile(this.models[var2], 0)) {
+			if (this.models[var2] != -1 && !class288.KitDefinition_modelsArchive.tryLoadFile(this.models[var2], 0)) {
 				var1 = false;
 			}
 		}
@@ -216,10 +205,10 @@ public class KitDefinition extends DualNode {
 		return var1;
 	}
 
-	@ObfuscatedName("z")
+	@ObfuscatedName("i")
 	@ObfuscatedSignature(
-		signature = "(I)Lea;",
-		garbageValue = "2142658297"
+		signature = "(B)Lds;",
+		garbageValue = "-27"
 	)
 	@Export("getKitDefinitionModels")
 	public ModelData getKitDefinitionModels() {
@@ -228,7 +217,7 @@ public class KitDefinition extends DualNode {
 
 		for (int var3 = 0; var3 < 5; ++var3) {
 			if (this.models[var3] != -1) {
-				var1[var2++] = ModelData.ModelData_get(KitDefinition_modelsArchive, this.models[var3], 0);
+				var1[var2++] = ModelData.ModelData_get(class288.KitDefinition_modelsArchive, this.models[var3], 0);
 			}
 		}
 
@@ -249,17 +238,99 @@ public class KitDefinition extends DualNode {
 		return var5;
 	}
 
-	@ObfuscatedName("jp")
+	@ObfuscatedName("fn")
 	@ObfuscatedSignature(
-		signature = "(Lhe;B)Lhe;",
-		garbageValue = "-1"
+		signature = "(I)V",
+		garbageValue = "1752614077"
 	)
-	static Widget method4538(Widget var0) {
-		Widget var1 = GrandExchangeOfferTotalQuantityComparator.method181(var0);
-		if (var1 == null) {
-			var1 = var0.parent;
+	static final void method4461() {
+		for (int var0 = 0; var0 < Client.soundEffectCount; ++var0) {
+			int var10002 = Client.queuedSoundEffectDelays[var0]--;
+			if (Client.queuedSoundEffectDelays[var0] >= -10) {
+				SoundEffect var9 = Client.soundEffects[var0];
+				if (var9 == null) {
+					Object var10000 = null;
+					var9 = SoundEffect.readSoundEffect(class13.archive4, Client.soundEffectIds[var0], 0);
+					if (var9 == null) {
+						continue;
+					}
+
+					int[] var13 = Client.queuedSoundEffectDelays;
+					var13[var0] += var9.calculateDelay();
+					Client.soundEffects[var0] = var9;
+				}
+
+				if (Client.queuedSoundEffectDelays[var0] < 0) {
+					int var2;
+					if (Client.soundLocations[var0] != 0) {
+						int var3 = (Client.soundLocations[var0] & 255) * 128;
+						int var4 = Client.soundLocations[var0] >> 16 & 255;
+						int var5 = var4 * 128 + 64 - Client.localPlayer.x;
+						if (var5 < 0) {
+							var5 = -var5;
+						}
+
+						int var6 = Client.soundLocations[var0] >> 8 & 255;
+						int var7 = var6 * 128 + 64 - Client.localPlayer.y;
+						if (var7 < 0) {
+							var7 = -var7;
+						}
+
+						int var8 = var5 + var7 - 128;
+						if (var8 > var3) {
+							Client.queuedSoundEffectDelays[var0] = -100;
+							continue;
+						}
+
+						if (var8 < 0) {
+							var8 = 0;
+						}
+
+						var2 = (var3 - var8) * Client.areaSoundEffectVolume / var3;
+					} else {
+						var2 = Client.soundEffectVolume;
+					}
+
+					if (var2 > 0) {
+						RawSound var10 = var9.toRawSound().resample(AttackOption.decimator);
+						RawPcmStream var11 = RawPcmStream.createRawPcmStream(var10, 100, var2);
+						var11.setNumLoops(Client.queuedSoundEffectLoops[var0] - 1);
+						SecureRandomCallable.pcmStreamMixer.addSubStream(var11);
+					}
+
+					Client.queuedSoundEffectDelays[var0] = -100;
+				}
+			} else {
+				--Client.soundEffectCount;
+
+				for (int var1 = var0; var1 < Client.soundEffectCount; ++var1) {
+					Client.soundEffectIds[var1] = Client.soundEffectIds[var1 + 1];
+					Client.soundEffects[var1] = Client.soundEffects[var1 + 1];
+					Client.queuedSoundEffectLoops[var1] = Client.queuedSoundEffectLoops[var1 + 1];
+					Client.queuedSoundEffectDelays[var1] = Client.queuedSoundEffectDelays[var1 + 1];
+					Client.soundLocations[var1] = Client.soundLocations[var1 + 1];
+				}
+
+				--var0;
+			}
 		}
 
-		return var1;
+		if (Client.field699) {
+			boolean var12;
+			if (class197.field2402 != 0) {
+				var12 = true;
+			} else {
+				var12 = Interpreter.midiPcmStream.isReady();
+			}
+
+			if (!var12) {
+				if (Client.musicVolume != 0 && Client.currentTrackGroupId != -1) {
+					FileSystem.method3503(WorldMapRegion.archive6, Client.currentTrackGroupId, 0, Client.musicVolume, false);
+				}
+
+				Client.field699 = false;
+			}
+		}
+
 	}
 }

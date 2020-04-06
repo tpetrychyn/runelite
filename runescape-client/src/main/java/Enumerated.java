@@ -6,10 +6,10 @@ import net.runelite.mapping.ObfuscatedSignature;
 @ObfuscatedName("go")
 @Implements("Enumerated")
 public interface Enumerated {
-	@ObfuscatedName("d")
+	@ObfuscatedName("e")
 	@ObfuscatedSignature(
-		signature = "(B)I",
-		garbageValue = "56"
+		signature = "(I)I",
+		garbageValue = "320353268"
 	)
 	@Export("rsOrdinal")
 	int rsOrdinal();

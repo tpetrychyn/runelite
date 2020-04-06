@@ -3,10 +3,12 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("fc")
+@ObfuscatedName("fi")
 @Implements("UserComparator5")
 public class UserComparator5 extends AbstractUserComparator {
-	@ObfuscatedName("x")
+	@ObfuscatedName("ax")
+	static String field1986;
+	@ObfuscatedName("q")
 	@Export("reversed")
 	final boolean reversed;
 
@@ -14,10 +16,10 @@ public class UserComparator5 extends AbstractUserComparator {
 		this.reversed = var1;
 	}
 
-	@ObfuscatedName("x")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(Lke;Lke;I)I",
-		garbageValue = "261090852"
+		signature = "(Ljz;Ljz;I)I",
+		garbageValue = "-604876330"
 	)
 	@Export("compareBuddy")
 	int compareBuddy(Buddy var1, Buddy var2) {
@@ -36,85 +38,23 @@ public class UserComparator5 extends AbstractUserComparator {
 		return this.compareBuddy((Buddy)var1, (Buddy)var2);
 	}
 
-	@ObfuscatedName("t")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		signature = "(I)V",
-		garbageValue = "-1985272675"
+		signature = "(I)[Lhn;",
+		garbageValue = "-1282154756"
 	)
-	public static void method3520() {
-		KitDefinition.KitDefinition_cached.clear();
+	@Export("PlayerType_values")
+	public static PlayerType[] PlayerType_values() {
+		return new PlayerType[]{PlayerType.PlayerType_playerModerator, PlayerType.PlayerType_jagexModerator, PlayerType.PlayerType_ironman, PlayerType.PlayerType_ultimateIronman, PlayerType.PlayerType_normal, PlayerType.PlayerType_hardcoreIronman};
 	}
 
-	@ObfuscatedName("gf")
+	@ObfuscatedName("iy")
 	@ObfuscatedSignature(
-		signature = "(IIIII)V",
-		garbageValue = "-447176134"
+		signature = "(ZI)V",
+		garbageValue = "1669969690"
 	)
-	static final void method3523(int var0, int var1, int var2, int var3) {
-		ViewportMouse.method3091();
-	}
-
-	@ObfuscatedName("if")
-	@ObfuscatedSignature(
-		signature = "(IB)Ljava/lang/String;",
-		garbageValue = "0"
-	)
-	@Export("formatItemStacks")
-	static final String formatItemStacks(int var0) {
-		String var1 = Integer.toString(var0);
-
-		for (int var2 = var1.length() - 3; var2 > 0; var2 -= 3) {
-			var1 = var1.substring(0, var2) + "," + var1.substring(var2);
-		}
-
-		if (var1.length() > 9) {
-			return " " + class297.colorStartTag(65408) + var1.substring(0, var1.length() - 8) + "M" + " " + " (" + var1 + ")" + "</col>";
-		} else {
-			return var1.length() > 6 ? " " + class297.colorStartTag(16777215) + var1.substring(0, var1.length() - 4) + "K" + " " + " (" + var1 + ")" + "</col>" : " " + class297.colorStartTag(16776960) + var1 + "</col>";
-		}
-	}
-
-	@ObfuscatedName("jt")
-	@ObfuscatedSignature(
-		signature = "(Lhe;I)V",
-		garbageValue = "-1600087023"
-	)
-	static final void method3521(Widget var0) {
-		int var1 = var0.contentType;
-		if (var1 == 324) {
-			if (Client.field945 == -1) {
-				Client.field945 = var0.spriteId2;
-				Client.field946 = var0.spriteId;
-			}
-
-			if (Client.playerAppearance.isFemale) {
-				var0.spriteId2 = Client.field945;
-			} else {
-				var0.spriteId2 = Client.field946;
-			}
-
-		} else if (var1 == 325) {
-			if (Client.field945 == -1) {
-				Client.field945 = var0.spriteId2;
-				Client.field946 = var0.spriteId;
-			}
-
-			if (Client.playerAppearance.isFemale) {
-				var0.spriteId2 = Client.field946;
-			} else {
-				var0.spriteId2 = Client.field945;
-			}
-
-		} else if (var1 == 327) {
-			var0.modelAngleX = 150;
-			var0.modelAngleY = (int)(Math.sin((double)Client.cycle / 40.0D) * 256.0D) & 2047;
-			var0.modelType = 5;
-			var0.modelId = 0;
-		} else if (var1 == 328) {
-			var0.modelAngleX = 150;
-			var0.modelAngleY = (int)(Math.sin((double)Client.cycle / 40.0D) * 256.0D) & 2047;
-			var0.modelType = 5;
-			var0.modelId = 1;
-		}
+	@Export("setTapToDrop")
+	static void setTapToDrop(boolean var0) {
+		Client.tapToDrop = var0;
 	}
 }

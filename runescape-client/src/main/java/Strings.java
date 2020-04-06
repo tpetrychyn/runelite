@@ -1,70 +1,50 @@
+import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
-import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
 @ObfuscatedName("hx")
 @Implements("Strings")
 public class Strings {
-	@ObfuscatedName("rx")
-	@ObfuscatedGetter(
-		intValue = 2019355049
-	)
-	static int field2759;
-	@ObfuscatedName("bd")
+	@ObfuscatedName("bg")
 	public static String field2811;
-	@ObfuscatedName("cy")
-	public static String field2914;
+	@ObfuscatedName("cs")
+	public static String field2961;
 	@ObfuscatedName("jm")
-	public static String field3026;
-	@ObfuscatedName("jh")
-	public static String field2898;
-	@ObfuscatedName("jk")
-	public static String field2807;
+	public static String field2942;
+	@ObfuscatedName("jj")
+	public static String field3027;
+	@ObfuscatedName("jr")
+	public static String field2768;
 
 	static {
 		field2811 = "Please visit the support page for assistance.";
-		field2914 = "Please visit the support page for assistance.";
-		field3026 = "";
-		field2898 = "Page has opened in a new window.";
-		field2807 = "(Please check your popup blocker.)";
+		field2961 = "Please visit the support page for assistance.";
+		field2942 = "";
+		field3027 = "Page has opened in a new window.";
+		field2768 = "(Please check your popup blocker.)";
 	}
 
-	@ObfuscatedName("m")
+	@ObfuscatedName("hg")
 	@ObfuscatedSignature(
-		signature = "(IS)Lii;",
-		garbageValue = "18624"
+		signature = "(I)V",
+		garbageValue = "-495158745"
 	)
-	public static ServerBuild method4219(int var0) {
-		ServerBuild[] var1 = Language.method3751();
-
-		for (int var2 = 0; var2 < var1.length; ++var2) {
-			ServerBuild var3 = var1[var2];
-			if (var0 == var3.field3101) {
-				return var3;
-			}
-		}
-
-		return null;
+	static void method4121() {
+		Client.menuOptionsCount = 0;
+		Client.isMenuOpen = false;
 	}
 
-	@ObfuscatedName("p")
+	@ObfuscatedName("jl")
 	@ObfuscatedSignature(
-		signature = "(III)I",
-		garbageValue = "-1791203071"
+		signature = "(Lhj;I)V",
+		garbageValue = "-2041903885"
 	)
-	static final int method4220(int var0, int var1) {
-		if (var0 == -1) {
-			return 12345678;
-		} else {
-			var1 = (var0 & 127) * var1 / 128;
-			if (var1 < 2) {
-				var1 = 2;
-			} else if (var1 > 126) {
-				var1 = 126;
-			}
-
-			return (var0 & 65408) + var1;
+	@Export("invalidateWidget")
+	static void invalidateWidget(Widget var0) {
+		if (var0.cycle == Client.field741) {
+			Client.field843[var0.rootIndex] = true;
 		}
+
 	}
 }
