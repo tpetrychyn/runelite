@@ -2,7 +2,7 @@
 
 
 
-# OpenOSRS  
+# OpenOSRS - RSMOD Branch  
 
 [![Build Status](https://github.com/open-osrs/runelite/workflows/OpenOSRS%20-%20CI%20(push)/badge.svg)](https://github.com/open-osrs/runelite/actions?query=workflow%3A%22OpenOSRS+-+CI+%28push%29%22)
 [![HitCount](http://hits.dwyl.io/open-osrs/runelite.svg)](http://hits.dwyl.io/open-osrs/runelite)  
@@ -25,7 +25,12 @@
 - [wiki-scraper](wiki-scraper/src/main/java/net/runelite/data) - Scrapes the runescape wiki https://oldschool.runescape.wiki for the latest npc data
 
 ## Building  
-
+  
+Set Codebase(IP Address) at RuneLite.CODEBASE  
+Set Modulus(Server Key) at RSBufferMixin  
+  
+Build and run as normal after that.  
+  
 We have migrated the project to Gradle. Information on how to setup and build the project can be found at https://github.com/open-osrs/runelite/wiki/Building-with-IntelliJ-IDEA
 
 ## Install from Pre-built Binaries 
