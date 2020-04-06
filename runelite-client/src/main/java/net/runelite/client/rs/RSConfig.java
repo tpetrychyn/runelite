@@ -28,6 +28,7 @@ package net.runelite.client.rs;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
+import net.runelite.client.RuneLite;
 
 @Getter
 class RSConfig
@@ -37,7 +38,7 @@ class RSConfig
 
 	String getCodeBase()
 	{
-		return classLoaderProperties.get("codebase");
+		return RuneLite.CODEBASE;
 	}
 
 	void setCodebase(String codebase)

@@ -100,6 +100,8 @@ import org.slf4j.LoggerFactory;
 @Slf4j
 public class RuneLite
 {
+	public static final String CODEBASE = "http://127.0.0.1";
+
 	public static final String SYSTEM_VERSION = "0.0.1";
 
 	public static final File RUNELITE_DIR = new File(System.getProperty("user.home"), ".runelite");
