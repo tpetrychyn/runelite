@@ -247,16 +247,13 @@ class SceneUploader
 
 	private int upload(TilePaint tile, int tileZ, int tileX, int tileY, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
 	{
-		// FIXME: TILE HEIGHTS
-		final int[][][] tileHeights = new int[Constants.MAX_Z][Constants.SCENE_SIZE+1][Constants.SCENE_SIZE+1]; //client.getTileHeights();
-
 		final int localX = 0;
 		final int localY = 0;
 
-		int swHeight = tile.getSwHeight();//tileHeights[tileZ][tileX][tileY];
-		int seHeight = tile.getSeHeight();//tileHeights[tileZ][tileX + 1][tileY];
-		int neHeight = tile.getNeHeight();//tileHeights[tileZ][tileX + 1][tileY + 1];
-		int nwHeight = tile.getNwHeight();//tileHeights[tileZ][tileX][tileY + 1];
+		int swHeight = tile.getSwHeight();
+		int seHeight = tile.getSeHeight();
+		int neHeight = tile.getNeHeight();
+		int nwHeight = tile.getNwHeight();
 
 		final int neColor = tile.getNeColor();
 		final int nwColor = tile.getNwColor();

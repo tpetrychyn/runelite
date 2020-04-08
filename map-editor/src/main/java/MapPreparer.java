@@ -5,9 +5,11 @@ import net.runelite.api.Constants;
 import net.runelite.api.Scene;
 import net.runelite.cache.*;
 import net.runelite.cache.TextureManager;
+import net.runelite.cache.definitions.MapDefinition;
 import net.runelite.cache.definitions.OverlayDefinition;
 import net.runelite.cache.definitions.SpriteDefinition;
 import net.runelite.cache.definitions.UnderlayDefinition;
+import net.runelite.cache.definitions.loaders.MapLoader;
 import net.runelite.cache.definitions.loaders.OverlayLoader;
 import net.runelite.cache.definitions.loaders.SpriteLoader;
 import net.runelite.cache.definitions.loaders.UnderlayLoader;
@@ -49,6 +51,7 @@ public class MapPreparer {
     private final Map<Integer, OverlayDefinition> overlays = new HashMap<>();
     private final Map<Integer, Image> scaledMapIcons = new HashMap<>();
 
+    private MapLoader mapLoader;
     private RegionLoader regionLoader;
     private final AreaManager areas;
     private final SpriteManager sprites;
@@ -71,6 +74,8 @@ public class MapPreparer {
         textureManager.load();
         rsTextureProvider = new RSTextureProvider(textureManager, sprites);
 
+        mapLoader = new MapLoader(store);
+
         loadRegions(store);
         areas.load();
         sprites.load();
@@ -78,6 +83,8 @@ public class MapPreparer {
     }
 
     public void loadTiles(Region region, SceneImpl scene) {
+//        int x = 3500;
+//        int y = 3500;
         int baseX = region.getBaseX();
         int baseY = region.getBaseY();
 
@@ -97,6 +104,7 @@ public class MapPreparer {
 
             for (int y = 1; y < 103; y++) {
                 for (int x = 1; x < 103; x++) {
+//                    Tile t = mapLoader.getWorldTile(z, x, y);
                     Region r = regionLoader.findRegionForWorldCoordinates(baseX + x, baseY + y);
 
                     int xHeightDiff = r.getTileHeight(0, convert(x + 1), convert(y)) - r.getTileHeight(0, convert(x - 1), convert(y));

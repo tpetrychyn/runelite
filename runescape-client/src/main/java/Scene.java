@@ -1157,16 +1157,16 @@ public class Scene {
 		int var14;
 		Tile var15;
 		int var16;
-		for (var7 = this.minPlane; var7 < this.planes; ++var7) {
-			var8 = this.tiles[var7];
+		for (int z = this.minPlane; z < this.planes; ++z) {
+			var8 = this.tiles[z];
 
-			for (var9 = -25; var9 <= 0; ++var9) {
-				var10 = var9 + Scene_cameraXTile;
-				var16 = Scene_cameraXTile - var9;
+			for (int x = -25; x <= 0; ++x) {
+				var10 = x + Scene_cameraXTile;
+				var16 = Scene_cameraXTile - x;
 				if (var10 >= Scene_cameraXTileMin || var16 < Scene_cameraXTileMax) {
-					for (var12 = -25; var12 <= 0; ++var12) {
-						var13 = var12 + Scene_cameraYTile;
-						var14 = Scene_cameraYTile - var12;
+					for (int y = -25; y <= 0; ++y) {
+						var13 = y + Scene_cameraYTile;
+						var14 = Scene_cameraYTile - y;
 						if (var10 >= Scene_cameraXTileMin) {
 							if (var13 >= Scene_cameraYTileMin) {
 								var15 = var8[var10][var13];
@@ -1272,10 +1272,10 @@ public class Scene {
 
 		while (true) {
 			Tile var3;
-			int var4;
-			int var5;
-			int var6;
-			int var7;
+			int x;
+			int y;
+			int plane;
+			int originalPlane;
 			Tile[][] tiles;
 			Tile tile;
 			int var11;
@@ -1306,46 +1306,46 @@ public class Scene {
 												}
 											} while(!var3.drawSecondary);
 
-											var4 = var3.x;
-											var5 = var3.y;
-											var6 = var3.plane;
-											var7 = var3.originalPlane;
-											tiles = this.tiles[var6];
+											x = var3.x;
+											y = var3.y;
+											plane = var3.plane;
+											originalPlane = var3.originalPlane;
+											tiles = this.tiles[plane];
 											if (!var3.drawPrimary) {
 												break;
 											}
 
 											if (aFlag) {
-												if (var6 > 0) {
-													tile = this.tiles[var6 - 1][var4][var5];
+												if (plane > 0) {
+													tile = this.tiles[plane - 1][x][y];
 													if (tile != null && tile.drawSecondary) {
 														continue;
 													}
 												}
 
-												if (var4 <= Scene_cameraXTile && var4 > Scene_cameraXTileMin) {
-													tile = tiles[var4 - 1][var5];
+												if (x <= Scene_cameraXTile && x > Scene_cameraXTileMin) {
+													tile = tiles[x - 1][y];
 													if (tile != null && tile.drawSecondary && (tile.drawPrimary || (var3.gameObjectsEdgeMask & 1) == 0)) {
 														continue;
 													}
 												}
 
-												if (var4 >= Scene_cameraXTile && var4 < Scene_cameraXTileMax - 1) {
-													tile = tiles[var4 + 1][var5];
+												if (x >= Scene_cameraXTile && x < Scene_cameraXTileMax - 1) {
+													tile = tiles[x + 1][y];
 													if (tile != null && tile.drawSecondary && (tile.drawPrimary || (var3.gameObjectsEdgeMask & 4) == 0)) {
 														continue;
 													}
 												}
 
-												if (var5 <= Scene_cameraYTile && var5 > Scene_cameraYTileMin) {
-													tile = tiles[var4][var5 - 1];
+												if (y <= Scene_cameraYTile && y > Scene_cameraYTileMin) {
+													tile = tiles[x][y - 1];
 													if (tile != null && tile.drawSecondary && (tile.drawPrimary || (var3.gameObjectsEdgeMask & 8) == 0)) {
 														continue;
 													}
 												}
 
-												if (var5 >= Scene_cameraYTile && var5 < Scene_cameraYTileMax - 1) {
-													tile = tiles[var4][var5 + 1];
+												if (y >= Scene_cameraYTile && y < Scene_cameraYTileMax - 1) {
+													tile = tiles[x][y + 1];
 													if (tile != null && tile.drawSecondary && (tile.drawPrimary || (var3.gameObjectsEdgeMask & 2) == 0)) {
 														continue;
 													}
@@ -1358,11 +1358,11 @@ public class Scene {
 											if (var3.linkedBelowTile != null) {
 												tile = var3.linkedBelowTile;
 												if (tile.paint != null) {
-													if (!this.method3177(0, var4, var5)) {
-														this.drawTileUnderlay(tile.paint, 0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var4, var5);
+													if (!this.method3177(0, x, y)) {
+														this.drawTileUnderlay(tile.paint, 0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, x, y);
 													}
-												} else if (tile.model != null && !this.method3177(0, var4, var5)) {
-													this.drawTileOverlay(tile.model, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var4, var5);
+												} else if (tile.model != null && !this.method3177(0, x, y)) {
+													this.drawTileOverlay(tile.model, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, x, y);
 												}
 
 												var10 = tile.boundaryObject;
@@ -1380,15 +1380,15 @@ public class Scene {
 
 											var20 = false;
 											if (var3.paint != null) {
-												if (!this.method3177(var7, var4, var5)) {
+												if (!this.method3177(originalPlane, x, y)) {
 													var20 = true;
-													if (var3.paint.neColor != 12345678 || checkClick && var6 <= Scene_selectedPlane) {
-														this.drawTileUnderlay(var3.paint, var7, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var4, var5);
+													if (var3.paint.neColor != 12345678 || checkClick && plane <= Scene_selectedPlane) {
+														this.drawTileUnderlay(var3.paint, originalPlane, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, x, y);
 													}
 												}
-											} else if (var3.model != null && !this.method3177(var7, var4, var5)) {
+											} else if (var3.model != null && !this.method3177(originalPlane, x, y)) {
 												var20 = true;
-												this.drawTileOverlay(var3.model, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var4, var5);
+												this.drawTileOverlay(var3.model, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, x, y);
 											}
 
 											var21 = 0;
@@ -1396,15 +1396,15 @@ public class Scene {
 											BoundaryObject var31 = var3.boundaryObject;
 											WallDecoration var13 = var3.wallDecoration;
 											if (var31 != null || var13 != null) {
-												if (var4 == Scene_cameraXTile) {
+												if (x == Scene_cameraXTile) {
 													++var21;
-												} else if (Scene_cameraXTile < var4) {
+												} else if (Scene_cameraXTile < x) {
 													var21 += 2;
 												}
 
-												if (var5 == Scene_cameraYTile) {
+												if (y == Scene_cameraYTile) {
 													var21 += 3;
-												} else if (Scene_cameraYTile > var5) {
+												} else if (Scene_cameraYTile > y) {
 													var21 += 6;
 												}
 
@@ -1435,16 +1435,16 @@ public class Scene {
 													var3.drawGameObjectEdges = 0;
 												}
 
-												if ((var31.orientationA & var11) != 0 && !this.method3303(var7, var4, var5, var31.orientationA)) {
+												if ((var31.orientationA & var11) != 0 && !this.method3303(originalPlane, x, y, var31.orientationA)) {
 													var31.entity1.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var31.x - Scene_cameraX, var31.tileHeight - Scene_cameraY, var31.y - Scene_cameraZ, var31.tag);
 												}
 
-												if ((var31.orientationB & var11) != 0 && !this.method3303(var7, var4, var5, var31.orientationB)) {
+												if ((var31.orientationB & var11) != 0 && !this.method3303(originalPlane, x, y, var31.orientationB)) {
 													var31.entity2.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var31.x - Scene_cameraX, var31.tileHeight - Scene_cameraY, var31.y - Scene_cameraZ, var31.tag);
 												}
 											}
 
-											if (var13 != null && !this.method3226(var7, var4, var5, var13.entity1.height)) {
+											if (var13 != null && !this.method3226(originalPlane, x, y, var13.entity1.height)) {
 												if ((var13.orientation & var11) != 0) {
 													var13.entity1.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var13.x - Scene_cameraX + var13.xOffset, var13.tileHeight - Scene_cameraY, var13.y - Scene_cameraZ + var13.yOffset, var13.tag);
 												} else if (var13.orientation == 256) {
@@ -1497,29 +1497,29 @@ public class Scene {
 
 											var14 = var3.gameObjectsEdgeMask;
 											if (var14 != 0) {
-												if (var4 < Scene_cameraXTile && (var14 & 4) != 0) {
-													var36 = tiles[var4 + 1][var5];
+												if (x < Scene_cameraXTile && (var14 & 4) != 0) {
+													var36 = tiles[x + 1][y];
 													if (var36 != null && var36.drawSecondary) {
 														Scene_tilesDeque.addFirst(var36);
 													}
 												}
 
-												if (var5 < Scene_cameraYTile && (var14 & 2) != 0) {
-													var36 = tiles[var4][var5 + 1];
+												if (y < Scene_cameraYTile && (var14 & 2) != 0) {
+													var36 = tiles[x][y + 1];
 													if (var36 != null && var36.drawSecondary) {
 														Scene_tilesDeque.addFirst(var36);
 													}
 												}
 
-												if (var4 > Scene_cameraXTile && (var14 & 1) != 0) {
-													var36 = tiles[var4 - 1][var5];
+												if (x > Scene_cameraXTile && (var14 & 1) != 0) {
+													var36 = tiles[x - 1][y];
 													if (var36 != null && var36.drawSecondary) {
 														Scene_tilesDeque.addFirst(var36);
 													}
 												}
 
-												if (var5 > Scene_cameraYTile && (var14 & 8) != 0) {
-													var36 = tiles[var4][var5 - 1];
+												if (y > Scene_cameraYTile && (var14 & 8) != 0) {
+													var36 = tiles[x][y - 1];
 													if (var36 != null && var36.drawSecondary) {
 														Scene_tilesDeque.addFirst(var36);
 													}
@@ -1540,7 +1540,7 @@ public class Scene {
 
 											if (var20) {
 												var10 = var3.boundaryObject;
-												if (!this.method3303(var7, var4, var5, var10.orientationA)) {
+												if (!this.method3303(originalPlane, x, y, var10.orientationA)) {
 													var10.entity1.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var10.x - Scene_cameraX, var10.tileHeight - Scene_cameraY, var10.y - Scene_cameraZ, var10.tag);
 												}
 
@@ -1640,7 +1640,7 @@ public class Scene {
 
 												GameObject var33 = gameObjects[var25];
 												var33.lastDrawn = Scene_drawnCount;
-												if (!this.method3227(var7, var33.startX, var33.endX, var33.startY, var33.endY, var33.entity.height)) {
+												if (!this.method3227(originalPlane, var33.startX, var33.endX, var33.startY, var33.endY, var33.entity.height)) {
 													var33.entity.draw(var33.orientation, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var33.centerX - Scene_cameraX, var33.height - Scene_cameraY, var33.centerY - Scene_cameraZ, var33.tag);
 												}
 
@@ -1649,7 +1649,7 @@ public class Scene {
 														Tile var26 = tiles[var14][var15];
 														if (var26.drawGameObjectEdges != 0) {
 															Scene_tilesDeque.addFirst(var26);
-														} else if ((var14 != var4 || var15 != var5) && var26.drawSecondary) {
+														} else if ((var14 != x || var15 != y) && var26.drawSecondary) {
 															Scene_tilesDeque.addFirst(var26);
 														}
 													}
@@ -1667,32 +1667,32 @@ public class Scene {
 								} while(!var3.drawSecondary);
 							} while(var3.drawGameObjectEdges != 0);
 
-							if (var4 > Scene_cameraXTile || var4 <= Scene_cameraXTileMin) {
+							if (x > Scene_cameraXTile || x <= Scene_cameraXTileMin) {
 								break;
 							}
 
-							tile = tiles[var4 - 1][var5];
+							tile = tiles[x - 1][y];
 						} while(tile != null && tile.drawSecondary);
 
-						if (var4 < Scene_cameraXTile || var4 >= Scene_cameraXTileMax - 1) {
+						if (x < Scene_cameraXTile || x >= Scene_cameraXTileMax - 1) {
 							break;
 						}
 
-						tile = tiles[var4 + 1][var5];
+						tile = tiles[x + 1][y];
 					} while(tile != null && tile.drawSecondary);
 
-					if (var5 > Scene_cameraYTile || var5 <= Scene_cameraYTileMin) {
+					if (y > Scene_cameraYTile || y <= Scene_cameraYTileMin) {
 						break;
 					}
 
-					tile = tiles[var4][var5 - 1];
+					tile = tiles[x][y - 1];
 				} while(tile != null && tile.drawSecondary);
 
-				if (var5 < Scene_cameraYTile || var5 >= Scene_cameraYTileMax - 1) {
+				if (y < Scene_cameraYTile || y >= Scene_cameraYTileMax - 1) {
 					break;
 				}
 
-				tile = tiles[var4][var5 + 1];
+				tile = tiles[x][y + 1];
 			} while(tile != null && tile.drawSecondary);
 
 			var3.drawSecondary = false;
@@ -1714,7 +1714,7 @@ public class Scene {
 
 			if (var3.field1680 != 0) {
 				WallDecoration var29 = var3.wallDecoration;
-				if (var29 != null && !this.method3226(var7, var4, var5, var29.entity1.height)) {
+				if (var29 != null && !this.method3226(originalPlane, x, y, var29.entity1.height)) {
 					if ((var29.orientation & var3.field1680) != 0) {
 						var29.entity1.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var29.x - Scene_cameraX + var29.xOffset, var29.tileHeight - Scene_cameraY, var29.y - Scene_cameraZ + var29.yOffset, var29.tag);
 					} else if (var29.orientation == 256) {
@@ -1744,47 +1744,47 @@ public class Scene {
 
 				BoundaryObject var27 = var3.boundaryObject;
 				if (var27 != null) {
-					if ((var27.orientationB & var3.field1680) != 0 && !this.method3303(var7, var4, var5, var27.orientationB)) {
+					if ((var27.orientationB & var3.field1680) != 0 && !this.method3303(originalPlane, x, y, var27.orientationB)) {
 						var27.entity2.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var27.x - Scene_cameraX, var27.tileHeight - Scene_cameraY, var27.y - Scene_cameraZ, var27.tag);
 					}
 
-					if ((var27.orientationA & var3.field1680) != 0 && !this.method3303(var7, var4, var5, var27.orientationA)) {
+					if ((var27.orientationA & var3.field1680) != 0 && !this.method3303(originalPlane, x, y, var27.orientationA)) {
 						var27.entity1.draw(0, Scene_cameraPitchSine, Scene_cameraPitchCosine, Scene_cameraYawSine, Scene_cameraYawCosine, var27.x - Scene_cameraX, var27.tileHeight - Scene_cameraY, var27.y - Scene_cameraZ, var27.tag);
 					}
 				}
 			}
 
 			Tile var30;
-			if (var6 < this.planes - 1) {
-				var30 = this.tiles[var6 + 1][var4][var5];
+			if (plane < this.planes - 1) {
+				var30 = this.tiles[plane + 1][x][y];
 				if (var30 != null && var30.drawSecondary) {
 					Scene_tilesDeque.addFirst(var30);
 				}
 			}
 
-			if (var4 < Scene_cameraXTile) {
-				var30 = tiles[var4 + 1][var5];
+			if (x < Scene_cameraXTile) {
+				var30 = tiles[x + 1][y];
 				if (var30 != null && var30.drawSecondary) {
 					Scene_tilesDeque.addFirst(var30);
 				}
 			}
 
-			if (var5 < Scene_cameraYTile) {
-				var30 = tiles[var4][var5 + 1];
+			if (y < Scene_cameraYTile) {
+				var30 = tiles[x][y + 1];
 				if (var30 != null && var30.drawSecondary) {
 					Scene_tilesDeque.addFirst(var30);
 				}
 			}
 
-			if (var4 > Scene_cameraXTile) {
-				var30 = tiles[var4 - 1][var5];
+			if (x > Scene_cameraXTile) {
+				var30 = tiles[x - 1][y];
 				if (var30 != null && var30.drawSecondary) {
 					Scene_tilesDeque.addFirst(var30);
 				}
 			}
 
-			if (var5 > Scene_cameraYTile) {
-				var30 = tiles[var4][var5 - 1];
+			if (y > Scene_cameraYTile) {
+				var30 = tiles[x][y - 1];
 				if (var30 != null && var30.drawSecondary) {
 					Scene_tilesDeque.addFirst(var30);
 				}

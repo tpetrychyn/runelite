@@ -24,15 +24,79 @@
  */
 package net.runelite.cache.definitions.loaders;
 
+import net.runelite.cache.IndexType;
 import net.runelite.cache.definitions.MapDefinition;
 import net.runelite.cache.definitions.MapDefinition.Tile;
+import net.runelite.cache.fs.Archive;
+import net.runelite.cache.fs.Index;
+import net.runelite.cache.fs.Storage;
+import net.runelite.cache.fs.Store;
 import net.runelite.cache.io.InputStream;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import static net.runelite.cache.region.Region.X;
 import static net.runelite.cache.region.Region.Y;
 import static net.runelite.cache.region.Region.Z;
 
 public class MapLoader
 {
+	public MapLoader() {}
+
+	public MapLoader(Store store) {
+		this.store = store;
+		index = store.getIndex(IndexType.MAPS);
+
+		mapDefCache = new HashMap<>();
+	}
+
+	private Store store;
+	private Index index;
+	private Map<Integer, MapDefinition> mapDefCache;
+
+	public Tile getWorldTile(int z, int x, int y) {
+		MapDefinition m = loadFromWorldCoordinates(x, y);
+		if (m == null) {
+			return null;
+		}
+
+		return m.getTiles()[z][x][y];
+	}
+
+	public MapDefinition loadFromWorldCoordinates(int x, int y) {
+		x >>>= 6;
+		y >>>= 6;
+		int regionId = (x << 8) | y;
+		if (mapDefCache.containsKey(regionId)) {
+			return mapDefCache.get(regionId);
+		}
+
+		index = store.getIndex(IndexType.MAPS);
+
+		Storage storage = store.getStorage();
+		Archive map = index.findArchiveByName("m" + x + "_" + y);
+		Archive land = index.findArchiveByName("l" + x + "_" + y);
+
+		if (map == null || land == null)
+		{
+			return null;
+		}
+
+		byte[] data = new byte[0];
+		try {
+			data = map.decompress(storage.loadArchive(map));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		MapDefinition mapDef = new MapLoader().load(x, y, data);
+
+		mapDefCache.put(regionId, mapDef);
+		return mapDef;
+	}
+
 	public MapDefinition load(int regionX, int regionY, byte[] b)
 	{
 		MapDefinition map = new MapDefinition();

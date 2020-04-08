@@ -126,4 +126,9 @@ public class TileImpl implements Tile {
     public LocalPoint getLocalLocation() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return String.format("x %d y %d rgb %d", x, y, tilePaint.getRBG());
+    }
 }

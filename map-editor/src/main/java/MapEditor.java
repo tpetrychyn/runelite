@@ -6,7 +6,9 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.Animator;
 import config.AntiAliasingMode;
+import eventHandlers.MouseListener;
 import impl.SceneImpl;
+import impl.TilePaintImpl;
 import jogamp.nativewindow.SurfaceScaleUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -22,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.HashMap;
 
 @Slf4j
 public class MapEditor implements GLEventListener, KeyListener {
@@ -36,6 +37,8 @@ public class MapEditor implements GLEventListener, KeyListener {
 
     private static GLWindow window;
     private static Animator animator;
+
+    private MouseListener mouseListener;
 
     private SceneUploader sceneUploader = new SceneUploader();
     private Scene scene = new SceneImpl();
@@ -147,14 +150,8 @@ public class MapEditor implements GLEventListener, KeyListener {
     private int lastStretchedCanvasHeight;
     private AntiAliasingMode lastAntiAliasingMode;
 
-    private int centerX = 422;
-    private int centerY = 490;
-    private int yaw = 2000;
-    private int pitch = 250;
 
-    private int cameraX = 2400;
-    private int cameraY = 6500;
-    private int cameraZ = -2500;
+    private Camera camera = new Camera();
 
     // Uniforms
     private int uniUseFog;
@@ -225,10 +222,12 @@ public class MapEditor implements GLEventListener, KeyListener {
         window = GLWindow.create(glCaps);
 
         window.setTitle("Hello Triangle (enhanced)");
-        window.setSize(1024, 768);
+        window.setSize(windowWidth, windowHeight);
 
         window.addGLEventListener(this);
         window.addKeyListener(this);
+        mouseListener = new MouseListener();
+        window.addMouseListener(mouseListener);
 
         window.setContextCreationFlags(GLContext.CTX_OPTION_DEBUG);
         window.setVisible(true);
@@ -272,38 +271,246 @@ public class MapEditor implements GLEventListener, KeyListener {
 
     }
 
+    void drawTiles() {
+        int cameraX = camera.getCameraX();
+        int cameraY = camera.getCameraY();
+        int cameraZ = camera.getCameraZ();
 
-    @Override
-    public void display(GLAutoDrawable drawable) {
-        handleKeys();
+        if (cameraX < 0)
+        {
+            cameraX = 0;
+        }
+        else if (cameraX >= 104 * Perspective.LOCAL_TILE_SIZE)
+        {
+            cameraX = 104 * Perspective.LOCAL_TILE_SIZE - 1;
+        }
 
-        gl = drawable.getGL().getGL4();
+        if (cameraY < 0)
+        {
+            cameraY = 0;
+        }
+        else if (cameraY >= 104 * Perspective.LOCAL_TILE_SIZE)
+        {
+            cameraY = 104 * Perspective.LOCAL_TILE_SIZE - 1;
+        }
 
-        for (int y = 0; y < Constants.SCENE_SIZE; ++y) {
-            for (int x = 0; x < Constants.SCENE_SIZE; ++x) {
-                Tile t = scene.getTiles()[0][x][y];
-                if (t == null) {
-                    continue;
+        camera.setCameraX2(cameraX);
+        camera.setCameraY2(cameraY);
+        camera.setCameraZ2(cameraZ);
+
+        int screenCenterX = cameraX / 128;
+        int screenCenterY = cameraY / 128;
+
+//        camera.setCenterX(screenCenterX);
+//        camera.setCenterY(screenCenterY);
+
+        int cameraXTileMin = 0;
+        int cameraYTileMin = 0;
+        int cameraXTileMax = Constants.SCENE_SIZE;
+        int cameraYTileMax = Constants.SCENE_SIZE;
+
+        Tile[][] tiles = scene.getTiles()[0];
+        Tile tile;
+        for (int x = -MAX_DISTANCE; x <= 0; x++) {
+            int xMin = x + screenCenterX;
+            int xMax = screenCenterX - x;
+            if (xMin >= cameraXTileMin || xMax < cameraXTileMax) {
+                for (int y = -MAX_DISTANCE; y <= 0; y++) {
+                    int yMin = y + screenCenterY;
+                    if (yMin > Constants.SCENE_SIZE-1) {
+                        yMin = Constants.SCENE_SIZE-1;
+                    }
+                    int yMax = screenCenterY - y;
+                    if (xMin >= cameraXTileMin) {
+                        if (yMin >= cameraYTileMin) {
+                            tile = tiles[xMin][yMin];
+                            if (tile != null) {
+                                this.drawTile(tile);
+                            }
+                        }
+
+                        if (yMax < cameraYTileMax) {
+                            tile = tiles[xMin][yMax];
+                            if (tile != null) {
+                                this.drawTile(tile);
+                            }
+                        }
+                    }
+
+                    if (xMax < cameraXTileMax) {
+                        if (yMin >= cameraYTileMin) {
+                            tile = tiles[xMax][yMin];
+                            if (tile != null) {
+                                this.drawTile(tile);
+                            }
+                        }
+
+                        if (yMax < cameraYTileMax) {
+                            tile = tiles[xMax][yMax];
+                            if (tile != null) {
+                                this.drawTile(tile);
+                            }
+                        }
+                    }
                 }
-                if (t.getTilePaint() != null) {
-                    drawScenePaint(t.getTilePaint(), t.getX(), t.getY());
-                }
-                if (t.getTileModel() != null) {
-                    drawSceneModel(t.getTileModel(), t.getX(), t.getY());
+            }
+        }
+    }
+
+    void drawTile(Tile tile) {
+        int x = tile.getX();
+        int y = tile.getY();
+
+        int pitchSin = camera.getPitchSin();
+        int pitchCos = camera.getPitchCos();
+        int yawSin = camera.getYawSin();
+        int yawCos = camera.getYawCos();
+
+        if (tile.getTilePaint() != null) {
+            int var9;
+            int var10 = var9 = (x << 7) - camera.getCameraX();
+            int var11;
+            int var12 = var11 = (y << 7) - camera.getCameraY();
+            int var13;
+            int var14 = var13 = var10 + 128;
+            int var15;
+            int var16 = var15 = var12 + 128;
+            int var17 = tile.getTilePaint().getSwHeight() - camera.getCameraZ();
+            int var18 = tile.getTilePaint().getSeHeight() - camera.getCameraZ();
+            int var19 = tile.getTilePaint().getNeHeight() - camera.getCameraZ();
+            int var20 = tile.getTilePaint().getNwHeight() - camera.getCameraZ();
+            int var21 = var10 * yawCos + yawSin * var12 >> 16;
+            var12 = var12 * yawCos - yawSin * var10 >> 16;
+            var10 = var21;
+            var21 = var17 * pitchCos - pitchSin * var12 >> 16;
+            var12 = pitchSin * var17 + var12 * pitchCos >> 16;
+            var17 = var21;
+            if (var12 >= 50) {
+                var21 = var14 * yawCos + yawSin * var11 >> 16;
+                var11 = var11 * yawCos - yawSin * var14 >> 16;
+                var14 = var21;
+                var21 = var18 * pitchCos - pitchSin * var11 >> 16;
+                var11 = pitchSin * var18 + var11 * pitchCos >> 16;
+                var18 = var21;
+                if (var11 >= 50) {
+                    var21 = var13 * yawCos + yawSin * var16 >> 16;
+                    var16 = var16 * yawCos - yawSin * var13 >> 16;
+                    var13 = var21;
+                    var21 = var19 * pitchCos - pitchSin * var16 >> 16;
+                    var16 = pitchSin * var19 + var16 * pitchCos >> 16;
+                    var19 = var21;
+                    if (var16 >= 50) {
+                        var21 = var9 * yawCos + yawSin * var15 >> 16;
+                        var15 = var15 * yawCos - yawSin * var9 >> 16;
+                        var9 = var21;
+                        var21 = var20 * pitchCos - pitchSin * var15 >> 16;
+                        var15 = pitchSin * var20 + var15 * pitchCos >> 16;
+                        if (var15 >= 50) {
+
+                            int dx = var17 * camera.getScale() / var12 + camera.getCenterX();
+                            int dy = var10 * camera.getScale() / var12 + camera.getCenterY();
+                            int cy = var14 * camera.getScale() / var11 + camera.getCenterX();
+                            int cx = var18 * camera.getScale() / var11 + camera.getCenterY();
+                            int ay = var13 * camera.getScale() / var16 + camera.getCenterX();
+                            int ax = var19 * camera.getScale() / var16 + camera.getCenterY();
+                            int by = var9 * camera.getScale() / var15 + camera.getCenterX();
+                            int bx = var21 * camera.getScale() / var15 + camera.getCenterY();
+
+                            int mouseX2 = mouseListener.getMouseX();
+                            int mouseY2 = mouseListener.getMouseY();
+                            if (((ay - by) * (cx - bx) - (ax - bx) * (cy - by) > 0) && containsBounds(mouseX2, mouseY2, ax, bx, cx, ay, by, cy)) {
+                                hoverTile = tile;
+                            }
+
+                            if (((dy - cy) * (bx - cx) - (dx - cx) * (by - cy) > 0) && containsBounds(mouseX2, mouseY2, dx, cx, bx, dy, cy, by))
+                            {
+                                hoverTile = tile;
+                            }
+
+                            drawScenePaint(tile.getTilePaint(), tile.getX(), tile.getY());
+                        }
+                    }
                 }
             }
         }
 
-        final int viewportHeight = 600;
-        final int viewportWidth = 800;
+        if (tile.getTileModel() != null) {
+            drawSceneModel(tile.getTileModel(), x, y);
+        }
+    }
+
+    void handleHover() {
+        if (hoverTile == lastHoverTile) {
+            return;
+        }
+
+        if (saveSw != 0) {
+            ((TilePaintImpl)lastHoverTile.getTilePaint()).setSwColor(saveSw);
+            ((TilePaintImpl)lastHoverTile.getTilePaint()).setSeColor(saveSe);
+            ((TilePaintImpl)lastHoverTile.getTilePaint()).setNeColor(saveNe);
+            ((TilePaintImpl)lastHoverTile.getTilePaint()).setNwColor(saveNw);
+        }
+
+        lastHoverTile = hoverTile;
+        saveSw = hoverTile.getTilePaint().getSwColor();
+        saveSe = hoverTile.getTilePaint().getSeColor();
+        saveNe = hoverTile.getTilePaint().getNeColor();
+        saveNw = hoverTile.getTilePaint().getNwColor();
+
+        ((TilePaintImpl)hoverTile.getTilePaint()).setSwColor(5555);
+        ((TilePaintImpl)hoverTile.getTilePaint()).setSeColor(5555);
+        ((TilePaintImpl)hoverTile.getTilePaint()).setNeColor(5555);
+        ((TilePaintImpl)hoverTile.getTilePaint()).setNwColor(5555);
+        uploadScene();
+    }
+
+    Tile lastHoverTile;
+    Tile hoverTile;
+    int saveSw, saveSe, saveNe, saveNw;
+
+    int windowWidth = 800;
+    int windowHeight = 600;
+
+    boolean containsBounds(int i_0, int i_1, int i_2, int i_3, int i_4, int i_5, int i_6, int i_7) {
+        if (i_1 < i_2 && i_1 < i_3 && i_1 < i_4) {
+            return false;
+        } else if (i_1 > i_2 && i_1 > i_3 && i_1 > i_4) {
+            return false;
+        } else if (i_0 < i_5 && i_0 < i_6 && i_0 < i_7) {
+            return false;
+        } else if (i_0 > i_5 && i_0 > i_6 && i_0 > i_7) {
+            return false;
+        } else {
+            int i_8 = (i_1 - i_2) * (i_6 - i_5) - (i_0 - i_5) * (i_3 - i_2);
+            int i_9 = (i_7 - i_6) * (i_1 - i_3) - (i_0 - i_6) * (i_4 - i_3);
+            int i_10 = (i_5 - i_7) * (i_1 - i_4) - (i_2 - i_4) * (i_0 - i_7);
+            return i_8 == 0 ? (i_9 != 0 ? (i_9 < 0 ? i_10 <= 0 : i_10 >= 0) : true) : (i_8 < 0 ? i_9 <= 0 && i_10 <= 0 : i_9 >= 0 && i_10 >= 0);
+        }
+    }
+
+    @Override
+    public void display(GLAutoDrawable drawable) {
+        handleKeys();
+        handleHover();
+        drawTiles();
+
+        if (mouseListener.isMouseClicked()) {
+            System.out.printf("clicked tile %s \n", hoverTile);
+            mouseListener.setMouseClicked(false);
+        }
+
+        gl = drawable.getGL().getGL4();
 
         // Clear scene
         int sky = 9493480;
         gl.glClearColor((sky >> 16 & 0xFF) / 255f, (sky >> 8 & 0xFF) / 255f, (sky & 0xFF) / 255f, 1f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
 
-        createProjectionMatrix(0, 800, 600, 0, 0, Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE * 2);
-
+        if (windowWidth > 0 && windowHeight > 0 && (windowWidth != lastViewportWidth || windowHeight != lastViewportHeight)) {
+            createProjectionMatrix(0, windowWidth, windowHeight, 0, 0, Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE);
+            lastViewportWidth = windowWidth;
+            lastViewportHeight = windowHeight;
+        }
         // Upload buffers
         vertexBuffer.flip();
         uvBuffer.flip();
@@ -348,14 +555,14 @@ public class MapEditor implements GLEventListener, KeyListener {
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
         uniformBuffer.clear();
         uniformBuffer
-                .put(yaw)
-                .put(pitch)
-                .put(centerX)
-                .put(centerY)
-                .put(300)
-                .put(cameraX) //x
-                .put(cameraZ) // z
-                .put(cameraY); // y
+                .put(camera.getYaw())
+                .put(camera.getPitch())
+                .put(camera.getCenterX())
+                .put(camera.getCenterY())
+                .put(camera.getScale())
+                .put(camera.getCameraX2()) //x
+                .put(camera.getCameraZ2()) // z
+                .put(camera.getCameraY2()); // y
         uniformBuffer.flip();
 
         gl.glBufferSubData(gl.GL_UNIFORM_BUFFER, 0, uniformBuffer.limit() * Integer.BYTES, uniformBuffer);
@@ -424,8 +631,8 @@ public class MapEditor implements GLEventListener, KeyListener {
             int renderHeightOff = 0;
             int renderWidthOff = 0;
             int renderCanvasHeight = 800;
-            int renderViewportHeight = viewportHeight;
-            int renderViewportWidth = viewportWidth;
+//            int renderViewportHeight = viewportHeight;
+//            int renderViewportWidth = viewportWidth;
 
 //            if (client.isStretchedEnabled()) {
 //                Dimension dim = client.getStretchedDimensions();
@@ -744,35 +951,35 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
 
         if (keys[KeyEvent.VK_LEFT]) {
-            cameraX += 2 * speed;
+            camera.addX(2 * speed);
         }
 
         if (keys[KeyEvent.VK_RIGHT]) {
-            cameraX -= 2 * speed;
+            camera.addX(-2 * speed);
         }
 
         if (keys[KeyEvent.VK_UP]) {
-            cameraY += 2 * speed;
+            camera.addY(2 * speed);
         }
 
         if (keys[KeyEvent.VK_DOWN]) {
-            cameraY -= 2 * speed;
+            camera.addY(-2 * speed);
         }
 
         if (keys[KeyEvent.VK_P]) {
-            yaw += 2 * speed;
+            camera.addYaw(2 * speed);
         }
 
         if (keys[KeyEvent.VK_O]) {
-            yaw -= 2 * speed;
+            camera.addYaw(-2 * speed);
         }
 
         if (keys[KeyEvent.VK_I]) {
-            cameraZ -= 2 * speed;
+            camera.addZ(-2 * speed);
         }
 
         if (keys[KeyEvent.VK_K]) {
-            cameraZ += 2 * speed;
+            camera.addZ(2 * speed);
         }
     }
 
@@ -782,9 +989,10 @@ public class MapEditor implements GLEventListener, KeyListener {
     }
 
     boolean[] keys = new boolean[250];
+
     @Override
     public void keyReleased(KeyEvent e) {
-        if(e.isAutoRepeat()){
+        if (e.isAutoRepeat()) {
             return;
         }
 

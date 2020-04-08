@@ -25,6 +25,8 @@
 package net.runelite.cache.definitions;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 public class MapDefinition
@@ -34,6 +36,8 @@ public class MapDefinition
 	public static final int Z = 4;
 
 	@Data
+	@Getter
+	@Setter
 	public static class Tile
 	{
 		public Integer height;

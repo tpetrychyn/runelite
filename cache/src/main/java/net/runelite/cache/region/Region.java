@@ -26,10 +26,13 @@ package net.runelite.cache.region;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Getter;
 import net.runelite.cache.definitions.LocationsDefinition;
 import net.runelite.cache.definitions.MapDefinition;
 import net.runelite.cache.definitions.MapDefinition.Tile;
 
+@Getter
 public class Region
 {
 
