@@ -24,49 +24,65 @@
  */
 package net.runelite.api;
 
-import java.awt.Shape;
-
 /**
- * Represents the wall of a tile, which is an un-passable boundary.
+ * Represents the model of a tile in the current scene.
  */
-public interface WallObject extends TileObject
+public interface SceneTileModel
 {
 	/**
-	 * Gets the first orientation of the wall.
+	 * Gets the underlay color of the tile.
 	 *
-	 * @return the first orientation, 0-2048 where 0 is north
+	 * @return the underlay color
 	 */
-	int getOrientationA();
+	int getModelUnderlay();
 
 	/**
-	 * Gets the second orientation value of the wall.
+	 * Gets the overlay color of the tile.
 	 *
-	 * @return the second orientation, 0-2048 where 0 is north
+	 * @return the overlay color
 	 */
-	int getOrientationB();
+	int getModelOverlay();
 
 	/**
-	 * Gets the boundary configuration of the wall.
+	 * Gets the shape mask type.
 	 *
-	 * @return the boundary configuration
+	 * @return the shape mask
 	 */
-	int getConfig();
-
-	Entity getEntity1();
-	Entity getEntity2();
-
-	Model getModelA();
-	Model getModelB();
+	int getShape();
 
 	/**
-	 * Gets the convex hull of the objects model.
+	 * Gets the rotation of the tile.
 	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
+	 * @return the rotation
 	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
+	int getRotation();
 
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+	int[] getFaceX();
+
+	int[] getFaceY();
+
+	int[] getFaceZ();
+
+	int[] getVertexX();
+
+	int[] getVertexY();
+
+	int[] getVertexZ();
+
+	int[] getTriangleColorA();
+
+	int[] getTriangleColorB();
+
+	int[] getTriangleColorC();
+
+	int[] getTriangleTextureId();
+
+	int getBufferOffset();
+	void setBufferOffset(int bufferOffset);
+
+	int getUvBufferOffset();
+	void setUvBufferOffset(int bufferOffset);
+
+	int getBufferLen();
+	void setBufferLen(int bufferLen);
 }

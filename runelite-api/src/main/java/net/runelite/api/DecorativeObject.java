@@ -52,4 +52,8 @@ public interface DecorativeObject extends TileObject
 	int getXOffset();
 
 	int getOrientation();
+
+    Renderable getRenderable();
+
+	Renderable getRenderable2();
 }

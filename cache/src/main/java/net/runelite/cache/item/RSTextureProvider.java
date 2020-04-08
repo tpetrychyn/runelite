@@ -98,4 +98,8 @@ public class RSTextureProvider
 	{
 		return this.width == 64;
 	}
+
+	public TextureDefinition[] getTextureDefinitions() {
+		return this.textures;
+	}
 }

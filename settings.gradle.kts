@@ -42,6 +42,7 @@ include(":injected-client")
 include("injection-annotations")
 include(":runelite-plugin-archetype")
 include(":wiki-scraper")
+include(":map-editor")
 
 for (project in rootProject.children) {
     project.apply {

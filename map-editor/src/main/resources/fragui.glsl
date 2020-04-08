@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,51 +22,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api;
+#version 330
 
-import java.awt.Shape;
+#define SAMPLING_DEFAULT 0
+#define SAMPLING_MITCHELL 1
+#define SAMPLING_CATROM 2
+#define SAMPLING_XBR 3
 
-/**
- * Represents the wall of a tile, which is an un-passable boundary.
- */
-public interface WallObject extends TileObject
-{
-	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationA();
+uniform sampler2D tex;
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
+uniform int samplingMode;
+uniform ivec2 sourceDimensions;
+uniform ivec2 targetDimensions;
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
+#include scale/bicubic.glsl
+#include scale/xbr_lv2_frag.glsl
 
-	Entity getEntity1();
-	Entity getEntity2();
+in vec2 TexCoord;
+in XBRTable xbrTable;
 
-	Model getModelA();
-	Model getModelB();
+out vec4 FragColor;
 
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
+void main() {
+    vec4 c;
 
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+    if (samplingMode == SAMPLING_DEFAULT)
+        c = texture(tex, TexCoord);
+    else if (samplingMode == SAMPLING_CATROM || samplingMode == SAMPLING_MITCHELL)
+        c = textureCubic(tex, TexCoord, samplingMode);
+    else if (samplingMode == SAMPLING_XBR)
+        c = textureXBR(tex, TexCoord, xbrTable, ceil(1.0 * targetDimensions.x / sourceDimensions.x));
+
+    FragColor = c;
 }

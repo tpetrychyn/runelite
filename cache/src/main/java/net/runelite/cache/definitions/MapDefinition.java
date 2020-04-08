@@ -29,8 +29,8 @@ import lombok.Data;
 @Data
 public class MapDefinition
 {
-	public static final int X = 64;
-	public static final int Y = 64;
+	public static final int X = 104;
+	public static final int Y = 104;
 	public static final int Z = 4;
 
 	@Data

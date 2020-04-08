@@ -24,49 +24,39 @@
  */
 package net.runelite.api;
 
-import java.awt.Shape;
-
 /**
- * Represents the wall of a tile, which is an un-passable boundary.
+ * Represents the paint of a tile in the current scene.
  */
-public interface WallObject extends TileObject
+public interface SceneTilePaint
 {
 	/**
-	 * Gets the first orientation of the wall.
+	 * Gets the RGB value of the paint.
 	 *
-	 * @return the first orientation, 0-2048 where 0 is north
+	 * @return the paint RGB
 	 */
-	int getOrientationA();
+	int getRBG();
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
+	int getSwColor();
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
+	int getSeColor();
 
-	Entity getEntity1();
-	Entity getEntity2();
+	int getNwColor();
 
-	Model getModelA();
-	Model getModelB();
+	int getNeColor();
 
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
+	int getTexture();
 
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+	void setSwColor(int color);
+	void setSeColor(int color);
+	void setNwColor(int color);
+	void setNeColor(int color);
+
+	int getBufferOffset();
+	void setBufferOffset(int bufferOffset);
+
+	int getUvBufferOffset();
+	void setUvBufferOffset(int bufferOffset);
+
+	int getBufferLen();
+	void setBufferLen(int bufferLen);
 }

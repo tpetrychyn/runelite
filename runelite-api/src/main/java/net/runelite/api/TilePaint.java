@@ -36,6 +36,11 @@ public interface TilePaint
 	 */
 	int getRBG();
 
+	int getSwHeight();
+	int getSeHeight();
+	int getNeHeight();
+	int getNwHeight();
+
 	int getSwColor();
 
 	int getSeColor();

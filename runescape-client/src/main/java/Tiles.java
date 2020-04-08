@@ -26,11 +26,11 @@ public final class Tiles {
 	@Export("Tiles_minPlane")
 	static int Tiles_minPlane;
 	@ObfuscatedName("d")
-	static byte[][][] field538;
+	static byte[][][] underlayIds;
 	@ObfuscatedName("v")
-	static byte[][][] field539;
+	static byte[][][] overlayPaths;
 	@ObfuscatedName("q")
-	static byte[][][] field540;
+	static byte[][][] overlayRotations;
 	@ObfuscatedName("t")
 	static int[][] field545;
 	@ObfuscatedName("n")

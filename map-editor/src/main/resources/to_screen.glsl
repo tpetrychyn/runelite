@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,51 +22,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api;
 
-import java.awt.Shape;
-
-/**
- * Represents the wall of a tile, which is an un-passable boundary.
+/*
+ * Convert a vertex to screen space
  */
-public interface WallObject extends TileObject
-{
-	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationA();
+vec3 toScreen(ivec3 vertex, int cameraYaw, int cameraPitch, int centerX, int centerY, int zoom) {
+  float yawSin = sin(cameraYaw * UNIT);
+  float yawCos = cos(cameraYaw * UNIT);
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
+  float pitchSin = sin(cameraPitch * UNIT);
+  float pitchCos = cos(cameraPitch * UNIT);
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
+  float rotatedX = (vertex.z * yawSin) + (vertex.x * yawCos);
+  float rotatedZ = (vertex.z * yawCos) - (vertex.x * yawSin);
 
-	Entity getEntity1();
-	Entity getEntity2();
+  float var13 = (vertex.y * pitchCos) - (rotatedZ * pitchSin);
+  float var12 = (vertex.y * pitchSin) + (rotatedZ * pitchCos);
 
-	Model getModelA();
-	Model getModelB();
+  float x = rotatedX * zoom / var12 + centerX;
+  float y = var13 * zoom / var12 + centerY;
+  float z = -var12; // in OpenGL depth is negative
 
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
-
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+  return vec3(x, y, z);
 }

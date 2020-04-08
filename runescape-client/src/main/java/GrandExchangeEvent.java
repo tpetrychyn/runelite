@@ -274,7 +274,7 @@ public class GrandExchangeEvent {
 
 				ChatChannel.playPcmPlayers();
 				UserComparator9.method3498();
-				var1 = WorldMapData_0.regionLandArchives.length;
+				int regionsLength = WorldMapData_0.regionLandArchives.length;
 				TriBool.method5249();
 				class303.method5397(true);
 				int var5;
@@ -283,30 +283,30 @@ public class GrandExchangeEvent {
 				int var40;
 				int var51;
 				if (!Client.isInInstance) {
-					byte[] var36;
-					for (var35 = 0; var35 < var1; ++var35) {
-						var3 = (StructDefinition.regions[var35] >> 8) * 64 - class69.baseX;
-						var4 = (StructDefinition.regions[var35] & 255) * 64 - class89.baseY;
-						var36 = WorldMapData_0.regionLandArchives[var35];
-						if (var36 != null) {
+					byte[] regionData;
+					for (int i = 0; i < regionsLength; ++i) {
+						int regionX = (StructDefinition.regions[i] >> 8) * 64 - class69.baseX;
+						int regionY = (StructDefinition.regions[i] & 255) * 64 - class89.baseY;
+						regionData = WorldMapData_0.regionLandArchives[i];
+						if (regionData != null) {
 							ChatChannel.playPcmPlayers();
-							WorldMapData_0.method275(var36, var3, var4, class69.field585 * 8 - 48, MouseHandler.field529 * 8 - 48, Client.collisionMaps);
+							WorldMapData_0.method275(regionData, regionX, regionY, class69.field585 * 8 - 48, MouseHandler.field529 * 8 - 48, Client.collisionMaps);
 						}
 					}
 
-					for (var35 = 0; var35 < var1; ++var35) {
-						var3 = (StructDefinition.regions[var35] >> 8) * 64 - class69.baseX;
-						var4 = (StructDefinition.regions[var35] & 255) * 64 - class89.baseY;
-						var36 = WorldMapData_0.regionLandArchives[var35];
-						if (var36 == null && MouseHandler.field529 < 800) {
+					for (int i = 0; i < regionsLength; ++i) {
+						int regionX = (StructDefinition.regions[i] >> 8) * 64 - class69.baseX;
+						int regionY = (StructDefinition.regions[i] & 255) * 64 - class89.baseY;
+						regionData = WorldMapData_0.regionLandArchives[i];
+						if (regionData == null && MouseHandler.field529 < 800) {
 							ChatChannel.playPcmPlayers();
-							WorldMapSprite.method514(var3, var4, 64, 64);
+							WorldMapSprite.method514(regionX, regionY, 64, 64);
 						}
 					}
 
 					class303.method5397(true);
 
-					for (var35 = 0; var35 < var1; ++var35) {
+					for (var35 = 0; var35 < regionsLength; ++var35) {
 						byte[] var41 = class23.regionMapArchives[var35];
 						if (var41 != null) {
 							var4 = (StructDefinition.regions[var35] >> 8) * 64 - class69.baseX;
@@ -584,10 +584,10 @@ public class GrandExchangeEvent {
 
 				MouseRecorder.updateGameState(30);
 				ChatChannel.playPcmPlayers();
-				Tiles.field538 = null;
-				class348.field4061 = null;
-				Tiles.field539 = null;
-				Tiles.field540 = null;
+				Tiles.underlayIds = null;
+				class348.overlayIds = null;
+				Tiles.overlayPaths = null;
+				Tiles.overlayRotations = null;
 				class51.field404 = null;
 				SoundCache.field1462 = null;
 				Tiles.field545 = null;

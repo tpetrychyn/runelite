@@ -42,4 +42,6 @@ public interface GroundObject extends TileObject
 	 * @see net.runelite.api.model.Jarvis
 	 */
 	Shape getConvexHull();
+
+    Renderable getRenderable();
 }

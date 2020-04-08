@@ -51,14 +51,14 @@ public final class TilePaint {
 	@Export("rgb")
 	int rgb;
 
-	TilePaint(int var1, int var2, int var3, int var4, int var5, int var6, boolean var7) {
+	TilePaint(int swColor, int seColor, int neColor, int nwColor, int texture, int rgb, boolean isFlat) {
 		this.isFlat = true;
-		this.swColor = var1;
-		this.seColor = var2;
-		this.neColor = var3;
-		this.nwColor = var4;
-		this.texture = var5;
-		this.rgb = var6;
-		this.isFlat = var7;
+		this.swColor = swColor;
+		this.seColor = seColor;
+		this.neColor = neColor;
+		this.nwColor = nwColor;
+		this.texture = texture;
+		this.rgb = rgb;
+		this.isFlat = isFlat;
 	}
 }

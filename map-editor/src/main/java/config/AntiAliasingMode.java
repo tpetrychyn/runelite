@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Lotto <https://github.com/devLotto>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,51 +22,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api;
+package config;
 
-import java.awt.Shape;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-/**
- * Represents the wall of a tile, which is an un-passable boundary.
- */
-public interface WallObject extends TileObject
+@Getter
+@RequiredArgsConstructor
+public enum AntiAliasingMode
 {
-	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationA();
+	DISABLED("Disabled", 0),
+	MSAA_2("MSAA x2", 2),
+	MSAA_4("MSAA x4", 4),
+	MSAA_8("MSAA x8", 8),
+	MSAA_16("MSAA x16", 16);
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
+	private final String name;
+	private final int samples;
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
-
-	Entity getEntity1();
-	Entity getEntity2();
-
-	Model getModelA();
-	Model getModelB();
-
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
-
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }

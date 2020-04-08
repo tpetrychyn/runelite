@@ -77,10 +77,10 @@ public class UserComparator9 extends AbstractUserComparator {
 	)
 	static void method3498() {
 		Tiles.Tiles_minPlane = 99;
-		Tiles.field538 = new byte[4][104][104];
-		class348.field4061 = new byte[4][104][104];
-		Tiles.field539 = new byte[4][104][104];
-		Tiles.field540 = new byte[4][104][104];
+		Tiles.underlayIds = new byte[4][104][104];
+		class348.overlayIds = new byte[4][104][104];
+		Tiles.overlayPaths = new byte[4][104][104];
+		Tiles.overlayRotations = new byte[4][104][104];
 		class51.field404 = new int[4][105][105];
 		SoundCache.field1462 = new byte[4][105][105];
 		Tiles.field545 = new int[105][105];

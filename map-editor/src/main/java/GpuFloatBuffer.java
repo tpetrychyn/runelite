@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,51 +22,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api;
 
-import java.awt.Shape;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
-/**
- * Represents the wall of a tile, which is an un-passable boundary.
- */
-public interface WallObject extends TileObject
+class GpuFloatBuffer
 {
-	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationA();
+	private FloatBuffer buffer = allocateDirect(65536);
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
+	void put(float texture, float u, float v, float pad)
+	{
+		buffer.put(texture).put(u).put(v).put(pad);
+	}
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
+	void flip()
+	{
+		buffer.flip();
+	}
 
-	Entity getEntity1();
-	Entity getEntity2();
+	void clear()
+	{
+		buffer.clear();
+	}
 
-	Model getModelA();
-	Model getModelB();
+	void ensureCapacity(int size)
+	{
+		while (buffer.remaining() < size)
+		{
+			FloatBuffer newB = allocateDirect(buffer.capacity() * 2);
+			buffer.flip();
+			newB.put(buffer);
+			buffer = newB;
+		}
+	}
 
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
+	FloatBuffer getBuffer()
+	{
+		return buffer;
+	}
 
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+	static FloatBuffer allocateDirect(int size)
+	{
+		return ByteBuffer.allocateDirect(size * Float.BYTES)
+			.order(ByteOrder.nativeOrder())
+			.asFloatBuffer();
+	}
 }

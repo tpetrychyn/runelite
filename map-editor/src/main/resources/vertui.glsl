@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,51 +22,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api;
+#version 330
 
-import java.awt.Shape;
+#define SAMPLING_DEFAULT 0
+#define SAMPLING_MITCHELL 1
+#define SAMPLING_CATROM 2
+#define SAMPLING_XBR 3
 
-/**
- * Represents the wall of a tile, which is an un-passable boundary.
- */
-public interface WallObject extends TileObject
+uniform int samplingMode;
+uniform ivec2 sourceDimensions;
+uniform ivec2 targetDimensions;
+
+#include scale/xbr_lv2_vert.glsl
+
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoord;
+
+out vec2 TexCoord;
+out XBRTable xbrTable;
+
+void main()
 {
-	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationA();
+    gl_Position = vec4(aPos, 1.0);
+    TexCoord = aTexCoord;
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
-
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
-
-	Entity getEntity1();
-	Entity getEntity2();
-
-	Model getModelA();
-	Model getModelB();
-
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
-
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+    if (samplingMode == SAMPLING_XBR)
+        xbrTable = xbr_vert(TexCoord, sourceDimensions);
 }

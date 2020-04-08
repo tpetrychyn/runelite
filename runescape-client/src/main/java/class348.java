@@ -9,7 +9,7 @@ public class class348 {
 	@ObfuscatedName("d")
 	public static final char[] field4063;
 	@ObfuscatedName("w")
-	static byte[][][] field4061;
+	static byte[][][] overlayIds;
 	@ObfuscatedName("br")
 	@ObfuscatedSignature(
 		signature = "[Lle;"

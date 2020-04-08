@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,49 +24,22 @@
  */
 package net.runelite.api;
 
-import java.awt.Shape;
-
 /**
- * Represents the wall of a tile, which is an un-passable boundary.
+ * Represents an object that can be rendered.
  */
-public interface WallObject extends TileObject
+public interface Renderable extends Node
 {
 	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
+	 * Gets the model of the object.
 	 */
-	int getOrientationA();
+	Model getModel();
 
 	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
+	 * Gets the height of the model.
 	 */
-	int getOrientationB();
+	int getModelHeight();
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
+	void setModelHeight(int modelHeight);
 
-	Entity getEntity1();
-	Entity getEntity2();
-
-	Model getModelA();
-	Model getModelB();
-
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
-
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+	void draw(int orientation, int pitchSin, int pitchCos, int yawSin, int yawCos, int x, int y, int z, long hash);
 }

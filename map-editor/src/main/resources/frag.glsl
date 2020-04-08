@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,51 +22,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api;
+#version 330
 
-import java.awt.Shape;
+uniform sampler2DArray textures;
+uniform vec2 textureOffsets[64];
+uniform float brightness;
+uniform float smoothBanding;
+uniform vec4 fogColor;
 
-/**
- * Represents the wall of a tile, which is an un-passable boundary.
- */
-public interface WallObject extends TileObject
-{
-	/**
-	 * Gets the first orientation of the wall.
-	 *
-	 * @return the first orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationA();
+in vec4 Color;
+centroid in float fHsl;
+in vec4 fUv;
+in float fogAmount;
 
-	/**
-	 * Gets the second orientation value of the wall.
-	 *
-	 * @return the second orientation, 0-2048 where 0 is north
-	 */
-	int getOrientationB();
+out vec4 FragColor;
 
-	/**
-	 * Gets the boundary configuration of the wall.
-	 *
-	 * @return the boundary configuration
-	 */
-	int getConfig();
+#include hsl_to_rgb.glsl
 
-	Entity getEntity1();
-	Entity getEntity2();
+void main() {
+  float n = fUv.x;
 
-	Model getModelA();
-	Model getModelB();
+  int hsl = int(fHsl);
+  vec3 rgb = hslToRgb(hsl) * smoothBanding + Color.rgb * (1.f - smoothBanding);
+  vec4 smoothColor = vec4(rgb, Color.a);
 
-	/**
-	 * Gets the convex hull of the objects model.
-	 *
-	 * @return the convex hull
-	 * @see net.runelite.api.model.Jarvis
-	 */
-	Shape getConvexHull();
-	Shape getConvexHull2();
+  if (n > 0.0) {
+    n -= 1.0;
+    int textureIdx = int(n);
 
-	Renderable getRenderable1();
-	Renderable getRenderable2();
+    vec2 uv = fUv.yz;
+    vec2 animatedUv = uv + textureOffsets[textureIdx];
+
+    vec4 textureColor = texture(textures, vec3(animatedUv, n));
+    vec4 textureColorBrightness = pow(textureColor, vec4(brightness, brightness, brightness, 1.0f));
+
+    smoothColor = textureColorBrightness * smoothColor;
+  }
+
+  vec3 mixedColor = mix(smoothColor.rgb, fogColor.rgb, fogAmount);
+  FragColor = vec4(mixedColor, smoothColor.a);
 }
