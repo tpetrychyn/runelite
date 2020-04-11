@@ -148,7 +148,7 @@ public class DynamicObject extends Renderable {
 			int var5 = (var2 + 1 >> 1) + this.x;
 			int var6 = (var3 >> 1) + this.y;
 			int var7 = (var3 + 1 >> 1) + this.y;
-			int[][] var8 = Tiles.Tiles_heights[this.plane];
+			int[][] var8 = SceneRegion.Tiles_heights[this.plane];
 			int var9 = var8[var4][var7] + var8[var5][var6] + var8[var4][var6] + var8[var5][var7] >> 2;
 			int var10 = (this.x << 7) + (var2 << 6);
 			int var11 = (this.y << 7) + (var3 << 6);

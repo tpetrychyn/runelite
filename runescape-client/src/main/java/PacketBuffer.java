@@ -164,9 +164,9 @@ public class PacketBuffer extends Buffer {
 		garbageValue = "7907"
 	)
 	static final void addLocationObjectToScene(int z, int x, int y, int type, int orientation, int type, Scene scene, CollisionMap collisionMap) {
-		if (!Client.isLowDetail || (Tiles.Tiles_renderFlags[0][x][y] & 2) != 0 || (Tiles.Tiles_renderFlags[z][x][y] & 16) == 0) {
-			if (z < Tiles.Tiles_minPlane) {
-				Tiles.Tiles_minPlane = z;
+		if (!Client.isLowDetail || (SceneRegion.Tiles_renderFlags[0][x][y] & 2) != 0 || (SceneRegion.Tiles_renderFlags[z][x][y] & 16) == 0) {
+			if (z < SceneRegion.Tiles_minPlane) {
+				SceneRegion.Tiles_minPlane = z;
 			}
 
 			ObjectDefinition objectDefinition = WorldMapSection2.getObjectDefinition(type);
@@ -200,7 +200,7 @@ public class PacketBuffer extends Buffer {
 				var14 = y + 1;
 			}
 
-			int[][] tileHeights = Tiles.Tiles_heights[z];
+			int[][] tileHeights = SceneRegion.Tiles_heights[z];
 			int height = tileHeights[var12][var14] + tileHeights[var11][var14] + tileHeights[var12][var13] + tileHeights[var11][var13] >> 2;
 			int xSize = (x << 7) + (width << 6);
 			int ySize = (y << 7) + (length << 6);
@@ -287,7 +287,7 @@ public class PacketBuffer extends Buffer {
 						renderable = new DynamicObject(type, 0, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 					}
 
-					scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field544[orientation], 0, tag, flags);
+					scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field544[orientation], 0, tag, flags);
 					if (orientation == 0) {
 						if (objectDefinition.clipped) {
 							SoundCache.field1462[z][x][y] = 50;
@@ -345,7 +345,7 @@ public class PacketBuffer extends Buffer {
 						renderable = new DynamicObject(type, 1, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 					}
 
-					scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field542[orientation], 0, tag, flags);
+					scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field542[orientation], 0, tag, flags);
 					if (objectDefinition.clipped) {
 						if (orientation == 0) {
 							SoundCache.field1462[z][x][y + 1] = 50;
@@ -376,7 +376,7 @@ public class PacketBuffer extends Buffer {
 							var30 = new DynamicObject(type, 2, var28, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						scene.newBoundaryObject(z, x, y, height, (Renderable)var29, (Renderable)var30, Tiles.field544[orientation], Tiles.field544[var28], tag, flags);
+						scene.newBoundaryObject(z, x, y, height, (Renderable)var29, (Renderable)var30, SceneRegion.field544[orientation], SceneRegion.field544[var28], tag, flags);
 						if (objectDefinition.modelClipped) {
 							if (orientation == 0) {
 								var10000 = class51.field404[z][x];
@@ -416,7 +416,7 @@ public class PacketBuffer extends Buffer {
 							renderable = new DynamicObject(type, 3, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field542[orientation], 0, tag, flags);
+						scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field542[orientation], 0, tag, flags);
 						if (objectDefinition.clipped) {
 							if (orientation == 0) {
 								SoundCache.field1462[z][x][y + 1] = 50;
@@ -456,7 +456,7 @@ public class PacketBuffer extends Buffer {
 							renderable = new DynamicObject(type, 4, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						scene.newWallDecoration(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field544[orientation], 0, 0, 0, tag, flags);
+						scene.newWallDecoration(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field544[orientation], 0, 0, 0, tag, flags);
 					} else {
 						long var31;
 						Object var33;
@@ -473,7 +473,7 @@ public class PacketBuffer extends Buffer {
 								var33 = new DynamicObject(type, 4, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)null, Tiles.field544[orientation], 0, var28 * Tiles.field541[orientation], var28 * Tiles.field547[orientation], tag, flags);
+							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)null, SceneRegion.field544[orientation], 0, var28 * SceneRegion.field541[orientation], var28 * SceneRegion.field547[orientation], tag, flags);
 						} else if (type == 6) {
 							var28 = 8;
 							var31 = scene.getBoundaryObjectTag(z, x, y);
@@ -487,7 +487,7 @@ public class PacketBuffer extends Buffer {
 								var33 = new DynamicObject(type, 4, orientation + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)null, 256, orientation, var28 * Tiles.field546[orientation], var28 * Tiles.field552[orientation], tag, flags);
+							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)null, 256, orientation, var28 * SceneRegion.field546[orientation], var28 * SceneRegion.field552[orientation], tag, flags);
 						} else if (type == 7) {
 							var23 = orientation + 2 & 3;
 							if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
@@ -514,7 +514,7 @@ public class PacketBuffer extends Buffer {
 								var26 = new DynamicObject(type, 4, var27 + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)var26, 256, orientation, var28 * Tiles.field546[orientation], var28 * Tiles.field552[orientation], tag, flags);
+							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)var26, 256, orientation, var28 * SceneRegion.field546[orientation], var28 * SceneRegion.field552[orientation], tag, flags);
 						}
 					}
 				}

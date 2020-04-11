@@ -1,19 +1,12 @@
-package impl;
+package models;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.*;
-import net.runelite.api.Point;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
-
-import javax.annotation.Nullable;
-import java.awt.*;
-import java.util.List;
 
 @Getter
 @Setter
-public class TileImpl {
+public class SceneTile {
     private int plane;
     private int x;
     private int y;
@@ -22,7 +15,7 @@ public class TileImpl {
     private FloorDecoration floorDecoration;
     private WallDecoration wallDecoration;
 
-    TileImpl(int z, int x, int y) {
+    SceneTile(int z, int x, int y) {
         this.plane = z;
         this.x = x;
         this.y = y;

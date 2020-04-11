@@ -315,7 +315,7 @@ public class class22 {
 						RawSound var10 = var9.toRawSound().resample(class25.decimator);
 						RawPcmStream var11 = RawPcmStream.createRawPcmStream(var10, 100, var2);
 						var11.setNumLoops(Client.queuedSoundEffectLoops[var0] - 1);
-						Tiles.pcmStreamMixer.addSubStream(var11);
+						SceneRegion.pcmStreamMixer.addSubStream(var11);
 					}
 
 					Client.queuedSoundEffectDelays[var0] = -100;

@@ -1,31 +1,31 @@
-package impl;
+package models;
 
 import net.runelite.api.*;
 
 public class SceneImpl{
     private Occluder[][] planeOccluders;
     private int[] planeOccluderCounts;
-    private TileImpl[][][] tiles;
+    private SceneTile[][][] tiles;
 
     public SceneImpl() {
-        tiles = new TileImpl[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
+        tiles = new SceneTile[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
         planeOccluders = new Occluder[4][500];
         planeOccluderCounts = new int[4];
     }
 
-    public TileImpl[][][] getTiles() {
+    public SceneTile[][][] getTiles() {
         return tiles;
     }
 
     public void clearTiles() {
-        this.tiles = new TileImpl[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
+        this.tiles = new SceneTile[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
     }
 
     public void addTile(int z, int x, int y, int overlayPath, int overlayRotation, int overlayTexture, int swHeight, int seHeight, int neHeight, int nwHeight, int swColor, int seColor, int neColor, int nwColor, int var15, int var16, int var17, int var18, int rgb, int overlayRgb) {
         if (overlayPath == 0) {
             for (int iz = z; iz >= 0; --iz) {
                 if (this.tiles[iz][x][y] == null) {
-                    this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+                    this.tiles[iz][x][y] = new SceneTile(iz, x, y);
                 }
             }
 
@@ -37,7 +37,7 @@ public class SceneImpl{
         } else if (overlayPath != 1) {
             for (int iz = z; iz >= 0; --iz) {
                 if (this.tiles[iz][x][y] == null) {
-                    this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+                    this.tiles[iz][x][y] = new SceneTile(iz, x, y);
                 }
             }
 
@@ -45,7 +45,7 @@ public class SceneImpl{
         } else {
             for (int iz = z; iz >= 0; --iz) {
                 if (this.tiles[iz][x][y] == null) {
-                    this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+                    this.tiles[iz][x][y] = new SceneTile(iz, x, y);
                 }
             }
 
@@ -69,7 +69,7 @@ public class SceneImpl{
     public void newFloorDecoration(int z, int x, int y, int height, Entity entity, long tag, int flags) {
         for (int iz = z; iz >= 0; --iz) {
             if (this.tiles[iz][x][y] == null) {
-                this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+                this.tiles[iz][x][y] = new SceneTile(iz, x, y);
             }
         }
 
@@ -89,7 +89,7 @@ public class SceneImpl{
     public void newWallDecoration(int z, int x, int y, int height, ModelImpl modelA, ModelImpl modelB, int orientationA, int orientationB, long tag, int flags) {
         for (int iz = z; iz >= 0; --iz) {
             if (this.tiles[iz][x][y] == null) {
-                this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+                this.tiles[iz][x][y] = new SceneTile(iz, x, y);
             }
         }
 

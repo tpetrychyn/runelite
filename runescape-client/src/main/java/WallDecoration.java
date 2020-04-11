@@ -121,7 +121,7 @@ public final class WallDecoration {
 					}
 
 					String var4 = var0.substring(0, var3);
-					int var6 = Tiles.method1227(var1, var2 - 1);
+					int var6 = SceneRegion.method1227(var1, var2 - 1);
 					String var5;
 					if (var6 < 999999999) {
 						var5 = Integer.toString(var6);

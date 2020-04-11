@@ -1,12 +1,10 @@
-import impl.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import net.runelite.api.*;
-import net.runelite.cache.*;
-import net.runelite.cache.TextureManager;
+import models.ModelImpl;
+import models.SceneImpl;
+import net.runelite.api.Constants;
+import net.runelite.cache.ConfigType;
+import net.runelite.cache.IndexType;
+import net.runelite.cache.ObjectManager;
 import net.runelite.cache.definitions.*;
-import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.definitions.loaders.MapLoader;
 import net.runelite.cache.definitions.loaders.OverlayLoader;
 import net.runelite.cache.definitions.loaders.SpriteLoader;
@@ -19,8 +17,6 @@ import net.runelite.cache.region.LocationType;
 import net.runelite.cache.region.Region;
 import net.runelite.cache.region.RegionLoader;
 import net.runelite.cache.util.Djb2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -55,7 +51,7 @@ public class MapPreparer {
 
     public MapPreparer(Store store, RSTextureProvider textureProvider) {
         this.store = store;
-        this.rsTextureProvider = textureProvider;
+        rsTextureProvider = textureProvider;
         mapLoader = new MapLoader(store);
         regionLoader = new RegionLoader(store);
         objectManager = new ObjectManager(store);
@@ -64,7 +60,7 @@ public class MapPreparer {
     public void load() throws IOException {
         loadUnderlays(store);
         loadOverlays(store);
-        loadSprites();
+//        loadSprites();
         objectManager.load();
     }
 

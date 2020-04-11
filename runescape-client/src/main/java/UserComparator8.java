@@ -67,7 +67,7 @@ public class UserComparator8 extends AbstractUserComparator {
 					return ScriptEvent.Client_plane;
 				}
 
-				if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
+				if ((SceneRegion.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
 					var0 = ScriptEvent.Client_plane;
 				}
 
@@ -98,7 +98,7 @@ public class UserComparator8 extends AbstractUserComparator {
 							--var3;
 						}
 
-						if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
+						if ((SceneRegion.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
 							var0 = ScriptEvent.Client_plane;
 						}
 
@@ -111,7 +111,7 @@ public class UserComparator8 extends AbstractUserComparator {
 								--var4;
 							}
 
-							if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
+							if ((SceneRegion.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
 								var0 = ScriptEvent.Client_plane;
 							}
 						}
@@ -127,7 +127,7 @@ public class UserComparator8 extends AbstractUserComparator {
 							--var4;
 						}
 
-						if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
+						if ((SceneRegion.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
 							var0 = ScriptEvent.Client_plane;
 						}
 
@@ -140,7 +140,7 @@ public class UserComparator8 extends AbstractUserComparator {
 								--var3;
 							}
 
-							if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
+							if ((SceneRegion.Tiles_renderFlags[ScriptEvent.Client_plane][var3][var4] & 4) != 0) {
 								var0 = ScriptEvent.Client_plane;
 							}
 						}
@@ -149,7 +149,7 @@ public class UserComparator8 extends AbstractUserComparator {
 			}
 
 			if (ByteArrayPool.localPlayer.x >= 0 && ByteArrayPool.localPlayer.y >= 0 && ByteArrayPool.localPlayer.x < 13312 && ByteArrayPool.localPlayer.y < 13312) {
-				if ((Tiles.Tiles_renderFlags[ScriptEvent.Client_plane][ByteArrayPool.localPlayer.x >> 7][ByteArrayPool.localPlayer.y >> 7] & 4) != 0) {
+				if ((SceneRegion.Tiles_renderFlags[ScriptEvent.Client_plane][ByteArrayPool.localPlayer.x >> 7][ByteArrayPool.localPlayer.y >> 7] & 4) != 0) {
 					var0 = ScriptEvent.Client_plane;
 				}
 

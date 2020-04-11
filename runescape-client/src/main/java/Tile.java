@@ -177,11 +177,11 @@ public final class Tile extends Node {
 				for (var6 = var2 - 4; var6 <= var2 + 4; ++var6) {
 					for (int var7 = var3 - 4; var7 <= var3 + 4; ++var7) {
 						int var8 = ScriptEvent.Client_plane;
-						if (var8 < 3 && (Tiles.Tiles_renderFlags[1][var6][var7] & 2) == 2) {
+						if (var8 < 3 && (SceneRegion.Tiles_renderFlags[1][var6][var7] & 2) == 2) {
 							++var8;
 						}
 
-						int var9 = var4 - Tiles.Tiles_heights[var8][var6][var7];
+						int var9 = var4 - SceneRegion.Tiles_heights[var8][var6][var7];
 						if (var9 > var5) {
 							var5 = var9;
 						}

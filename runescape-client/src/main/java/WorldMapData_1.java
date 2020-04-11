@@ -280,7 +280,7 @@ public class WorldMapData_1 extends AbstractWorldMapData {
 					int var22 = var12 + (var19 + 1 >> 1);
 					int var23 = var13 + (var20 >> 1);
 					int var24 = var13 + (var20 + 1 >> 1);
-					int[][] var25 = Tiles.Tiles_heights[ScriptEvent.Client_plane];
+					int[][] var25 = SceneRegion.Tiles_heights[ScriptEvent.Client_plane];
 					int var26 = var25[var21][var24] + var25[var21][var23] + var25[var22][var23] + var25[var22][var24] >> 2;
 					int var27 = (var12 << 7) + (var19 << 6);
 					int var28 = (var13 << 7) + (var20 << 6);

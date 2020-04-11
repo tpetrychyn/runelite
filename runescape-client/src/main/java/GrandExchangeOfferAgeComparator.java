@@ -778,9 +778,9 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 		for (z = 0; z < 4; ++z) {
 			for (var3 = 0; var3 < 104; ++var3) {
 				for (var4 = 0; var4 < 104; ++var4) {
-					if ((Tiles.Tiles_renderFlags[z][var3][var4] & 1) == 1) {
+					if ((SceneRegion.Tiles_renderFlags[z][var3][var4] & 1) == 1) {
 						var5 = z;
-						if ((Tiles.Tiles_renderFlags[1][var3][var4] & 2) == 2) {
+						if ((SceneRegion.Tiles_renderFlags[1][var3][var4] & 2) == 2) {
 							var5 = z - 1;
 						}
 
@@ -792,22 +792,22 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 			}
 		}
 
-		Tiles.field550 += (int)(Math.random() * 5.0D) - 2;
-		if (Tiles.field550 < -8) {
-			Tiles.field550 = -8;
+		SceneRegion.field550 += (int)(Math.random() * 5.0D) - 2;
+		if (SceneRegion.field550 < -8) {
+			SceneRegion.field550 = -8;
 		}
 
-		if (Tiles.field550 > 8) {
-			Tiles.field550 = 8;
+		if (SceneRegion.field550 > 8) {
+			SceneRegion.field550 = 8;
 		}
 
-		Tiles.field548 += (int)(Math.random() * 5.0D) - 2;
-		if (Tiles.field548 < -16) {
-			Tiles.field548 = -16;
+		SceneRegion.field548 += (int)(Math.random() * 5.0D) - 2;
+		if (SceneRegion.field548 < -16) {
+			SceneRegion.field548 = -16;
 		}
 
-		if (Tiles.field548 > 16) {
-			Tiles.field548 = 16;
+		if (SceneRegion.field548 > 16) {
+			SceneRegion.field548 = 16;
 		}
 
 		int var9;
@@ -830,8 +830,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 			int var20;
 			for (int y = 1; y < 103; ++y) {
 				for (int x = 1; x < 103; ++x) {
-					int xHeightDiff = Tiles.Tiles_heights[z][x + 1][y] - Tiles.Tiles_heights[z][x - 1][y];
-					int yHeightDiff = Tiles.Tiles_heights[z][x][y + 1] - Tiles.Tiles_heights[z][x][y - 1];
+					int xHeightDiff = SceneRegion.Tiles_heights[z][x + 1][y] - SceneRegion.Tiles_heights[z][x - 1][y];
+					int yHeightDiff = SceneRegion.Tiles_heights[z][x][y + 1] - SceneRegion.Tiles_heights[z][x][y - 1];
 					int diff = (int)Math.sqrt((double)(xHeightDiff * xHeightDiff + yHeightDiff * yHeightDiff + 65536));
 					var16 = (xHeightDiff << 8) / diff;
 					var17 = 65536 / diff;
@@ -839,7 +839,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 					var19 = (var16 * -50 + var18 * -50 + var17 * -10) / var10 + 96;
 
 					var20 = (var42[x - 1][y] >> 2) + (var42[x][y - 1] >> 2) + (var42[x + 1][y] >> 3) + (var42[x][y + 1] >> 3) + (var42[x][y] >> 1);
-					Tiles.field545[x][y] = var19 - var20;
+					SceneRegion.tileColors[x][y] = var19 - var20;
 				}
 			}
 
@@ -847,7 +847,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 				Tiles_hue[var11] = 0;
 				UserComparator6.Tiles_saturation[var11] = 0;
 				StructDefinition.Tiles_lightness[var11] = 0;
-				Tiles.Tiles_hueMultiplier[var11] = 0;
+				SceneRegion.Tiles_hueMultiplier[var11] = 0;
 				FriendSystem.field1086[var11] = 0;
 			}
 
@@ -856,7 +856,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 					int xr = xi + 5;
 					int var10002;
 					if (xr >= 0 && xr < 104) {
-						int underlayId = Tiles.underlayIds[z][xr][yi] & 255;
+						int underlayId = SceneRegion.underlayIds[z][xr][yi] & 255;
 						if (underlayId > 0) {
 							FloorUnderlayDefinition var43 = class60.method995(underlayId - 1);
 							var10000 = Tiles_hue;
@@ -865,7 +865,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							var10000[yi] += var43.saturation;
 							var10000 = StructDefinition.Tiles_lightness;
 							var10000[yi] += var43.lightness;
-							var10000 = Tiles.Tiles_hueMultiplier;
+							var10000 = SceneRegion.Tiles_hueMultiplier;
 							var10000[yi] += var43.hueMultiplier;
 							var10002 = FriendSystem.field1086[yi]++;
 						}
@@ -873,7 +873,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 
 					int xl = xi - 5;
 					if (xl >= 0 && xl < 104) {
-						int underlayId = Tiles.underlayIds[z][xl][yi] & 255;
+						int underlayId = SceneRegion.underlayIds[z][xl][yi] & 255;
 						if (underlayId > 0) {
 							FloorUnderlayDefinition var44 = class60.method995(underlayId - 1);
 							var10000 = Tiles_hue;
@@ -882,7 +882,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							var10000[yi] -= var44.saturation;
 							var10000 = StructDefinition.Tiles_lightness;
 							var10000[yi] -= var44.lightness;
-							var10000 = Tiles.Tiles_hueMultiplier;
+							var10000 = SceneRegion.Tiles_hueMultiplier;
 							var10000[yi] -= var44.hueMultiplier;
 							var10002 = FriendSystem.field1086[yi]--;
 						}
@@ -902,7 +902,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							runningHues += Tiles_hue[yu];
 							runningSat += UserComparator6.Tiles_saturation[yu];
 							runningLight += StructDefinition.Tiles_lightness[yu];
-							runningMultiplier += Tiles.Tiles_hueMultiplier[yu];
+							runningMultiplier += SceneRegion.Tiles_hueMultiplier[yu];
 							runningNumber += FriendSystem.field1086[yu];
 						}
 
@@ -911,26 +911,26 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							runningHues -= Tiles_hue[yd];
 							runningSat -= UserComparator6.Tiles_saturation[yd];
 							runningLight -= StructDefinition.Tiles_lightness[yd];
-							runningMultiplier -= Tiles.Tiles_hueMultiplier[yd];
+							runningMultiplier -= SceneRegion.Tiles_hueMultiplier[yd];
 							runningNumber -= FriendSystem.field1086[yd];
 						}
 
-						if (yi >= 1 && yi < 103 && (!Client.isLowDetail || (Tiles.Tiles_renderFlags[0][xi][yi] & 2) != 0 || (Tiles.Tiles_renderFlags[z][xi][yi] & 16) == 0)) {
-							if (z < Tiles.Tiles_minPlane) {
-								Tiles.Tiles_minPlane = z;
+						if (yi >= 1 && yi < 103 && (!Client.isLowDetail || (SceneRegion.Tiles_renderFlags[0][xi][yi] & 2) != 0 || (SceneRegion.Tiles_renderFlags[z][xi][yi] & 16) == 0)) {
+							if (z < SceneRegion.Tiles_minPlane) {
+								SceneRegion.Tiles_minPlane = z;
 							}
 
-							int underlayId = Tiles.underlayIds[z][xi][yi] & 255;
+							int underlayId = SceneRegion.underlayIds[z][xi][yi] & 255;
 							int overlayId = class348.overlayIds[z][xi][yi] & 255;
 							if (underlayId > 0 || overlayId > 0) {
-								int swHeight = Tiles.Tiles_heights[z][xi][yi];
-								int seHeight = Tiles.Tiles_heights[z][xi + 1][yi];
-								int neHeight = Tiles.Tiles_heights[z][xi + 1][yi + 1];
-								int nwHeight = Tiles.Tiles_heights[z][xi][yi + 1];
-								int swColor = Tiles.field545[xi][yi];
-								int seColor = Tiles.field545[xi + 1][yi];
-								int neColor = Tiles.field545[xi + 1][yi + 1];
-								int nwColor = Tiles.field545[xi][yi + 1];
+								int swHeight = SceneRegion.Tiles_heights[z][xi][yi];
+								int seHeight = SceneRegion.Tiles_heights[z][xi + 1][yi];
+								int neHeight = SceneRegion.Tiles_heights[z][xi + 1][yi + 1];
+								int nwHeight = SceneRegion.Tiles_heights[z][xi][yi + 1];
+								int swColor = SceneRegion.tileColors[xi][yi];
+								int seColor = SceneRegion.tileColors[xi + 1][yi];
+								int neColor = SceneRegion.tileColors[xi + 1][yi + 1];
+								int nwColor = SceneRegion.tileColors[xi][yi + 1];
 								int rgb = -1;
 								int underlayHsl = -1;
 
@@ -939,8 +939,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 									int avgSat = runningSat / runningNumber;
 									int avgLight = runningLight / runningNumber;
 									rgb = DevicePcmPlayerProvider.hslToRgb(avgHue, avgSat, avgLight);
-									avgHue = avgHue + Tiles.field550 & 255;
-									avgLight += Tiles.field548;
+									avgHue = avgHue + SceneRegion.field550 & 255;
+									avgLight += SceneRegion.field548;
 									if (avgLight < 0) {
 										avgLight = 0;
 									} else if (avgLight > 255) {
@@ -952,7 +952,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 
 								if (z > 0) {
 									boolean var47 = true;
-									if (underlayId == 0 && Tiles.overlayPaths[z][xi][yi] != 0) {
+									if (underlayId == 0 && SceneRegion.overlayPaths[z][xi][yi] != 0) {
 										var47 = false;
 									}
 
@@ -974,8 +974,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 								if (overlayId == 0) {
 									scene.addTile(z, xi, yi, 0, 0, -1, swHeight, seHeight, neHeight, nwHeight, Strings.method4220(rgb, swColor), Strings.method4220(rgb, seColor), Strings.method4220(rgb, neColor), Strings.method4220(rgb, nwColor), 0, 0, 0, 0, underlayRgb, 0);
 								} else {
-									int overlayPath = Tiles.overlayPaths[z][xi][yi] + 1;
-									byte overlayRotation = Tiles.overlayRotations[z][xi][yi];
+									int overlayPath = SceneRegion.overlayPaths[z][xi][yi] + 1;
+									byte overlayRotation = SceneRegion.overlayRotations[z][xi][yi];
 									FloorOverlayDefinition overlayDefinition = UserComparator9.FloorUnderlayDefinition_get(overlayId - 1);
 									int overlayTexture = overlayDefinition.texture;
 									int overlayHsl;
@@ -989,8 +989,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 										rgb = -2;
 									} else {
 										overlayHsl = DevicePcmPlayerProvider.hslToRgb(overlayDefinition.hue, overlayDefinition.saturation, overlayDefinition.lightness);
-										int var39 = overlayDefinition.hue + Tiles.field550 & 255;
-										int var40 = overlayDefinition.lightness + Tiles.field548;
+										int var39 = overlayDefinition.hue + SceneRegion.field550 & 255;
+										int var40 = overlayDefinition.lightness + SceneRegion.field548;
 										if (var40 < 0) {
 											var40 = 0;
 										} else if (var40 > 255) {
@@ -1006,8 +1006,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 									}
 
 									if (overlayDefinition.secondaryRgb != -1) {
-										int hue = overlayDefinition.secondaryHue + Tiles.field550 & 255;
-										int lightness = overlayDefinition.secondaryLightness + Tiles.field548;
+										int hue = overlayDefinition.secondaryHue + SceneRegion.field550 & 255;
+										int lightness = overlayDefinition.secondaryLightness + SceneRegion.field548;
 										if (lightness < 0) {
 											lightness = 0;
 										} else if (lightness > 255) {
@@ -1028,9 +1028,9 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 
 			for (var11 = 1; var11 < 103; ++var11) {
 				for (var12 = 1; var12 < 103; ++var12) {
-					if ((Tiles.Tiles_renderFlags[z][var12][var11] & 8) != 0) {
+					if ((SceneRegion.Tiles_renderFlags[z][var12][var11] & 8) != 0) {
 						var17 = 0;
-					} else if (z > 0 && (Tiles.Tiles_renderFlags[1][var12][var11] & 2) != 0) {
+					} else if (z > 0 && (SceneRegion.Tiles_renderFlags[1][var12][var11] & 2) != 0) {
 						var17 = z - 1;
 					} else {
 						var17 = z;
@@ -1040,10 +1040,10 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 				}
 			}
 
-			Tiles.underlayIds[z] = null;
+			SceneRegion.underlayIds[z] = null;
 			class348.overlayIds[z] = null;
-			Tiles.overlayPaths[z] = null;
-			Tiles.overlayRotations[z] = null;
+			SceneRegion.overlayPaths[z] = null;
+			SceneRegion.overlayRotations[z] = null;
 			SoundCache.field1462[z] = null;
 		}
 
@@ -1051,7 +1051,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 
 		for (z = 0; z < 104; ++z) {
 			for (var3 = 0; var3 < 104; ++var3) {
-				if ((Tiles.Tiles_renderFlags[1][z][var3] & 2) == 2) {
+				if ((SceneRegion.Tiles_renderFlags[1][z][var3] & 2) == 2) {
 					scene.setLinkBelow(z, var3);
 				}
 			}
@@ -1109,8 +1109,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							var13 = (var10 - var9 + 1) * (var12 + 1 - var11);
 							if (var13 >= 8) {
 								var46 = 240;
-								var15 = Tiles.Tiles_heights[var12][xi][var9] - var46;
-								var16 = Tiles.Tiles_heights[var11][xi][var9];
+								var15 = SceneRegion.Tiles_heights[var12][xi][var9] - var46;
+								var16 = SceneRegion.Tiles_heights[var11][xi][var9];
 								Scene.Scene_addOccluder(renderLevel, 1, xi * 128, xi * 128, var9 * 128, var10 * 128 + 128, var15, var16);
 
 								for (var17 = var11; var17 <= var12; ++var17) {
@@ -1159,8 +1159,8 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							var13 = (var12 + 1 - var11) * (var10 - var9 + 1);
 							if (var13 >= 8) {
 								var46 = 240;
-								var15 = Tiles.Tiles_heights[var12][var9][yi] - var46;
-								var16 = Tiles.Tiles_heights[var11][var9][yi];
+								var15 = SceneRegion.Tiles_heights[var12][var9][yi] - var46;
+								var16 = SceneRegion.Tiles_heights[var11][var9][yi];
 								Scene.Scene_addOccluder(renderLevel, 2, var9 * 128, var10 * 128 + 128, yi * 128, yi * 128, var15, var16);
 
 								for (var17 = var11; var17 <= var12; ++var17) {
@@ -1207,7 +1207,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 							}
 
 							if ((var12 - var11 + 1) * (var10 - var9 + 1) >= 4) {
-								var13 = Tiles.Tiles_heights[zi][var9][var11];
+								var13 = SceneRegion.Tiles_heights[zi][var9][var11];
 								Scene.Scene_addOccluder(renderLevel, 4, var9 * 128, var10 * 128 + 128, var11 * 128, var12 * 128 + 128, var13, var13);
 
 								for (var14 = var9; var14 <= var10; ++var14) {
@@ -1259,7 +1259,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 			return false;
 		} else {
 			for (int var1 = 0; var1 < var0.cs1Comparisons.length; ++var1) {
-				int var2 = Tiles.method1227(var0, var1);
+				int var2 = SceneRegion.method1227(var0, var1);
 				int var3 = var0.cs1ComparisonValues[var1];
 				if (var0.cs1Comparisons[var1] == 2) {
 					if (var2 >= var3) {

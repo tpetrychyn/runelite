@@ -158,7 +158,7 @@ public class WorldMapRegion {
 						for (int var11 = 0; var11 < var10.length; ++var11) {
 							WorldMapDecoration var12 = var10[var11];
 							ObjectDefinition var13 = WorldMapSection2.getObjectDefinition(var12.objectDefinitionId);
-							if (Tiles.method1239(var13)) {
+							if (SceneRegion.method1239(var13)) {
 								this.getIcon(var13, var8, var6, var7, var5);
 								continue label50;
 							}

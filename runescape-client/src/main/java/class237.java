@@ -41,7 +41,7 @@ public class class237 {
 	static void load() {
 		int var0;
 		if (Client.titleLoadingStage == 0) {
-			GrandExchangeOfferWorldComparator.scene = new Scene(4, 104, 104, Tiles.Tiles_heights);
+			GrandExchangeOfferWorldComparator.scene = new Scene(4, 104, 104, SceneRegion.Tiles_heights);
 
 			for (var0 = 0; var0 < 4; ++var0) {
 				Client.collisionMaps[var0] = new CollisionMap(104, 104);
@@ -145,8 +145,8 @@ public class class237 {
 				class206.soundEffectsArchive = var3;
 				class206.midiPcmStream = var33;
 				AbstractWorldMapData.pcmPlayer1 = Occluder.method3401(class227.taskHandler, 1, 2048);
-				Tiles.pcmStreamMixer = new PcmStreamMixer();
-				AbstractWorldMapData.pcmPlayer1.setStream(Tiles.pcmStreamMixer);
+				SceneRegion.pcmStreamMixer = new PcmStreamMixer();
+				AbstractWorldMapData.pcmPlayer1.setStream(SceneRegion.pcmStreamMixer);
 				class25.decimator = new Decimator(22050, PcmPlayer.field1421);
 				Login.Login_loadingText = "Prepared sound engine";
 				Login.Login_loadingPercent = 35;

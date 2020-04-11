@@ -1,8 +1,7 @@
-package impl;
+package models;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.api.SceneTileModel;
 import net.runelite.api.TileModel;
 
 @Getter

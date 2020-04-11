@@ -253,7 +253,7 @@ public class Coord {
 		if (!Client.isCameraLocked) {
 			var4 = UserComparator8.method3503();
 		} else {
-			var4 = Tiles.method1238();
+			var4 = SceneRegion.method1238();
 		}
 
 		var20 = WorldMapRectangle.cameraX;

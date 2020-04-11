@@ -30,14 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.definitions.loaders.ModelLoader;
-import net.runelite.cache.fs.Archive;
-import net.runelite.cache.fs.Index;
-import net.runelite.cache.fs.Storage;
-import net.runelite.cache.fs.Store;
+import net.runelite.cache.fs.*;
 import net.runelite.cache.util.StoreLocation;
 
 @Data
@@ -142,7 +137,7 @@ public class ObjectDefinition {
                 modelDefinition = modelDefCache.get(modelId);
                 if (modelDefinition == null) {
 
-                    Storage storage = store.getStorage();
+                    Storage storage = StoreProvider.getStore().getStorage();
                     Index index = store.getIndex(IndexType.MODELS);
 
                     Archive archive = index.getArchive(modelId);

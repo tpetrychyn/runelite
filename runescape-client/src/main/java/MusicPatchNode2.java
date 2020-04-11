@@ -69,13 +69,13 @@ public class MusicPatchNode2 {
 	static final void loadTerrain(Buffer buffer, int z, int x, int y, int var4, int var5, int var6) {
 		int var7;
 		if (x >= 0 && x < 104 && y >= 0 && y < 104) {
-			Tiles.Tiles_renderFlags[z][x][y] = 0;
+			SceneRegion.Tiles_renderFlags[z][x][y] = 0;
 
 			while (true) {
 				var7 = buffer.readUnsignedByte();
 				if (var7 == 0) {
 					if (z == 0) {
-						int[] var8 = Tiles.Tiles_heights[0][x];
+						int[] var8 = SceneRegion.Tiles_heights[0][x];
 						int var11 = x + var4 + 932731;
 						int var12 = y + var5 + 556238;
 						int var13 = Canvas.method957(var11 + 45365, 91923 + var12, 4) - 128 + (Canvas.method957(10294 + var11, 37821 + var12, 2) - 128 >> 1) + (Canvas.method957(var11, var12, 1) - 128 >> 2);
@@ -88,7 +88,7 @@ public class MusicPatchNode2 {
 
 						var8[y] = -var13 * 8;
 					} else {
-						Tiles.Tiles_heights[z][x][y] = Tiles.Tiles_heights[z - 1][x][y] - 240;
+						SceneRegion.Tiles_heights[z][x][y] = SceneRegion.Tiles_heights[z - 1][x][y] - 240;
 					}
 					break;
 				}
@@ -100,21 +100,21 @@ public class MusicPatchNode2 {
 					}
 
 					if (z == 0) {
-						Tiles.Tiles_heights[0][x][y] = -var14 * 8;
+						SceneRegion.Tiles_heights[0][x][y] = -var14 * 8;
 					} else {
-						Tiles.Tiles_heights[z][x][y] = Tiles.Tiles_heights[z - 1][x][y] - var14 * 8;
+						SceneRegion.Tiles_heights[z][x][y] = SceneRegion.Tiles_heights[z - 1][x][y] - var14 * 8;
 					}
 					break;
 				}
 
 				if (var7 <= 49) {
 					class348.overlayIds[z][x][y] = buffer.readByte();
-					Tiles.overlayPaths[z][x][y] = (byte)((var7 - 2) / 4);
-					Tiles.overlayRotations[z][x][y] = (byte)(var7 - 2 + var6 & 3);
+					SceneRegion.overlayPaths[z][x][y] = (byte)((var7 - 2) / 4);
+					SceneRegion.overlayRotations[z][x][y] = (byte)(var7 - 2 + var6 & 3);
 				} else if (var7 <= 81) {
-					Tiles.Tiles_renderFlags[z][x][y] = (byte)(var7 - 49);
+					SceneRegion.Tiles_renderFlags[z][x][y] = (byte)(var7 - 49);
 				} else {
-					Tiles.underlayIds[z][x][y] = (byte)(var7 - 81);
+					SceneRegion.underlayIds[z][x][y] = (byte)(var7 - 81);
 				}
 			}
 		} else {

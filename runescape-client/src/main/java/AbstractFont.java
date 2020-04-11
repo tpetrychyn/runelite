@@ -238,7 +238,7 @@ public abstract class AbstractFont extends Rasterizer2D {
 							if (!var7.equals("gt")) {
 								if (var7.startsWith("img=")) {
 									try {
-										int var8 = Tiles.parseInt(var7.substring(4));
+										int var8 = SceneRegion.parseInt(var7.substring(4));
 										var4 += AbstractFont_modIconSprites[var8].width;
 										var3 = -1;
 									} catch (Exception var10) {
@@ -321,7 +321,7 @@ public abstract class AbstractFont extends Rasterizer2D {
 							var11 = '>';
 						} else if (var16.startsWith("img=")) {
 							try {
-								int var17 = Tiles.parseInt(var16.substring(4));
+								int var17 = SceneRegion.parseInt(var16.substring(4));
 								var4 += AbstractFont_modIconSprites[var17].width;
 								var11 = 0;
 							} catch (Exception var20) {
@@ -672,7 +672,7 @@ public abstract class AbstractFont extends Rasterizer2D {
 							if (!var8.equals("gt")) {
 								if (var8.startsWith("img=")) {
 									try {
-										var9 = Tiles.parseInt(var8.substring(4));
+										var9 = SceneRegion.parseInt(var8.substring(4));
 										IndexedSprite var10 = AbstractFont_modIconSprites[var9];
 										var10.drawAt(var2, var3 + this.ascent - var10.height);
 										var2 += var10.width;
@@ -777,7 +777,7 @@ public abstract class AbstractFont extends Rasterizer2D {
 										}
 
 										++var8;
-										var14 = Tiles.parseInt(var11.substring(4));
+										var14 = SceneRegion.parseInt(var11.substring(4));
 										IndexedSprite var15 = AbstractFont_modIconSprites[var14];
 										var15.drawAt(var12 + var2, var13 + (var3 + this.ascent - var15.height));
 										var2 += var15.width;

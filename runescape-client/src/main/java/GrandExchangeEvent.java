@@ -267,7 +267,7 @@ public class GrandExchangeEvent {
 				for (var1 = 0; var1 < 4; ++var1) {
 					for (var35 = 0; var35 < 104; ++var35) {
 						for (var3 = 0; var3 < 104; ++var3) {
-							Tiles.Tiles_renderFlags[var1][var35][var3] = 0;
+							SceneRegion.Tiles_renderFlags[var1][var35][var3] = 0;
 						}
 					}
 				}
@@ -343,7 +343,7 @@ public class GrandExchangeEvent {
 									var20 = var13 + var5;
 									if (var40 > 0 && var20 > 0 && var40 < 103 && var20 < 103) {
 										var21 = var15;
-										if ((Tiles.Tiles_renderFlags[1][var40][var20] & 2) == 2) {
+										if ((SceneRegion.Tiles_renderFlags[1][var40][var20] & 2) == 2) {
 											var21 = var15 - 1;
 										}
 
@@ -509,7 +509,7 @@ public class GrandExchangeEvent {
 														int var32 = var14 + method166(var25 & 7, var24 & 7, var50, var48.sizeX, var48.sizeY, var29);
 														if (var31 > 0 && var32 > 0 && var31 < 103 && var32 < 103) {
 															int var33 = var35;
-															if ((Tiles.Tiles_renderFlags[1][var31][var32] & 2) == 2) {
+															if ((SceneRegion.Tiles_renderFlags[1][var31][var32] & 2) == 2) {
 																var33 = var35 - 1;
 															}
 
@@ -535,7 +535,7 @@ public class GrandExchangeEvent {
 				ChatChannel.playPcmPlayers();
 				GrandExchangeOfferAgeComparator.method248(GrandExchangeOfferWorldComparator.scene, Client.collisionMaps);
 				class303.method5397(true);
-				var35 = Tiles.Tiles_minPlane;
+				var35 = SceneRegion.Tiles_minPlane;
 				if (var35 > ScriptEvent.Client_plane) {
 					var35 = ScriptEvent.Client_plane;
 				}
@@ -545,7 +545,7 @@ public class GrandExchangeEvent {
 				}
 
 				if (Client.isLowDetail) {
-					GrandExchangeOfferWorldComparator.scene.init(Tiles.Tiles_minPlane);
+					GrandExchangeOfferWorldComparator.scene.init(SceneRegion.Tiles_minPlane);
 				} else {
 					GrandExchangeOfferWorldComparator.scene.init(0);
 				}
@@ -584,17 +584,17 @@ public class GrandExchangeEvent {
 
 				MouseRecorder.updateGameState(30);
 				ChatChannel.playPcmPlayers();
-				Tiles.underlayIds = null;
+				SceneRegion.underlayIds = null;
 				class348.overlayIds = null;
-				Tiles.overlayPaths = null;
-				Tiles.overlayRotations = null;
+				SceneRegion.overlayPaths = null;
+				SceneRegion.overlayRotations = null;
 				class51.field404 = null;
 				SoundCache.field1462 = null;
-				Tiles.field545 = null;
+				SceneRegion.tileColors = null;
 				GrandExchangeOfferAgeComparator.Tiles_hue = null;
 				UserComparator6.Tiles_saturation = null;
 				StructDefinition.Tiles_lightness = null;
-				Tiles.Tiles_hueMultiplier = null;
+				SceneRegion.Tiles_hueMultiplier = null;
 				FriendSystem.field1086 = null;
 				var53 = FaceNormal.getPacketBufferNode(ClientPacket.field2241, Client.packetWriter.isaacCipher);
 				Client.packetWriter.addNode(var53);

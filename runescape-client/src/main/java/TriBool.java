@@ -42,12 +42,12 @@ public class TriBool {
 	static void method5249() {
 		for (ObjectSound var0 = (ObjectSound)ObjectSound.objectSounds.last(); var0 != null; var0 = (ObjectSound)ObjectSound.objectSounds.previous()) {
 			if (var0.stream1 != null) {
-				Tiles.pcmStreamMixer.removeSubStream(var0.stream1);
+				SceneRegion.pcmStreamMixer.removeSubStream(var0.stream1);
 				var0.stream1 = null;
 			}
 
 			if (var0.stream2 != null) {
-				Tiles.pcmStreamMixer.removeSubStream(var0.stream2);
+				SceneRegion.pcmStreamMixer.removeSubStream(var0.stream2);
 				var0.stream2 = null;
 			}
 		}

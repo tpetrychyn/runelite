@@ -1,4 +1,4 @@
-package impl;
+package models;
 
 import net.runelite.cache.definitions.providers.SpriteProvider;
 import net.runelite.cache.item.RSTextureProvider;

@@ -33,13 +33,12 @@ import java.util.List;
 import java.util.Objects;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.fs.jagex.DiskStorage;
+import net.runelite.cache.util.StoreLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class Store implements Closeable
 {
-	private static final Logger logger = LoggerFactory.getLogger(Store.class);
-
 	private final Storage storage;
 	private final List<Index> indexes = new ArrayList<>();
 

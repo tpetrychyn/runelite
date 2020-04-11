@@ -879,7 +879,7 @@ public abstract class GameShell extends Applet implements Runnable, FocusListene
 						}
 
 						String var4 = var2.substring(6, var3);
-						if (MusicPatch.isNumber(var4) && Tiles.parseInt(var4) < 10) {
+						if (MusicPatch.isNumber(var4) && SceneRegion.parseInt(var4) < 10) {
 							this.error("wrongjava");
 							return;
 						}

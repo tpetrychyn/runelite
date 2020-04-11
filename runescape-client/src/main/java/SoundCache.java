@@ -217,7 +217,7 @@ public class SoundCache {
 
 			if (var4 >= 0) {
 				var12 = var0;
-				if (var0 < 3 && (Tiles.Tiles_renderFlags[1][var2][var3] & 2) == 2) {
+				if (var0 < 3 && (SceneRegion.Tiles_renderFlags[1][var2][var3] & 2) == 2) {
 					var12 = var0 + 1;
 				}
 
@@ -254,7 +254,7 @@ public class SoundCache {
 					var21 = var3 + 1;
 				}
 
-				int[][] var22 = Tiles.Tiles_heights[var12];
+				int[][] var22 = SceneRegion.Tiles_heights[var12];
 				int var23 = var22[var19][var21] + var22[var18][var20] + var22[var19][var20] + var22[var18][var21] >> 2;
 				int var24 = (var2 << 7) + (var16 << 6);
 				int var25 = (var3 << 7) + (var17 << 6);
@@ -295,7 +295,7 @@ public class SoundCache {
 							var29 = new DynamicObject(var4, 0, var5, var12, var2, var3, var15.animationId, true, (Renderable)null);
 						}
 
-						var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, Tiles.field544[var5], 0, var26, var28);
+						var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, SceneRegion.field544[var5], 0, var26, var28);
 						if (var15.interactType != 0) {
 							var14.method3630(var2, var3, var6, var5, var15.boolean1);
 						}
@@ -306,7 +306,7 @@ public class SoundCache {
 							var29 = new DynamicObject(var4, 1, var5, var12, var2, var3, var15.animationId, true, (Renderable)null);
 						}
 
-						var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, Tiles.field542[var5], 0, var26, var28);
+						var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, SceneRegion.field542[var5], 0, var26, var28);
 						if (var15.interactType != 0) {
 							var14.method3630(var2, var3, var6, var5, var15.boolean1);
 						}
@@ -324,7 +324,7 @@ public class SoundCache {
 								var31 = new DynamicObject(var4, 2, var35, var12, var2, var3, var15.animationId, true, (Renderable)null);
 							}
 
-							var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var30, (Renderable)var31, Tiles.field544[var5], Tiles.field544[var35], var26, var28);
+							var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var30, (Renderable)var31, SceneRegion.field544[var5], SceneRegion.field544[var35], var26, var28);
 							if (var15.interactType != 0) {
 								var14.method3630(var2, var3, var6, var5, var15.boolean1);
 							}
@@ -335,7 +335,7 @@ public class SoundCache {
 								var29 = new DynamicObject(var4, 3, var5, var12, var2, var3, var15.animationId, true, (Renderable)null);
 							}
 
-							var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, Tiles.field542[var5], 0, var26, var28);
+							var42.newBoundaryObject(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, SceneRegion.field542[var5], 0, var26, var28);
 							if (var15.interactType != 0) {
 								var14.method3630(var2, var3, var6, var5, var15.boolean1);
 							}
@@ -357,7 +357,7 @@ public class SoundCache {
 								var29 = new DynamicObject(var4, 4, var5, var12, var2, var3, var15.animationId, true, (Renderable)null);
 							}
 
-							var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, Tiles.field544[var5], 0, 0, 0, var26, var28);
+							var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var29, (Renderable)null, SceneRegion.field544[var5], 0, 0, 0, var26, var28);
 						} else {
 							Object var32;
 							long var36;
@@ -374,7 +374,7 @@ public class SoundCache {
 									var32 = new DynamicObject(var4, 4, var5, var12, var2, var3, var15.animationId, true, (Renderable)null);
 								}
 
-								var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var32, (Renderable)null, Tiles.field544[var5], 0, var35 * Tiles.field541[var5], var35 * Tiles.field547[var5], var26, var28);
+								var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var32, (Renderable)null, SceneRegion.field544[var5], 0, var35 * SceneRegion.field541[var5], var35 * SceneRegion.field547[var5], var26, var28);
 							} else if (var6 == 6) {
 								var35 = 8;
 								var36 = var42.getBoundaryObjectTag(var0, var2, var3);
@@ -388,7 +388,7 @@ public class SoundCache {
 									var32 = new DynamicObject(var4, 4, var5 + 4, var12, var2, var3, var15.animationId, true, (Renderable)null);
 								}
 
-								var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var32, (Renderable)null, 256, var5, var35 * Tiles.field546[var5], var35 * Tiles.field552[var5], var26, var28);
+								var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var32, (Renderable)null, 256, var5, var35 * SceneRegion.field546[var5], var35 * SceneRegion.field552[var5], var26, var28);
 							} else if (var6 == 7) {
 								int var38 = var5 + 2 & 3;
 								if (var15.animationId == -1 && var15.transforms == null) {
@@ -415,7 +415,7 @@ public class SoundCache {
 									var33 = new DynamicObject(var4, 4, var34 + 4, var12, var2, var3, var15.animationId, true, (Renderable)null);
 								}
 
-								var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var32, (Renderable)var33, 256, var5, var35 * Tiles.field546[var5], var35 * Tiles.field552[var5], var26, var28);
+								var42.newWallDecoration(var0, var2, var3, var23, (Renderable)var32, (Renderable)var33, 256, var5, var35 * SceneRegion.field546[var5], var35 * SceneRegion.field552[var5], var26, var28);
 							}
 						}
 					}

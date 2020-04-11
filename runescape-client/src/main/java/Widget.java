@@ -1576,7 +1576,7 @@ public class Widget extends Node {
 				var3 = Interpreter.Interpreter_stringStack[--Interpreter.Interpreter_stringStackSize];
 				var10 = 0;
 				if (MusicPatch.isNumber(var3)) {
-					var10 = Tiles.parseInt(var3);
+					var10 = SceneRegion.parseInt(var3);
 				}
 
 				PacketBufferNode var12 = FaceNormal.getPacketBufferNode(ClientPacket.field2279, Client.packetWriter.isaacCipher);

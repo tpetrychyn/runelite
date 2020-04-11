@@ -8,9 +8,9 @@ import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.Animator;
 import config.AntiAliasingMode;
 import eventHandlers.MouseListener;
-import impl.SceneImpl;
-import impl.TileImpl;
-import impl.WallDecoration;
+import models.SceneImpl;
+import models.SceneTile;
+import models.WallDecoration;
 import jogamp.nativewindow.SurfaceScaleUtils;
 import layoutControllers.MainController;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,9 @@ import net.runelite.cache.SpriteManager;
 import net.runelite.cache.definitions.TextureDefinition;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.item.RSTextureProvider;
+import net.runelite.cache.region.Region;
 import renderer.Camera;
+import scene.SceneRegionBuilder;
 import template.Template;
 
 import java.io.File;
@@ -174,6 +176,9 @@ public class MapEditor implements GLEventListener, KeyListener {
 
     public void LoadMap(MainController mainController) {
         try {
+            SceneRegionBuilder sceneRegionBuilder = new SceneRegionBuilder();
+            sceneRegionBuilder.loadTiles(10038);
+
             File base = StoreLocation.LOCATION;
             Store store = new Store(base);
             store.load();
@@ -287,8 +292,8 @@ public class MapEditor implements GLEventListener, KeyListener {
         int cameraXTileMax = Constants.SCENE_SIZE;
         int cameraYTileMax = Constants.SCENE_SIZE;
 
-        TileImpl[][] tiles = scene.getTiles()[0];
-        TileImpl tile;
+        SceneTile[][] tiles = scene.getTiles()[0];
+        SceneTile tile;
         for (int x = -MAX_DISTANCE; x <= 0; x++) {
             int xMin = x + screenCenterX;
             int xMax = screenCenterX - x;
@@ -332,7 +337,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
     }
 
-    void drawTile(TileImpl tile) {
+    void drawTile(SceneTile tile) {
         int x = tile.getX();
         int y = tile.getY();
 
@@ -444,8 +449,8 @@ public class MapEditor implements GLEventListener, KeyListener {
         uploadScene();
     }
 
-    TileImpl lastHoverTile;
-    TileImpl hoverTile;
+    SceneTile lastHoverTile;
+    SceneTile hoverTile;
     int saveSw, saveSe, saveNe, saveNw;
 
     int windowWidth = 800;

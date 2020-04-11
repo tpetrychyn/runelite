@@ -36,7 +36,6 @@ import net.runelite.cache.definitions.MapDefinition.Tile;
 @Getter
 public class Region
 {
-
 	public static final int X = 64;
 	public static final int Y = 64;
 	public static final int Z = 4;

@@ -106,7 +106,7 @@ public class InterfaceDefinition
 	public boolean hasListener;
 	
 	public int menuType;
-	// This is set to a siblings' child id when that widget should get a hover effect when this one is hovered
+	// This is set to a siblings' child id when that widget should getStore a hover effect when this one is hovered
 	public int hoveredSiblingId;
 	public int[] alternateOperators;
 	public int[] alternateRhs;

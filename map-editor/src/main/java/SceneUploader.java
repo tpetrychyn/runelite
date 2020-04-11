@@ -23,7 +23,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import impl.*;
+import models.*;
+import models.SceneTile;
 import net.runelite.api.*;
 
 class SceneUploader
@@ -46,7 +47,7 @@ class SceneUploader
 			{
 				for (int y = 0; y < Constants.SCENE_SIZE; ++y)
 				{
-					TileImpl tile = scene.getTiles()[z][x][y];
+					SceneTile tile = scene.getTiles()[z][x][y];
 					if (tile != null)
 					{
 						reset(tile);
@@ -61,7 +62,7 @@ class SceneUploader
 			{
 				for (int y = 0; y < Constants.SCENE_SIZE; ++y)
 				{
-					TileImpl tile = scene.getTiles()[z][x][y];
+					SceneTile tile = scene.getTiles()[z][x][y];
 					if (tile != null)
 					{
 						upload(tile, vertexbuffer, uvBuffer);
@@ -71,7 +72,7 @@ class SceneUploader
 		}
 	}
 
-	private void reset(TileImpl tile)
+	private void reset(SceneTile tile)
 	{
 //		Tile bridge = tile.getBridge();
 //		if (bridge != null)
@@ -136,7 +137,7 @@ class SceneUploader
 //		}
 	}
 
-	private void upload(TileImpl tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
+	private void upload(SceneTile tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
 	{
 //		Tile bridge = tile.getBridge();
 //		if (bridge != null)

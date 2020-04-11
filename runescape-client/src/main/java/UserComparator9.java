@@ -76,18 +76,18 @@ public class UserComparator9 extends AbstractUserComparator {
 		garbageValue = "1233574382"
 	)
 	static void method3498() {
-		Tiles.Tiles_minPlane = 99;
-		Tiles.underlayIds = new byte[4][104][104];
+		SceneRegion.Tiles_minPlane = 99;
+		SceneRegion.underlayIds = new byte[4][104][104];
 		class348.overlayIds = new byte[4][104][104];
-		Tiles.overlayPaths = new byte[4][104][104];
-		Tiles.overlayRotations = new byte[4][104][104];
+		SceneRegion.overlayPaths = new byte[4][104][104];
+		SceneRegion.overlayRotations = new byte[4][104][104];
 		class51.field404 = new int[4][105][105];
 		SoundCache.field1462 = new byte[4][105][105];
-		Tiles.field545 = new int[105][105];
+		SceneRegion.tileColors = new int[105][105];
 		GrandExchangeOfferAgeComparator.Tiles_hue = new int[104];
 		UserComparator6.Tiles_saturation = new int[104];
 		StructDefinition.Tiles_lightness = new int[104];
-		Tiles.Tiles_hueMultiplier = new int[104];
+		SceneRegion.Tiles_hueMultiplier = new int[104];
 		FriendSystem.field1086 = new int[104];
 	}
 

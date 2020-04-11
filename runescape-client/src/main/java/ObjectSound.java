@@ -120,7 +120,7 @@ public final class ObjectSound extends Node {
 		}
 
 		if (var1 != this.soundEffectId && this.stream1 != null) {
-			Tiles.pcmStreamMixer.removeSubStream(this.stream1);
+			SceneRegion.pcmStreamMixer.removeSubStream(this.stream1);
 			this.stream1 = null;
 		}
 

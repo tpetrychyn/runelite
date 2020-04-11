@@ -43,5 +43,5 @@ class JShadowedLabelUI extends BasicLabelUI
 		g.drawString(s, textX, textY);
 	}
 
-	// The default impl of paintDisabledText is OK
+	// The default models of paintDisabledText is OK
 }

@@ -209,7 +209,7 @@ public class Message extends DualNode {
 								RawSound var8 = var7.toRawSound().resample(class25.decimator);
 								RawPcmStream var9 = RawPcmStream.createRawPcmStream(var8, 100, var6);
 								var9.setNumLoops(-1);
-								Tiles.pcmStreamMixer.addSubStream(var9);
+								SceneRegion.pcmStreamMixer.addSubStream(var9);
 								var4.stream1 = var9;
 							}
 						}
@@ -225,7 +225,7 @@ public class Message extends DualNode {
 								RawSound var13 = var12.toRawSound().resample(class25.decimator);
 								RawPcmStream var10 = RawPcmStream.createRawPcmStream(var13, 100, var6);
 								var10.setNumLoops(0);
-								Tiles.pcmStreamMixer.addSubStream(var10);
+								SceneRegion.pcmStreamMixer.addSubStream(var10);
 								var4.stream2 = var10;
 								var4.field1107 = var4.field1104 + (int)(Math.random() * (double)(var4.field1105 - var4.field1104));
 							}
@@ -238,12 +238,12 @@ public class Message extends DualNode {
 					}
 				} else {
 					if (var4.stream1 != null) {
-						Tiles.pcmStreamMixer.removeSubStream(var4.stream1);
+						SceneRegion.pcmStreamMixer.removeSubStream(var4.stream1);
 						var4.stream1 = null;
 					}
 
 					if (var4.stream2 != null) {
-						Tiles.pcmStreamMixer.removeSubStream(var4.stream2);
+						SceneRegion.pcmStreamMixer.removeSubStream(var4.stream2);
 						var4.stream2 = null;
 					}
 				}
