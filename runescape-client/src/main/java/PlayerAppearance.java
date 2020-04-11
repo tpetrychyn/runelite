@@ -336,7 +336,7 @@ public class PlayerAppearance {
 					}
 
 					var8 = var17.toModel(64, 850, -30, -50, -30);
-					PlayerAppearance_cachedModels.put(var8, var5);
+					PlayerAppearance_cachedModels.put(var5, var8);
 					this.field2538 = var5;
 				}
 			}

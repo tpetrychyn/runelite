@@ -663,7 +663,7 @@ public class ItemDefinition extends DualNode {
 
 				var5 = var6.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
 				var5.isSingleTile = true;
-				ItemDefinition_cachedModels.put(var5, (long)this.id);
+				ItemDefinition_cachedModels.put((long)this.id, var5);
 				return var5;
 			}
 		}

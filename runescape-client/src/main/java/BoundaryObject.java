@@ -43,13 +43,13 @@ public final class BoundaryObject {
 		signature = "Lee;"
 	)
 	@Export("entity1")
-	public Entity entity1;
+	public Renderable entity1;
 	@ObfuscatedName("q")
 	@ObfuscatedSignature(
 		signature = "Lee;"
 	)
 	@Export("entity2")
-	public Entity entity2;
+	public Renderable entity2;
 	@ObfuscatedName("z")
 	@ObfuscatedGetter(
 		longValue = 8712969699368096229L
@@ -96,7 +96,7 @@ public final class BoundaryObject {
 
 						var6 = SecureRandomCallable.newScript(var9);
 						if (var6 != null) {
-							Script.Script_cached.put(var6, (long)(var3 << 16));
+							Script.Script_cached.put((long)(var3 << 16), var6);
 							var5 = var6;
 							break label56;
 						}
@@ -130,7 +130,7 @@ public final class BoundaryObject {
 
 						var12 = SecureRandomCallable.newScript(var11);
 						if (var12 != null) {
-							Script.Script_cached.put(var12, (long)(var4 << 16));
+							Script.Script_cached.put((long)(var4 << 16), var12);
 							var13 = var12;
 							return var13 != null ? var13 : null;
 						}

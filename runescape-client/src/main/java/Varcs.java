@@ -61,7 +61,7 @@ public class Varcs {
 					var4.method4487(new Buffer(var5));
 				}
 
-				VarcInt.VarcInt_cached.put(var4, (long)var2);
+				VarcInt.VarcInt_cached.put((long)var2, var4);
 				var3 = var4;
 			}
 

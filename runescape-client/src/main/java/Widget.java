@@ -1312,7 +1312,7 @@ public class Widget extends Node {
 						var5.shadow(this.spriteShadow);
 					}
 
-					Widget_cachedSprites.put(var5, var3);
+					Widget_cachedSprites.put(var3, var5);
 					return var5;
 				}
 			}
@@ -1345,7 +1345,7 @@ public class Widget extends Node {
 				}
 
 				if (var2 != null) {
-					Widget_cachedFonts.put(var2, (long)this.fontId);
+					Widget_cachedFonts.put((long)this.fontId, var2);
 				} else {
 					field2565 = true;
 				}
@@ -1374,7 +1374,7 @@ public class Widget extends Node {
 				} else {
 					var3 = MusicPatchNode2.SpriteBuffer_getSprite(Varps.Widget_spritesArchive, var2, 0);
 					if (var3 != null) {
-						Widget_cachedSprites.put(var3, (long)var2);
+						Widget_cachedSprites.put((long)var2, var3);
 					} else {
 						field2565 = true;
 					}
@@ -1458,7 +1458,7 @@ public class Widget extends Node {
 					var7 = var8.toModel(var9.ambient + 64, var9.contrast + 768, -50, -10, -50);
 				}
 
-				Widget_cachedModels.put(var7, (long)(var6 + (var5 << 16)));
+				Widget_cachedModels.put((long)(var6 + (var5 << 16)), var7);
 			}
 
 			if (var1 != null) {
@@ -1521,7 +1521,7 @@ public class Widget extends Node {
 					}
 
 					var5 = new SpriteMask(var7.subWidth, var7.subHeight, var9, var8, var2);
-					Widget_cachedSpriteMasks.put(var5, var3);
+					Widget_cachedSpriteMasks.put(var3, var5);
 					return var5;
 				}
 			}

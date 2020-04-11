@@ -113,7 +113,7 @@ public class IgnoreList extends UserList {
 			}
 
 			var1.postDecode();
-			ParamDefinition.ParamDefinition_cached.put(var1, (long)var0);
+			ParamDefinition.ParamDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

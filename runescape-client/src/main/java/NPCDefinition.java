@@ -422,7 +422,7 @@ public class NPCDefinition extends DualNode {
 				}
 
 				var5 = var11.toModel(this.ambient + 64, this.contrast + 850, -30, -50, -30);
-				NpcDefinition_cachedModels.put(var5, (long)this.id);
+				NpcDefinition_cachedModels.put((long)this.id, var5);
 			}
 
 			Model var10;

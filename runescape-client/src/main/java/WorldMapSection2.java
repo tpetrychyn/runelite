@@ -215,7 +215,7 @@ public class WorldMapSection2 implements WorldMapSection {
 				var1.boolean1 = false;
 			}
 
-			ObjectDefinition.ObjectDefinition_cached.put(var1, (long)var0);
+			ObjectDefinition.ObjectDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

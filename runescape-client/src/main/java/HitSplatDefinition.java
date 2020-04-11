@@ -284,7 +284,7 @@ public class HitSplatDefinition extends DualNode {
 			} else {
 				var1 = MusicPatchNode2.SpriteBuffer_getSprite(field3322, this.field3330, 0);
 				if (var1 != null) {
-					HitSplatDefinition_cachedSprites.put(var1, (long)this.field3330);
+					HitSplatDefinition_cachedSprites.put((long)this.field3330, var1);
 				}
 
 				return var1;
@@ -307,7 +307,7 @@ public class HitSplatDefinition extends DualNode {
 			} else {
 				var1 = MusicPatchNode2.SpriteBuffer_getSprite(field3322, this.field3331, 0);
 				if (var1 != null) {
-					HitSplatDefinition_cachedSprites.put(var1, (long)this.field3331);
+					HitSplatDefinition_cachedSprites.put((long)this.field3331, var1);
 				}
 
 				return var1;
@@ -330,7 +330,7 @@ public class HitSplatDefinition extends DualNode {
 			} else {
 				var1 = MusicPatchNode2.SpriteBuffer_getSprite(field3322, this.field3332, 0);
 				if (var1 != null) {
-					HitSplatDefinition_cachedSprites.put(var1, (long)this.field3332);
+					HitSplatDefinition_cachedSprites.put((long)this.field3332, var1);
 				}
 
 				return var1;
@@ -353,7 +353,7 @@ public class HitSplatDefinition extends DualNode {
 			} else {
 				var1 = MusicPatchNode2.SpriteBuffer_getSprite(field3322, this.field3333, 0);
 				if (var1 != null) {
-					HitSplatDefinition_cachedSprites.put(var1, (long)this.field3333);
+					HitSplatDefinition_cachedSprites.put((long)this.field3333, var1);
 				}
 
 				return var1;
@@ -386,7 +386,7 @@ public class HitSplatDefinition extends DualNode {
 				}
 
 				if (var2 != null) {
-					HitSplatDefinition_cachedFonts.put(var2, (long)this.fontId);
+					HitSplatDefinition_cachedFonts.put((long)this.fontId, var2);
 				}
 
 				return var2;

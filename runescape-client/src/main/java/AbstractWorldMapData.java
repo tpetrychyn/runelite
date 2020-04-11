@@ -300,7 +300,7 @@ public abstract class AbstractWorldMapData {
 				}
 			}
 
-			ItemDefinition.ItemDefinition_cached.put(var1, (long)var0);
+			ItemDefinition.ItemDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

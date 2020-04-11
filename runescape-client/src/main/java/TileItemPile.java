@@ -18,7 +18,7 @@ public final class TileItemPile {
 		signature = "Lee;"
 	)
 	@Export("second")
-	Entity second;
+    Renderable second;
 	@ObfuscatedName("k")
 	@ObfuscatedGetter(
 		intValue = 1402854643
@@ -36,13 +36,13 @@ public final class TileItemPile {
 		signature = "Lee;"
 	)
 	@Export("first")
-	Entity first;
+    Renderable first;
 	@ObfuscatedName("v")
 	@ObfuscatedSignature(
 		signature = "Lee;"
 	)
 	@Export("third")
-	Entity third;
+    Renderable third;
 	@ObfuscatedName("q")
 	@ObfuscatedGetter(
 		longValue = 1345007712428644829L

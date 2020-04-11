@@ -74,7 +74,7 @@ public final class EvictingDualNodeHashTable {
 		signature = "(Lge;J)V"
 	)
 	@Export("put")
-	public void put(DualNode var1, long var2) {
+	public void put(long var2, DualNode var1) {
 		if (this.remainingCapacity == 0) {
 			DualNode var4 = this.deque.removeLast();
 			var4.remove();

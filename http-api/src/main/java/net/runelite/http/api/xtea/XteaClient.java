@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
+
 import net.runelite.http.api.RuneLiteAPI;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -85,21 +87,21 @@ public class XteaClient
 		});
 	}
 
-	public HashMap<Integer, int[]> get() throws IOException
+	public List<XteaKey> get() throws IOException
 	{
-		HttpUrl url = RuneLiteAPI.getXteaBase().newBuilder()
-			.addPathSegment("get")
-			.build();
+		HttpUrl url = RuneLiteAPI.getApiBase().newBuilder()
+				.addPathSegment("xtea")
+				.build();
 
 		Request request = new Request.Builder()
-			.url(url)
-			.build();
+				.url(url)
+				.build();
 
 		try (Response response = RuneLiteAPI.CLIENT.newCall(request).execute())
 		{
 			InputStream in = response.body().byteStream();
 			// CHECKSTYLE:OFF
-			return RuneLiteAPI.GSON.fromJson(new InputStreamReader(in), new TypeToken<HashMap<Integer, Integer[]>>() {}.getType());
+			return RuneLiteAPI.GSON.fromJson(new InputStreamReader(in), new TypeToken<List<XteaKey>>() { }.getType());
 			// CHECKSTYLE:ON
 		}
 		catch (JsonParseException ex)

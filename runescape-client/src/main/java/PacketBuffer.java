@@ -163,76 +163,78 @@ public class PacketBuffer extends Buffer {
 		signature = "(IIIIIILej;Lfm;S)V",
 		garbageValue = "7907"
 	)
-	static final void method5554(int var0, int var1, int var2, int var3, int var4, int var5, Scene var6, CollisionMap var7) {
-		if (!Client.isLowDetail || (Tiles.Tiles_renderFlags[0][var1][var2] & 2) != 0 || (Tiles.Tiles_renderFlags[var0][var1][var2] & 16) == 0) {
-			if (var0 < Tiles.Tiles_minPlane) {
-				Tiles.Tiles_minPlane = var0;
+	static final void addLocationObjectToScene(int z, int x, int y, int type, int orientation, int type, Scene scene, CollisionMap collisionMap) {
+		if (!Client.isLowDetail || (Tiles.Tiles_renderFlags[0][x][y] & 2) != 0 || (Tiles.Tiles_renderFlags[z][x][y] & 16) == 0) {
+			if (z < Tiles.Tiles_minPlane) {
+				Tiles.Tiles_minPlane = z;
 			}
 
-			ObjectDefinition var8 = WorldMapSection2.getObjectDefinition(var3);
-			int var9;
-			int var10;
-			if (var4 != 1 && var4 != 3) {
-				var9 = var8.sizeX;
-				var10 = var8.sizeY;
+			ObjectDefinition objectDefinition = WorldMapSection2.getObjectDefinition(type);
+			int width;
+			int length;
+			if (orientation != 1 && orientation != 3) {
+				width = objectDefinition.sizeX;
+				length = objectDefinition.sizeY;
 			} else {
-				var9 = var8.sizeY;
-				var10 = var8.sizeX;
+				width = objectDefinition.sizeY;
+				length = objectDefinition.sizeX;
 			}
 
 			int var11;
 			int var12;
-			if (var9 + var1 <= 104) {
-				var11 = (var9 >> 1) + var1;
-				var12 = (var9 + 1 >> 1) + var1;
+			if (width + x <= 104) {
+				var11 = (width >> 1) + x;
+				var12 = (width + 1 >> 1) + x;
 			} else {
-				var11 = var1;
-				var12 = var1 + 1;
+				var11 = x;
+				var12 = x + 1;
 			}
 
 			int var13;
 			int var14;
-			if (var10 + var2 <= 104) {
-				var13 = (var10 >> 1) + var2;
-				var14 = var2 + (var10 + 1 >> 1);
+			if (length + y <= 104) {
+				var13 = (length >> 1) + y;
+				var14 = y + (length + 1 >> 1);
 			} else {
-				var13 = var2;
-				var14 = var2 + 1;
+				var13 = y;
+				var14 = y + 1;
 			}
 
-			int[][] var15 = Tiles.Tiles_heights[var0];
-			int var16 = var15[var12][var14] + var15[var11][var14] + var15[var12][var13] + var15[var11][var13] >> 2;
-			int var17 = (var1 << 7) + (var9 << 6);
-			int var18 = (var2 << 7) + (var10 << 6);
-			long var19 = IsaacCipher.calculateTag(var1, var2, 2, var8.int1 == 0, var3);
-			int var21 = var5 + (var4 << 6);
-			if (var8.int3 == 1) {
-				var21 += 256;
+			int[][] tileHeights = Tiles.Tiles_heights[z];
+			int height = tileHeights[var12][var14] + tileHeights[var11][var14] + tileHeights[var12][var13] + tileHeights[var11][var13] >> 2;
+			int xSize = (x << 7) + (width << 6);
+			int ySize = (y << 7) + (length << 6);
+
+
+			long tag = IsaacCipher.calculateTag(x, y, 2, objectDefinition.int1 == 0, type);
+			int flags = type + (orientation << 6);
+			if (objectDefinition.int3 == 1) {
+				flags += 256;
 			}
 
 			int var23;
 			int var24;
-			if (var8.hasSound()) {
+			if (objectDefinition.hasSound()) {
 				ObjectSound var22 = new ObjectSound();
-				var22.plane = var0;
-				var22.x = var1 * 128;
-				var22.y = var2 * 128;
-				var23 = var8.sizeX;
-				var24 = var8.sizeY;
-				if (var4 == 1 || var4 == 3) {
-					var23 = var8.sizeY;
-					var24 = var8.sizeX;
+				var22.plane = z;
+				var22.x = x * 128;
+				var22.y = y * 128;
+				var23 = objectDefinition.sizeX;
+				var24 = objectDefinition.sizeY;
+				if (orientation == 1 || orientation == 3) {
+					var23 = objectDefinition.sizeY;
+					var24 = objectDefinition.sizeX;
 				}
 
-				var22.field1110 = (var23 + var1) * 128;
-				var22.field1100 = (var24 + var2) * 128;
-				var22.soundEffectId = var8.ambientSoundId;
-				var22.field1106 = var8.int4 * 128;
-				var22.field1104 = var8.int5;
-				var22.field1105 = var8.int6;
-				var22.soundEffectIds = var8.soundEffectIds;
-				if (var8.transforms != null) {
-					var22.obj = var8;
+				var22.field1110 = (var23 + x) * 128;
+				var22.field1100 = (var24 + y) * 128;
+				var22.soundEffectId = objectDefinition.ambientSoundId;
+				var22.field1106 = objectDefinition.int4 * 128;
+				var22.field1104 = objectDefinition.int5;
+				var22.field1105 = objectDefinition.int6;
+				var22.soundEffectIds = objectDefinition.soundEffectIds;
+				if (objectDefinition.transforms != null) {
+					var22.obj = objectDefinition;
 					var22.set();
 				}
 
@@ -242,305 +244,307 @@ public class PacketBuffer extends Buffer {
 				}
 			}
 
-			Object var34;
-			if (var5 == 22) {
-				if (!Client.isLowDetail || var8.int1 != 0 || var8.interactType == 1 || var8.boolean2) {
-					if (var8.animationId == -1 && var8.transforms == null) {
-						var34 = var8.getEntity(22, var4, var15, var17, var16, var18);
+			Object renderable;
+			if (type == 22) {
+				if (!Client.isLowDetail || objectDefinition.int1 != 0 || objectDefinition.interactType == 1 || objectDefinition.boolean2) {
+					if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+						renderable = objectDefinition.getRenderable(22, orientation, tileHeights, xSize, height, ySize);
 					} else {
-						var34 = new DynamicObject(var3, 22, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+						renderable = new DynamicObject(type, 22, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 					}
 
-					var6.newFloorDecoration(var0, var1, var2, var16, (Entity)var34, var19, var21);
-					if (var8.interactType == 1 && var7 != null) {
-						var7.setBlockedByFloorDec(var1, var2);
+					scene.newFloorDecoration(z, x, y, height, (Renderable)renderable, tag, flags);
+					if (objectDefinition.interactType == 1 && collisionMap != null) {
+						collisionMap.setBlockedByFloorDec(x, y);
 					}
 
 				}
-			} else if (var5 != 10 && var5 != 11) {
+			}
+			else if (type != 10 && type != 11) {
+				// pretty sure this is all walls in here
 				int[] var10000;
-				if (var5 >= 12) {
-					if (var8.animationId == -1 && var8.transforms == null) {
-						var34 = var8.getEntity(var5, var4, var15, var17, var16, var18);
+				if (type >= 12) {
+					if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+						renderable = objectDefinition.getRenderable(type, orientation, tileHeights, xSize, height, ySize);
 					} else {
-						var34 = new DynamicObject(var3, var5, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+						renderable = new DynamicObject(type, type, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 					}
 
-					var6.method3187(var0, var1, var2, var16, 1, 1, (Entity)var34, 0, var19, var21);
-					if (var5 >= 12 && var5 <= 17 && var5 != 13 && var0 > 0) {
-						var10000 = class51.field404[var0][var1];
-						var10000[var2] |= 2340;
+					scene.newGameOjbect(z, x, y, height, 1, 1, (Renderable)renderable, 0, tag, flags);
+					if (type >= 12 && type <= 17 && type != 13 && z > 0) {
+						var10000 = class51.field404[z][x];
+						var10000[y] |= 2340;
 					}
 
-					if (var8.interactType != 0 && var7 != null) {
-						var7.addGameObject(var1, var2, var9, var10, var8.boolean1);
+					if (objectDefinition.interactType != 0 && collisionMap != null) {
+						collisionMap.addGameObject(x, y, width, length, objectDefinition.boolean1);
 					}
 
-				} else if (var5 == 0) {
-					if (var8.animationId == -1 && var8.transforms == null) {
-						var34 = var8.getEntity(0, var4, var15, var17, var16, var18);
+				} else if (type == 0) {
+					if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+						renderable = objectDefinition.getRenderable(0, orientation, tileHeights, xSize, height, ySize);
 					} else {
-						var34 = new DynamicObject(var3, 0, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+						renderable = new DynamicObject(type, 0, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 					}
 
-					var6.newBoundaryObject(var0, var1, var2, var16, (Entity)var34, (Entity)null, Tiles.field544[var4], 0, var19, var21);
-					if (var4 == 0) {
-						if (var8.clipped) {
-							SoundCache.field1462[var0][var1][var2] = 50;
-							SoundCache.field1462[var0][var1][var2 + 1] = 50;
+					scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field544[orientation], 0, tag, flags);
+					if (orientation == 0) {
+						if (objectDefinition.clipped) {
+							SoundCache.field1462[z][x][y] = 50;
+							SoundCache.field1462[z][x][y + 1] = 50;
 						}
 
-						if (var8.modelClipped) {
-							var10000 = class51.field404[var0][var1];
-							var10000[var2] |= 585;
+						if (objectDefinition.modelClipped) {
+							var10000 = class51.field404[z][x];
+							var10000[y] |= 585;
 						}
-					} else if (var4 == 1) {
-						if (var8.clipped) {
-							SoundCache.field1462[var0][var1][var2 + 1] = 50;
-							SoundCache.field1462[var0][var1 + 1][var2 + 1] = 50;
-						}
-
-						if (var8.modelClipped) {
-							var10000 = class51.field404[var0][var1];
-							var10000[var2 + 1] |= 1170;
-						}
-					} else if (var4 == 2) {
-						if (var8.clipped) {
-							SoundCache.field1462[var0][var1 + 1][var2] = 50;
-							SoundCache.field1462[var0][var1 + 1][var2 + 1] = 50;
+					} else if (orientation == 1) {
+						if (objectDefinition.clipped) {
+							SoundCache.field1462[z][x][y + 1] = 50;
+							SoundCache.field1462[z][x + 1][y + 1] = 50;
 						}
 
-						if (var8.modelClipped) {
-							var10000 = class51.field404[var0][var1 + 1];
-							var10000[var2] |= 585;
+						if (objectDefinition.modelClipped) {
+							var10000 = class51.field404[z][x];
+							var10000[y + 1] |= 1170;
 						}
-					} else if (var4 == 3) {
-						if (var8.clipped) {
-							SoundCache.field1462[var0][var1][var2] = 50;
-							SoundCache.field1462[var0][var1 + 1][var2] = 50;
+					} else if (orientation == 2) {
+						if (objectDefinition.clipped) {
+							SoundCache.field1462[z][x + 1][y] = 50;
+							SoundCache.field1462[z][x + 1][y + 1] = 50;
 						}
 
-						if (var8.modelClipped) {
-							var10000 = class51.field404[var0][var1];
-							var10000[var2] |= 1170;
+						if (objectDefinition.modelClipped) {
+							var10000 = class51.field404[z][x + 1];
+							var10000[y] |= 585;
+						}
+					} else if (orientation == 3) {
+						if (objectDefinition.clipped) {
+							SoundCache.field1462[z][x][y] = 50;
+							SoundCache.field1462[z][x + 1][y] = 50;
+						}
+
+						if (objectDefinition.modelClipped) {
+							var10000 = class51.field404[z][x];
+							var10000[y] |= 1170;
 						}
 					}
 
-					if (var8.interactType != 0 && var7 != null) {
-						var7.method3630(var1, var2, var5, var4, var8.boolean1);
+					if (objectDefinition.interactType != 0 && collisionMap != null) {
+						collisionMap.method3630(x, y, type, orientation, objectDefinition.boolean1);
 					}
 
-					if (var8.int2 != 16) {
-						var6.method3210(var0, var1, var2, var8.int2);
+					if (objectDefinition.int2 != 16) {
+						scene.method3210(z, x, y, objectDefinition.int2);
 					}
 
-				} else if (var5 == 1) {
-					if (var8.animationId == -1 && var8.transforms == null) {
-						var34 = var8.getEntity(1, var4, var15, var17, var16, var18);
+				} else if (type == 1) {
+					if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+						renderable = objectDefinition.getRenderable(1, orientation, tileHeights, xSize, height, ySize);
 					} else {
-						var34 = new DynamicObject(var3, 1, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+						renderable = new DynamicObject(type, 1, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 					}
 
-					var6.newBoundaryObject(var0, var1, var2, var16, (Entity)var34, (Entity)null, Tiles.field542[var4], 0, var19, var21);
-					if (var8.clipped) {
-						if (var4 == 0) {
-							SoundCache.field1462[var0][var1][var2 + 1] = 50;
-						} else if (var4 == 1) {
-							SoundCache.field1462[var0][var1 + 1][var2 + 1] = 50;
-						} else if (var4 == 2) {
-							SoundCache.field1462[var0][var1 + 1][var2] = 50;
-						} else if (var4 == 3) {
-							SoundCache.field1462[var0][var1][var2] = 50;
+					scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field542[orientation], 0, tag, flags);
+					if (objectDefinition.clipped) {
+						if (orientation == 0) {
+							SoundCache.field1462[z][x][y + 1] = 50;
+						} else if (orientation == 1) {
+							SoundCache.field1462[z][x + 1][y + 1] = 50;
+						} else if (orientation == 2) {
+							SoundCache.field1462[z][x + 1][y] = 50;
+						} else if (orientation == 3) {
+							SoundCache.field1462[z][x][y] = 50;
 						}
 					}
 
-					if (var8.interactType != 0 && var7 != null) {
-						var7.method3630(var1, var2, var5, var4, var8.boolean1);
+					if (objectDefinition.interactType != 0 && collisionMap != null) {
+						collisionMap.method3630(x, y, type, orientation, objectDefinition.boolean1);
 					}
 
 				} else {
 					int var28;
-					if (var5 == 2) {
-						var28 = var4 + 1 & 3;
+					if (type == 2) {
+						var28 = orientation + 1 & 3;
 						Object var29;
 						Object var30;
-						if (var8.animationId == -1 && var8.transforms == null) {
-							var29 = var8.getEntity(2, var4 + 4, var15, var17, var16, var18);
-							var30 = var8.getEntity(2, var28, var15, var17, var16, var18);
+						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+							var29 = objectDefinition.getRenderable(2, orientation + 4, tileHeights, xSize, height, ySize);
+							var30 = objectDefinition.getRenderable(2, var28, tileHeights, xSize, height, ySize);
 						} else {
-							var29 = new DynamicObject(var3, 2, var4 + 4, var0, var1, var2, var8.animationId, true, (Entity)null);
-							var30 = new DynamicObject(var3, 2, var28, var0, var1, var2, var8.animationId, true, (Entity)null);
+							var29 = new DynamicObject(type, 2, orientation + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
+							var30 = new DynamicObject(type, 2, var28, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						var6.newBoundaryObject(var0, var1, var2, var16, (Entity)var29, (Entity)var30, Tiles.field544[var4], Tiles.field544[var28], var19, var21);
-						if (var8.modelClipped) {
-							if (var4 == 0) {
-								var10000 = class51.field404[var0][var1];
-								var10000[var2] |= 585;
-								var10000 = class51.field404[var0][var1];
-								var10000[1 + var2] |= 1170;
-							} else if (var4 == 1) {
-								var10000 = class51.field404[var0][var1];
-								var10000[var2 + 1] |= 1170;
-								var10000 = class51.field404[var0][var1 + 1];
-								var10000[var2] |= 585;
-							} else if (var4 == 2) {
-								var10000 = class51.field404[var0][var1 + 1];
-								var10000[var2] |= 585;
-								var10000 = class51.field404[var0][var1];
-								var10000[var2] |= 1170;
-							} else if (var4 == 3) {
-								var10000 = class51.field404[var0][var1];
-								var10000[var2] |= 1170;
-								var10000 = class51.field404[var0][var1];
-								var10000[var2] |= 585;
+						scene.newBoundaryObject(z, x, y, height, (Renderable)var29, (Renderable)var30, Tiles.field544[orientation], Tiles.field544[var28], tag, flags);
+						if (objectDefinition.modelClipped) {
+							if (orientation == 0) {
+								var10000 = class51.field404[z][x];
+								var10000[y] |= 585;
+								var10000 = class51.field404[z][x];
+								var10000[1 + y] |= 1170;
+							} else if (orientation == 1) {
+								var10000 = class51.field404[z][x];
+								var10000[y + 1] |= 1170;
+								var10000 = class51.field404[z][x + 1];
+								var10000[y] |= 585;
+							} else if (orientation == 2) {
+								var10000 = class51.field404[z][x + 1];
+								var10000[y] |= 585;
+								var10000 = class51.field404[z][x];
+								var10000[y] |= 1170;
+							} else if (orientation == 3) {
+								var10000 = class51.field404[z][x];
+								var10000[y] |= 1170;
+								var10000 = class51.field404[z][x];
+								var10000[y] |= 585;
 							}
 						}
 
-						if (var8.interactType != 0 && var7 != null) {
-							var7.method3630(var1, var2, var5, var4, var8.boolean1);
+						if (objectDefinition.interactType != 0 && collisionMap != null) {
+							collisionMap.method3630(x, y, type, orientation, objectDefinition.boolean1);
 						}
 
-						if (var8.int2 != 16) {
-							var6.method3210(var0, var1, var2, var8.int2);
+						if (objectDefinition.int2 != 16) {
+							scene.method3210(z, x, y, objectDefinition.int2);
 						}
 
-					} else if (var5 == 3) {
-						if (var8.animationId == -1 && var8.transforms == null) {
-							var34 = var8.getEntity(3, var4, var15, var17, var16, var18);
+					} else if (type == 3) {
+						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+							renderable = objectDefinition.getRenderable(3, orientation, tileHeights, xSize, height, ySize);
 						} else {
-							var34 = new DynamicObject(var3, 3, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+							renderable = new DynamicObject(type, 3, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						var6.newBoundaryObject(var0, var1, var2, var16, (Entity)var34, (Entity)null, Tiles.field542[var4], 0, var19, var21);
-						if (var8.clipped) {
-							if (var4 == 0) {
-								SoundCache.field1462[var0][var1][var2 + 1] = 50;
-							} else if (var4 == 1) {
-								SoundCache.field1462[var0][var1 + 1][var2 + 1] = 50;
-							} else if (var4 == 2) {
-								SoundCache.field1462[var0][var1 + 1][var2] = 50;
-							} else if (var4 == 3) {
-								SoundCache.field1462[var0][var1][var2] = 50;
+						scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field542[orientation], 0, tag, flags);
+						if (objectDefinition.clipped) {
+							if (orientation == 0) {
+								SoundCache.field1462[z][x][y + 1] = 50;
+							} else if (orientation == 1) {
+								SoundCache.field1462[z][x + 1][y + 1] = 50;
+							} else if (orientation == 2) {
+								SoundCache.field1462[z][x + 1][y] = 50;
+							} else if (orientation == 3) {
+								SoundCache.field1462[z][x][y] = 50;
 							}
 						}
 
-						if (var8.interactType != 0 && var7 != null) {
-							var7.method3630(var1, var2, var5, var4, var8.boolean1);
+						if (objectDefinition.interactType != 0 && collisionMap != null) {
+							collisionMap.method3630(x, y, type, orientation, objectDefinition.boolean1);
 						}
 
-					} else if (var5 == 9) {
-						if (var8.animationId == -1 && var8.transforms == null) {
-							var34 = var8.getEntity(var5, var4, var15, var17, var16, var18);
+					} else if (type == 9) {
+						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+							renderable = objectDefinition.getRenderable(type, orientation, tileHeights, xSize, height, ySize);
 						} else {
-							var34 = new DynamicObject(var3, var5, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+							renderable = new DynamicObject(type, type, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						var6.method3187(var0, var1, var2, var16, 1, 1, (Entity)var34, 0, var19, var21);
-						if (var8.interactType != 0 && var7 != null) {
-							var7.addGameObject(var1, var2, var9, var10, var8.boolean1);
+						scene.newGameOjbect(z, x, y, height, 1, 1, (Renderable)renderable, 0, tag, flags);
+						if (objectDefinition.interactType != 0 && collisionMap != null) {
+							collisionMap.addGameObject(x, y, width, length, objectDefinition.boolean1);
 						}
 
-						if (var8.int2 != 16) {
-							var6.method3210(var0, var1, var2, var8.int2);
+						if (objectDefinition.int2 != 16) {
+							scene.method3210(z, x, y, objectDefinition.int2);
 						}
 
-					} else if (var5 == 4) {
-						if (var8.animationId == -1 && var8.transforms == null) {
-							var34 = var8.getEntity(4, var4, var15, var17, var16, var18);
+					} else if (type == 4) {
+						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+							renderable = objectDefinition.getRenderable(4, orientation, tileHeights, xSize, height, ySize);
 						} else {
-							var34 = new DynamicObject(var3, 4, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+							renderable = new DynamicObject(type, 4, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
-						var6.newWallDecoration(var0, var1, var2, var16, (Entity)var34, (Entity)null, Tiles.field544[var4], 0, 0, 0, var19, var21);
+						scene.newWallDecoration(z, x, y, height, (Renderable)renderable, (Renderable)null, Tiles.field544[orientation], 0, 0, 0, tag, flags);
 					} else {
 						long var31;
 						Object var33;
-						if (var5 == 5) {
+						if (type == 5) {
 							var28 = 16;
-							var31 = var6.getBoundaryObjectTag(var0, var1, var2);
+							var31 = scene.getBoundaryObjectTag(z, x, y);
 							if (var31 != 0L) {
 								var28 = WorldMapSection2.getObjectDefinition(WorldMapRectangle.Entity_unpackID(var31)).int2;
 							}
 
-							if (var8.animationId == -1 && var8.transforms == null) {
-								var33 = var8.getEntity(4, var4, var15, var17, var16, var18);
+							if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+								var33 = objectDefinition.getRenderable(4, orientation, tileHeights, xSize, height, ySize);
 							} else {
-								var33 = new DynamicObject(var3, 4, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+								var33 = new DynamicObject(type, 4, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							var6.newWallDecoration(var0, var1, var2, var16, (Entity)var33, (Entity)null, Tiles.field544[var4], 0, var28 * Tiles.field541[var4], var28 * Tiles.field547[var4], var19, var21);
-						} else if (var5 == 6) {
+							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)null, Tiles.field544[orientation], 0, var28 * Tiles.field541[orientation], var28 * Tiles.field547[orientation], tag, flags);
+						} else if (type == 6) {
 							var28 = 8;
-							var31 = var6.getBoundaryObjectTag(var0, var1, var2);
+							var31 = scene.getBoundaryObjectTag(z, x, y);
 							if (0L != var31) {
 								var28 = WorldMapSection2.getObjectDefinition(WorldMapRectangle.Entity_unpackID(var31)).int2 / 2;
 							}
 
-							if (var8.animationId == -1 && var8.transforms == null) {
-								var33 = var8.getEntity(4, var4 + 4, var15, var17, var16, var18);
+							if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+								var33 = objectDefinition.getRenderable(4, orientation + 4, tileHeights, xSize, height, ySize);
 							} else {
-								var33 = new DynamicObject(var3, 4, var4 + 4, var0, var1, var2, var8.animationId, true, (Entity)null);
+								var33 = new DynamicObject(type, 4, orientation + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							var6.newWallDecoration(var0, var1, var2, var16, (Entity)var33, (Entity)null, 256, var4, var28 * Tiles.field546[var4], var28 * Tiles.field552[var4], var19, var21);
-						} else if (var5 == 7) {
-							var23 = var4 + 2 & 3;
-							if (var8.animationId == -1 && var8.transforms == null) {
-								var34 = var8.getEntity(4, var23 + 4, var15, var17, var16, var18);
+							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)null, 256, orientation, var28 * Tiles.field546[orientation], var28 * Tiles.field552[orientation], tag, flags);
+						} else if (type == 7) {
+							var23 = orientation + 2 & 3;
+							if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+								renderable = objectDefinition.getRenderable(4, var23 + 4, tileHeights, xSize, height, ySize);
 							} else {
-								var34 = new DynamicObject(var3, 4, var23 + 4, var0, var1, var2, var8.animationId, true, (Entity)null);
+								renderable = new DynamicObject(type, 4, var23 + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							var6.newWallDecoration(var0, var1, var2, var16, (Entity)var34, (Entity)null, 256, var23, 0, 0, var19, var21);
-						} else if (var5 == 8) {
+							scene.newWallDecoration(z, x, y, height, (Renderable)renderable, (Renderable)null, 256, var23, 0, 0, tag, flags);
+						} else if (type == 8) {
 							var28 = 8;
-							var31 = var6.getBoundaryObjectTag(var0, var1, var2);
+							var31 = scene.getBoundaryObjectTag(z, x, y);
 							if (var31 != 0L) {
 								var28 = WorldMapSection2.getObjectDefinition(WorldMapRectangle.Entity_unpackID(var31)).int2 / 2;
 							}
 
-							int var27 = var4 + 2 & 3;
+							int var27 = orientation + 2 & 3;
 							Object var26;
-							if (var8.animationId == -1 && var8.transforms == null) {
-								var33 = var8.getEntity(4, var4 + 4, var15, var17, var16, var18);
-								var26 = var8.getEntity(4, var27 + 4, var15, var17, var16, var18);
+							if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+								var33 = objectDefinition.getRenderable(4, orientation + 4, tileHeights, xSize, height, ySize);
+								var26 = objectDefinition.getRenderable(4, var27 + 4, tileHeights, xSize, height, ySize);
 							} else {
-								var33 = new DynamicObject(var3, 4, var4 + 4, var0, var1, var2, var8.animationId, true, (Entity)null);
-								var26 = new DynamicObject(var3, 4, var27 + 4, var0, var1, var2, var8.animationId, true, (Entity)null);
+								var33 = new DynamicObject(type, 4, orientation + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
+								var26 = new DynamicObject(type, 4, var27 + 4, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 							}
 
-							var6.newWallDecoration(var0, var1, var2, var16, (Entity)var33, (Entity)var26, 256, var4, var28 * Tiles.field546[var4], var28 * Tiles.field552[var4], var19, var21);
+							scene.newWallDecoration(z, x, y, height, (Renderable)var33, (Renderable)var26, 256, orientation, var28 * Tiles.field546[orientation], var28 * Tiles.field552[orientation], tag, flags);
 						}
 					}
 				}
 			} else {
-				if (var8.animationId == -1 && var8.transforms == null) {
-					var34 = var8.getEntity(10, var4, var15, var17, var16, var18);
+				if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
+					renderable = objectDefinition.getRenderable(10, orientation, tileHeights, xSize, height, ySize);
 				} else {
-					var34 = new DynamicObject(var3, 10, var4, var0, var1, var2, var8.animationId, true, (Entity)null);
+					renderable = new DynamicObject(type, 10, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 				}
 
-				if (var34 != null && var6.method3187(var0, var1, var2, var16, var9, var10, (Entity)var34, var5 == 11 ? 256 : 0, var19, var21) && var8.clipped) {
+				if (renderable != null && scene.newGameOjbect(z, x, y, height, width, length, (Renderable)renderable, type == 11 ? 256 : 0, tag, flags) && objectDefinition.clipped) {
 					var23 = 15;
-					if (var34 instanceof Model) {
-						var23 = ((Model)var34).method2993() / 4;
+					if (renderable instanceof Model) {
+						var23 = ((Model)renderable).method2993() / 4;
 						if (var23 > 30) {
 							var23 = 30;
 						}
 					}
 
-					for (var24 = 0; var24 <= var9; ++var24) {
-						for (int var25 = 0; var25 <= var10; ++var25) {
-							if (var23 > SoundCache.field1462[var0][var24 + var1][var25 + var2]) {
-								SoundCache.field1462[var0][var24 + var1][var25 + var2] = (byte)var23;
+					for (var24 = 0; var24 <= width; ++var24) {
+						for (int var25 = 0; var25 <= length; ++var25) {
+							if (var23 > SoundCache.field1462[z][var24 + x][var25 + y]) {
+								SoundCache.field1462[z][var24 + x][var25 + y] = (byte)var23;
 							}
 						}
 					}
 				}
 
-				if (var8.interactType != 0 && var7 != null) {
-					var7.addGameObject(var1, var2, var9, var10, var8.boolean1);
+				if (objectDefinition.interactType != 0 && collisionMap != null) {
+					collisionMap.addGameObject(x, y, width, length, objectDefinition.boolean1);
 				}
 
 			}

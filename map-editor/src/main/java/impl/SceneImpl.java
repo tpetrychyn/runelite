@@ -1,26 +1,24 @@
 package impl;
 
-import net.runelite.api.Constants;
-import net.runelite.api.Occluder;
-import net.runelite.api.Scene;
-import net.runelite.api.Tile;
-import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.*;
 
-public class SceneImpl implements Scene {
-    private int drawDistance = 90;
+public class SceneImpl{
     private Occluder[][] planeOccluders;
     private int[] planeOccluderCounts;
-    private Tile[][][] tiles;
+    private TileImpl[][][] tiles;
 
     public SceneImpl() {
-        tiles = new Tile[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
+        tiles = new TileImpl[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
         planeOccluders = new Occluder[4][500];
         planeOccluderCounts = new int[4];
     }
 
-    @Override
-    public Tile[][][] getTiles() {
+    public TileImpl[][][] getTiles() {
         return tiles;
+    }
+
+    public void clearTiles() {
+        this.tiles = new TileImpl[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
     }
 
     public void addTile(int z, int x, int y, int overlayPath, int overlayRotation, int overlayTexture, int swHeight, int seHeight, int neHeight, int nwHeight, int swColor, int seColor, int neColor, int nwColor, int var15, int var16, int var17, int var18, int rgb, int overlayRgb) {
@@ -31,11 +29,11 @@ public class SceneImpl implements Scene {
                 }
             }
 
-            ((TileImpl)this.tiles[z][x][y]).setTilePaint(new TilePaintImpl(swColor, seColor, neColor, nwColor, -1, rgb, false));
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setSwHeight(swHeight);
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setSeHeight(seHeight);
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setNeHeight(neHeight);
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setNwHeight(nwHeight);
+            this.tiles[z][x][y].setTilePaint(new TilePaintImpl(swColor, seColor, neColor, nwColor, -1, rgb, false));
+            this.tiles[z][x][y].getTilePaint().setSwHeight(swHeight);
+            this.tiles[z][x][y].getTilePaint().setSeHeight(seHeight);
+            this.tiles[z][x][y].getTilePaint().setNeHeight(neHeight);
+            this.tiles[z][x][y].getTilePaint().setNwHeight(nwHeight);
         } else if (overlayPath != 1) {
             for (int iz = z; iz >= 0; --iz) {
                 if (this.tiles[iz][x][y] == null) {
@@ -43,7 +41,7 @@ public class SceneImpl implements Scene {
                 }
             }
 
-            ((TileImpl)this.tiles[z][x][y]).setTileModel(new TileModelImpl(overlayPath, overlayRotation, overlayTexture, x, y, swHeight, seHeight, neHeight, nwHeight, swColor, seColor, neColor, nwColor, var15, var16, var17, var18, rgb, overlayRgb));
+            this.tiles[z][x][y].setTileModel(new TileModelImpl(overlayPath, overlayRotation, overlayTexture, x, y, swHeight, seHeight, neHeight, nwHeight, swColor, seColor, neColor, nwColor, var15, var16, var17, var18, rgb, overlayRgb));
         } else {
             for (int iz = z; iz >= 0; --iz) {
                 if (this.tiles[iz][x][y] == null) {
@@ -51,11 +49,11 @@ public class SceneImpl implements Scene {
                 }
             }
 
-            ((TileImpl)this.tiles[z][x][y]).setTilePaint(new TilePaintImpl(var15, var16, var17, var18, overlayTexture, overlayRgb, seHeight == swHeight && swHeight == neHeight && nwHeight == swHeight));
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setSwHeight(swHeight);
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setSeHeight(seHeight);
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setNeHeight(neHeight);
-            ((TilePaintImpl)this.tiles[z][x][y].getTilePaint()).setNwHeight(nwHeight);
+            this.tiles[z][x][y].setTilePaint(new TilePaintImpl(var15, var16, var17, var18, overlayTexture, overlayRgb, seHeight == swHeight && swHeight == neHeight && nwHeight == swHeight));
+            this.tiles[z][x][y].getTilePaint().setSwHeight(swHeight);
+            this.tiles[z][x][y].getTilePaint().setSeHeight(seHeight);
+            this.tiles[z][x][y].getTilePaint().setNeHeight(neHeight);
+            this.tiles[z][x][y].getTilePaint().setNwHeight(nwHeight);
         }
     }
 
@@ -68,23 +66,43 @@ public class SceneImpl implements Scene {
         planeOccluderCounts[plane]++;
     }
 
-    @Override
-    public void addItem(int id, int quantity, WorldPoint point) {
+    public void newFloorDecoration(int z, int x, int y, int height, Entity entity, long tag, int flags) {
+        for (int iz = z; iz >= 0; --iz) {
+            if (this.tiles[iz][x][y] == null) {
+                this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+            }
+        }
 
+        FloorDecoration floorDecoration = new FloorDecoration();
+        floorDecoration.setEntity(entity);
+        floorDecoration.setModel(entity.getModel());
+        floorDecoration.setRenderable(floorDecoration);
+        floorDecoration.setX(x * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE);
+        floorDecoration.setY(y * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE);
+        floorDecoration.setHeight(height);
+        floorDecoration.setTag(tag);
+        floorDecoration.setFlags(flags);
+
+        this.tiles[z][x][y].setFloorDecoration(floorDecoration);
     }
 
-    @Override
-    public void removeItem(int id, int quantity, WorldPoint point) {
+    public void newWallDecoration(int z, int x, int y, int height, ModelImpl modelA, ModelImpl modelB, int orientationA, int orientationB, long tag, int flags) {
+        for (int iz = z; iz >= 0; --iz) {
+            if (this.tiles[iz][x][y] == null) {
+                this.tiles[iz][x][y] = new TileImpl(iz, x, y);
+            }
+        }
 
-    }
+        WallDecoration wallDecoration = new WallDecoration(tag,
+                flags,
+                x * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE,
+                y * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE,
+                height,
+                modelA,
+                modelB,
+                orientationA,
+                orientationB);
 
-    @Override
-    public int getDrawDistance() {
-        return drawDistance;
-    }
-
-    @Override
-    public void setDrawDistance(int drawDistance) {
-        this.drawDistance = drawDistance;
+        this.tiles[z][x][y].setWallDecoration(wallDecoration);
     }
 }

@@ -24,19 +24,36 @@
  */
 package net.runelite.cache.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gson.Gson;
+import net.runelite.http.api.xtea.XteaKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class XteaKeyManager
 {
 	private static final Logger logger = LoggerFactory.getLogger(XteaKeyManager.class);
 
 	private final Map<Integer, int[]> keys = new HashMap<>();
+	public static File LOCATION;
 
 	public void loadKeys()
 	{
+		File keyFile = new File(StoreLocation.LOCATION, "xteas.json");
+		Gson gson = new Gson();
+		try {
+			XteaKey[] loadedKeys = gson.fromJson(new FileReader(keyFile), XteaKey[].class);
+			for (XteaKey key : loadedKeys) {
+				keys.put(key.getMapsquare(), key.getKey());
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 
 	}
 

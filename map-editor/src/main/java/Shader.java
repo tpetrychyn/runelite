@@ -1,29 +1,3 @@
-/*
- * Copyright (c) 2018, Adam <Adam@sigterm.info>
- * Copyright (c) 2020 Abex
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 import com.google.common.annotations.VisibleForTesting;
 import com.jogamp.opengl.GL4;
 import lombok.Getter;
@@ -35,6 +9,32 @@ import java.util.List;
 
 public class Shader
 {
+
+	public static final String LINUX_VERSION_HEADER =
+			"#version 420\n" +
+					"#extension GL_ARB_compute_shader : require\n" +
+					"#extension GL_ARB_shader_storage_buffer_object : require\n" +
+					"#extension GL_ARB_explicit_attrib_location : require\n";
+	static final String WINDOWS_VERSION_HEADER = "#version 430\n";
+
+	static final Shader PROGRAM = new Shader()
+			.add(GL4.GL_VERTEX_SHADER, "gpu/vert.glsl")
+			.add(GL4.GL_GEOMETRY_SHADER, "gpu/geom.glsl")
+			.add(GL4.GL_FRAGMENT_SHADER, "gpu/frag.glsl");
+
+	static final Shader COMPUTE_PROGRAM = new Shader()
+			.add(GL4.GL_COMPUTE_SHADER, "gpu/comp.glsl");
+
+	static final Shader SMALL_COMPUTE_PROGRAM = new Shader()
+			.add(GL4.GL_COMPUTE_SHADER, "gpu/comp_small.glsl");
+
+	static final Shader UNORDERED_COMPUTE_PROGRAM = new Shader()
+			.add(GL4.GL_COMPUTE_SHADER, "gpu/comp_unordered.glsl");
+
+	static final Shader UI_PROGRAM = new Shader()
+			.add(GL4.GL_VERTEX_SHADER, "gpu/vertui.glsl")
+			.add(GL4.GL_FRAGMENT_SHADER, "gpu/fragui.glsl");
+
 	@VisibleForTesting
 	final List<Unit> units = new ArrayList<>();
 

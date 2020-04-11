@@ -24,28 +24,13 @@
  */
 package net.runelite.http.api.xtea;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class XteaKey
 {
-	private int region;
-	private int[] keys;
-
-	public int getRegion()
-	{
-		return region;
-	}
-
-	public void setRegion(int region)
-	{
-		this.region = region;
-	}
-
-	public int[] getKeys()
-	{
-		return keys;
-	}
-
-	public void setKeys(int[] keys)
-	{
-		this.keys = keys;
-	}
+	private int mapsquare;
+	private int[] key;
 }

@@ -167,7 +167,7 @@ public class HealthBarDefinition extends DualNode {
 			} else {
 				var1 = MusicPatchNode2.SpriteBuffer_getSprite(UserComparator1.HitSplatDefinition_spritesArchive, this.frontSpriteID, 0);
 				if (var1 != null) {
-					HealthBarDefinition_cachedSprites.put(var1, (long)this.frontSpriteID);
+					HealthBarDefinition_cachedSprites.put((long)this.frontSpriteID, var1);
 				}
 
 				return var1;
@@ -191,7 +191,7 @@ public class HealthBarDefinition extends DualNode {
 			} else {
 				var1 = MusicPatchNode2.SpriteBuffer_getSprite(UserComparator1.HitSplatDefinition_spritesArchive, this.backSpriteID, 0);
 				if (var1 != null) {
-					HealthBarDefinition_cachedSprites.put(var1, (long)this.backSpriteID);
+					HealthBarDefinition_cachedSprites.put((long)this.backSpriteID, var1);
 				}
 
 				return var1;

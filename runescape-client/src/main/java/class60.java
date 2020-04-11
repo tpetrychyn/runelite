@@ -40,7 +40,7 @@ public class class60 {
 			}
 
 			var1.postDecode();
-			FloorUnderlayDefinition.FloorUnderlayDefinition_cached.put(var1, (long)var0);
+			FloorUnderlayDefinition.FloorUnderlayDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

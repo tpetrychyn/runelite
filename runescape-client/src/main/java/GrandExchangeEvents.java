@@ -124,7 +124,7 @@ public class GrandExchangeEvents {
 			}
 
 			if (var2 != null) {
-				SequenceDefinition.SequenceDefinition_cachedFrames.put(var2, (long)var0);
+				SequenceDefinition.SequenceDefinition_cachedFrames.put((long)var0, var2);
 			}
 
 			return var2;

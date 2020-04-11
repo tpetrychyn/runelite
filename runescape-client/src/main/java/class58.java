@@ -48,7 +48,7 @@ public class class58 {
 				var1.decode(new Buffer(var2));
 			}
 
-			EnumDefinition.EnumDefinition_cached.put(var1, (long)var0);
+			EnumDefinition.EnumDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

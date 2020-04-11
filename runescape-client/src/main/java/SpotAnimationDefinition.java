@@ -198,7 +198,7 @@ public class SpotAnimationDefinition extends DualNode {
 			}
 
 			var2 = var3.toModel(this.ambient + 64, this.contrast + 850, -30, -50, -30);
-			SpotAnimationDefinition_cachedModels.put(var2, (long)this.id);
+			SpotAnimationDefinition_cachedModels.put((long)this.id, var2);
 		}
 
 		Model var5;
@@ -250,7 +250,7 @@ public class SpotAnimationDefinition extends DualNode {
 			}
 
 			var1.postDecode();
-			SequenceDefinition.SequenceDefinition_cached.put(var1, (long)var0);
+			SequenceDefinition.SequenceDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

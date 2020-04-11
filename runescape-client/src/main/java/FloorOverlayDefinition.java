@@ -227,7 +227,7 @@ public class FloorOverlayDefinition extends DualNode {
 			}
 
 			var1.postDecode();
-			StructDefinition.StructDefinition_cached.put(var1, (long)var0);
+			StructDefinition.StructDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

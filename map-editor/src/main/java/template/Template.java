@@ -46,6 +46,9 @@ public class Template
 			if (line.startsWith("#include "))
 			{
 				String resource = line.substring(9);
+				if (line.contains(".glsl")) {
+					resource = "gpu/" + resource;
+				}
 				String resourceStr = load(resource);
 				sb.append(resourceStr);
 			}
@@ -57,11 +60,11 @@ public class Template
 		return sb.toString();
 	}
 
-	public String load(String filename)
+	public String load(String fileNameOrContents)
 	{
 		for (Function<String, String> loader : resourceLoaders)
 		{
-			String value = loader.apply(filename);
+			String value = loader.apply(fileNameOrContents);
 			if (value != null)
 			{
 				return process(value);

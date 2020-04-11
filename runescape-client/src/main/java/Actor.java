@@ -6,7 +6,7 @@ import net.runelite.mapping.ObfuscatedSignature;
 
 @ObfuscatedName("cw")
 @Implements("Actor")
-public abstract class Actor extends Entity {
+public abstract class Actor extends Renderable {
 	@ObfuscatedName("an")
 	@Export("isWalking")
 	boolean isWalking;
@@ -483,7 +483,7 @@ public abstract class Actor extends Entity {
 				var8.decode(new Buffer(var9));
 			}
 
-			HealthBarDefinition.HealthBarDefinition_cached.put(var8, (long)var1);
+			HealthBarDefinition.HealthBarDefinition_cached.put((long)var1, var8);
 			var7 = var8;
 		}
 
@@ -545,7 +545,7 @@ public abstract class Actor extends Entity {
 				var3.decode(new Buffer(var4));
 			}
 
-			HealthBarDefinition.HealthBarDefinition_cached.put(var3, (long)var1);
+			HealthBarDefinition.HealthBarDefinition_cached.put((long)var1, var3);
 			var2 = var3;
 		}
 

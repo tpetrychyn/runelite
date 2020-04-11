@@ -27,7 +27,7 @@ public class class297 {
 		signature = "(III)I",
 		garbageValue = "-2032356267"
 	)
-	static final int method5332(int var0, int var1) {
+	static final int adjustHslListness(int var0, int var1) {
 		if (var0 == -2) {
 			return 12345678;
 		} else if (var0 == -1) {

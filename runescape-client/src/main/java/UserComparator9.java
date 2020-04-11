@@ -56,7 +56,7 @@ public class UserComparator9 extends AbstractUserComparator {
 			}
 
 			var1.postDecode();
-			FloorOverlayDefinition.FloorOverlayDefinition_cached.put(var1, (long)var0);
+			FloorOverlayDefinition.FloorOverlayDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

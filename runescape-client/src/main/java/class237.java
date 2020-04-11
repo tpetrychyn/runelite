@@ -27,7 +27,7 @@ public class class237 {
 			}
 
 			var1.postDecode();
-			NPCDefinition.NpcDefinition_cached.put(var1, (long)var0);
+			NPCDefinition.NpcDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

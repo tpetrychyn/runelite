@@ -5,7 +5,7 @@ import net.runelite.mapping.ObfuscatedSignature;
 
 @ObfuscatedName("el")
 @Implements("Model")
-public class Model extends Entity {
+public class Model extends Renderable {
 	@ObfuscatedName("x")
 	@ObfuscatedSignature(
 		signature = "Lel;"
@@ -368,48 +368,48 @@ public class Model extends Entity {
 		signature = "([[IIIIZI)Lel;"
 	)
 	@Export("contourGround")
-	public Model contourGround(int[][] var1, int var2, int var3, int var4, boolean var5, int var6) {
+	public Model contourGround(int[][] tileHeights, int xOff, int height, int yOff, boolean deepCopy, int clipType) {
 		this.calculateBoundsCylinder();
-		int var7 = var2 - this.xzRadius;
-		int var8 = var2 + this.xzRadius;
-		int var9 = var4 - this.xzRadius;
-		int var10 = var4 + this.xzRadius;
-		if (var7 >= 0 && var8 + 128 >> 7 < var1.length && var9 >= 0 && var10 + 128 >> 7 < var1[0].length) {
+		int var7 = xOff - this.xzRadius;
+		int var8 = xOff + this.xzRadius;
+		int var9 = yOff - this.xzRadius;
+		int var10 = yOff + this.xzRadius;
+		if (var7 >= 0 && var8 + 128 >> 7 < tileHeights.length && var9 >= 0 && var10 + 128 >> 7 < tileHeights[0].length) {
 			var7 >>= 7;
 			var8 = var8 + 127 >> 7;
 			var9 >>= 7;
 			var10 = var10 + 127 >> 7;
-			if (var3 == var1[var7][var9] && var3 == var1[var8][var9] && var3 == var1[var7][var10] && var3 == var1[var8][var10]) {
+			if (height == tileHeights[var7][var9] && height == tileHeights[var8][var9] && height == tileHeights[var7][var10] && height == tileHeights[var8][var10]) {
 				return this;
 			} else {
-				Model var11;
-				if (var5) {
-					var11 = new Model();
-					var11.verticesCount = this.verticesCount;
-					var11.indicesCount = this.indicesCount;
-					var11.field1698 = this.field1698;
-					var11.verticesX = this.verticesX;
-					var11.verticesZ = this.verticesZ;
-					var11.indices1 = this.indices1;
-					var11.indices2 = this.indices2;
-					var11.indices3 = this.indices3;
-					var11.faceColors1 = this.faceColors1;
-					var11.faceColors2 = this.faceColors2;
-					var11.faceColors3 = this.faceColors3;
-					var11.faceRenderPriorities = this.faceRenderPriorities;
-					var11.faceAlphas = this.faceAlphas;
-					var11.field1699 = this.field1699;
-					var11.faceTextures = this.faceTextures;
-					var11.field1701 = this.field1701;
-					var11.field1685 = this.field1685;
-					var11.field1704 = this.field1704;
-					var11.field1705 = this.field1705;
-					var11.vertexLabels = this.vertexLabels;
-					var11.faceLabelsAlpha = this.faceLabelsAlpha;
-					var11.isSingleTile = this.isSingleTile;
-					var11.verticesY = new int[var11.verticesCount];
+				Model model;
+				if (deepCopy) {
+					model = new Model();
+					model.verticesCount = this.verticesCount;
+					model.indicesCount = this.indicesCount;
+					model.field1698 = this.field1698;
+					model.verticesX = this.verticesX;
+					model.verticesZ = this.verticesZ;
+					model.indices1 = this.indices1;
+					model.indices2 = this.indices2;
+					model.indices3 = this.indices3;
+					model.faceColors1 = this.faceColors1;
+					model.faceColors2 = this.faceColors2;
+					model.faceColors3 = this.faceColors3;
+					model.faceRenderPriorities = this.faceRenderPriorities;
+					model.faceAlphas = this.faceAlphas;
+					model.field1699 = this.field1699;
+					model.faceTextures = this.faceTextures;
+					model.field1701 = this.field1701;
+					model.field1685 = this.field1685;
+					model.field1704 = this.field1704;
+					model.field1705 = this.field1705;
+					model.vertexLabels = this.vertexLabels;
+					model.faceLabelsAlpha = this.faceLabelsAlpha;
+					model.isSingleTile = this.isSingleTile;
+					model.verticesY = new int[model.verticesCount];
 				} else {
-					var11 = this;
+					model = this;
 				}
 
 				int var12;
@@ -422,39 +422,39 @@ public class Model extends Entity {
 				int var19;
 				int var20;
 				int var21;
-				if (var6 == 0) {
-					for (var12 = 0; var12 < var11.verticesCount; ++var12) {
-						var13 = var2 + this.verticesX[var12];
-						var14 = var4 + this.verticesZ[var12];
+				if (clipType == 0) {
+					for (var12 = 0; var12 < model.verticesCount; ++var12) {
+						var13 = xOff + this.verticesX[var12];
+						var14 = yOff + this.verticesZ[var12];
 						var15 = var13 & 127;
 						var16 = var14 & 127;
 						var17 = var13 >> 7;
 						var18 = var14 >> 7;
-						var19 = var1[var17][var18] * (128 - var15) + var1[var17 + 1][var18] * var15 >> 7;
-						var20 = var1[var17][var18 + 1] * (128 - var15) + var15 * var1[var17 + 1][var18 + 1] >> 7;
+						var19 = tileHeights[var17][var18] * (128 - var15) + tileHeights[var17 + 1][var18] * var15 >> 7;
+						var20 = tileHeights[var17][var18 + 1] * (128 - var15) + var15 * tileHeights[var17 + 1][var18 + 1] >> 7;
 						var21 = var19 * (128 - var16) + var20 * var16 >> 7;
-						var11.verticesY[var12] = var21 + this.verticesY[var12] - var3;
+						model.verticesY[var12] = var21 + this.verticesY[var12] - height;
 					}
 				} else {
-					for (var12 = 0; var12 < var11.verticesCount; ++var12) {
+					for (var12 = 0; var12 < model.verticesCount; ++var12) {
 						var13 = (-this.verticesY[var12] << 16) / super.height;
-						if (var13 < var6) {
-							var14 = var2 + this.verticesX[var12];
-							var15 = var4 + this.verticesZ[var12];
+						if (var13 < clipType) {
+							var14 = xOff + this.verticesX[var12];
+							var15 = yOff + this.verticesZ[var12];
 							var16 = var14 & 127;
 							var17 = var15 & 127;
 							var18 = var14 >> 7;
 							var19 = var15 >> 7;
-							var20 = var1[var18][var19] * (128 - var16) + var1[var18 + 1][var19] * var16 >> 7;
-							var21 = var1[var18][var19 + 1] * (128 - var16) + var16 * var1[var18 + 1][var19 + 1] >> 7;
+							var20 = tileHeights[var18][var19] * (128 - var16) + tileHeights[var18 + 1][var19] * var16 >> 7;
+							var21 = tileHeights[var18][var19 + 1] * (128 - var16) + var16 * tileHeights[var18 + 1][var19 + 1] >> 7;
 							int var22 = var20 * (128 - var17) + var21 * var17 >> 7;
-							var11.verticesY[var12] = (var6 - var13) * (var22 - var3) / var6 + this.verticesY[var12];
+							model.verticesY[var12] = (clipType - var13) * (var22 - height) / clipType + this.verticesY[var12];
 						}
 					}
 				}
 
-				var11.resetBounds();
-				return var11;
+				model.resetBounds();
+				return model;
 			}
 		} else {
 			return this;
@@ -1683,10 +1683,10 @@ public class Model extends Entity {
 								var37 = Model_cosine[var1];
 							}
 
-							for (int var38 = 0; var38 < this.verticesCount; ++var38) {
-								int var39 = this.verticesX[var38];
-								int var40 = this.verticesY[var38];
-								int var41 = this.verticesZ[var38];
+							for (int i = 0; i < this.verticesCount; ++i) {
+								int var39 = this.verticesX[i];
+								int var40 = this.verticesY[i];
+								int var41 = this.verticesZ[i];
 								int var42;
 								if (var1 != 0) {
 									var42 = var41 * var36 + var39 * var37 >> 16;
@@ -1702,19 +1702,19 @@ public class Model extends Entity {
 								var39 = var42;
 								var42 = var3 * var40 - var41 * var2 >> 16;
 								var41 = var40 * var2 + var3 * var41 >> 16;
-								field1703[var38] = var41 - var12;
+								field1703[i] = var41 - var12;
 								if (var41 >= 50) {
-									modelViewportXs[var38] = var39 * Rasterizer3D.Rasterizer3D_zoom / var41 + var47;
-									modelViewportYs[var38] = var42 * Rasterizer3D.Rasterizer3D_zoom / var41 + var35;
+									modelViewportXs[i] = var39 * Rasterizer3D.Rasterizer3D_zoom / var41 + var47;
+									modelViewportYs[i] = var42 * Rasterizer3D.Rasterizer3D_zoom / var41 + var35;
 								} else {
-									modelViewportXs[var38] = -5000;
+									modelViewportXs[i] = -5000;
 									var24 = true;
 								}
 
 								if (var26) {
-									field1726[var38] = var39;
-									field1707[var38] = var42;
-									field1728[var38] = var41;
+									field1726[i] = var39;
+									field1707[i] = var42;
+									field1728[i] = var41;
 								}
 							}
 

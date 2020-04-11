@@ -262,7 +262,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener, FocusLi
 				var1.decode(new Buffer(var2));
 			}
 
-			SpotAnimationDefinition.SpotAnimationDefinition_cached.put(var1, (long)var0);
+			SpotAnimationDefinition.SpotAnimationDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

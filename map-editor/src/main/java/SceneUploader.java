@@ -23,6 +23,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import impl.*;
 import net.runelite.api.*;
 
 class SceneUploader
@@ -31,7 +32,7 @@ class SceneUploader
 	private int offset;
 	private int uvoffset;
 
-	void upload(Scene scene, GpuIntBuffer vertexbuffer, GpuFloatBuffer uvBuffer)
+	void upload(SceneImpl scene, GpuIntBuffer vertexbuffer, GpuFloatBuffer uvBuffer)
 	{
 		++sceneId;
 		offset = 0;
@@ -45,7 +46,7 @@ class SceneUploader
 			{
 				for (int y = 0; y < Constants.SCENE_SIZE; ++y)
 				{
-					Tile tile = scene.getTiles()[z][x][y];
+					TileImpl tile = scene.getTiles()[z][x][y];
 					if (tile != null)
 					{
 						reset(tile);
@@ -60,7 +61,7 @@ class SceneUploader
 			{
 				for (int y = 0; y < Constants.SCENE_SIZE; ++y)
 				{
-					Tile tile = scene.getTiles()[z][x][y];
+					TileImpl tile = scene.getTiles()[z][x][y];
 					if (tile != null)
 					{
 						upload(tile, vertexbuffer, uvBuffer);
@@ -70,13 +71,13 @@ class SceneUploader
 		}
 	}
 
-	private void reset(Tile tile)
+	private void reset(TileImpl tile)
 	{
-		Tile bridge = tile.getBridge();
-		if (bridge != null)
-		{
-			reset(bridge);
-		}
+//		Tile bridge = tile.getBridge();
+//		if (bridge != null)
+//		{
+//			reset(bridge);
+//		}
 
 		TilePaint sceneTilePaint = tile.getTilePaint();
 		if (sceneTilePaint != null)
@@ -90,20 +91,20 @@ class SceneUploader
 			sceneTileModel.setBufferOffset(-1);
 		}
 
-		WallObject wallObject = tile.getWallObject();
-		if (wallObject != null)
+		WallDecoration wallDecoration = tile.getWallDecoration();
+		if (wallDecoration != null)
 		{
-			if (wallObject.getRenderable1() instanceof Model)
+			if (wallDecoration.getModelA() != null)
 			{
-				((Model) wallObject.getRenderable1()).setBufferOffset(-1);
+				wallDecoration.getModelA().setBufferOffset(-1);
 			}
-			if (wallObject.getRenderable2() instanceof Model)
+			if (wallDecoration.getModelB() != null)
 			{
-				((Model) wallObject.getRenderable2()).setBufferOffset(-1);
+				wallDecoration.getModelB().setBufferOffset(-1);
 			}
 		}
 
-		GroundObject groundObject = tile.getGroundObject();
+		GroundObject groundObject = tile.getFloorDecoration();
 		if (groundObject != null)
 		{
 			if (groundObject.getRenderable() instanceof Model)
@@ -112,38 +113,38 @@ class SceneUploader
 			}
 		}
 
-		DecorativeObject decorativeObject = tile.getDecorativeObject();
-		if (decorativeObject != null)
-		{
-			if (decorativeObject.getRenderable() instanceof Model)
-			{
-				((Model) decorativeObject.getRenderable()).setBufferOffset(-1);
-			}
-		}
-
-		GameObject[] gameObjects = tile.getGameObjects();
-		for (GameObject gameObject : gameObjects)
-		{
-			if (gameObject == null)
-			{
-				continue;
-			}
-			if (gameObject.getRenderable() instanceof Model)
-			{
-				((Model) gameObject.getRenderable()).setBufferOffset(-1);
-			}
-		}
+//		DecorativeObject decorativeObject = tile.getDecorativeObject();
+//		if (decorativeObject != null)
+//		{
+//			if (decorativeObject.getRenderable() instanceof Model)
+//			{
+//				((Model) decorativeObject.getRenderable()).setBufferOffset(-1);
+//			}
+//		}
+//
+//		GameObject[] gameObjects = tile.getGameObjects();
+//		for (GameObject gameObject : gameObjects)
+//		{
+//			if (gameObject == null)
+//			{
+//				continue;
+//			}
+//			if (gameObject.getRenderable() instanceof Model)
+//			{
+//				((Model) gameObject.getRenderable()).setBufferOffset(-1);
+//			}
+//		}
 	}
 
-	private void upload(Tile tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
+	private void upload(TileImpl tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
 	{
-		Tile bridge = tile.getBridge();
-		if (bridge != null)
-		{
-			upload(bridge, vertexBuffer, uvBuffer);
-		}
+//		Tile bridge = tile.getBridge();
+//		if (bridge != null)
+//		{
+//			upload(bridge, vertexBuffer, uvBuffer);
+//		}
 
-		TilePaint sceneTilePaint = tile.getTilePaint();
+		TilePaintImpl sceneTilePaint = tile.getTilePaint();
 		if (sceneTilePaint != null)
 		{
 			sceneTilePaint.setBufferOffset(offset);
@@ -155,8 +156,7 @@ class SceneUploader
 			{
 				sceneTilePaint.setUvBufferOffset(-1);
 			}
-			Point tilePoint = tile.getSceneLocation();
-			int len = upload(sceneTilePaint, tile.getRenderLevel(), tilePoint.getX(), tilePoint.getY(), vertexBuffer, uvBuffer);
+			int len = upload(sceneTilePaint, vertexBuffer, uvBuffer);
 			sceneTilePaint.setBufferLen(len);
 			offset += len;
 			if (sceneTilePaint.getTexture() != -1)
@@ -177,8 +177,7 @@ class SceneUploader
 			{
 				sceneTileModel.setUvBufferOffset(-1);
 			}
-			Point tilePoint = tile.getSceneLocation();
-			int len = upload(sceneTileModel, tilePoint.getX(), tilePoint.getY(), vertexBuffer, uvBuffer);
+			int len = upload(sceneTileModel, tile.getX(), tile.getY(), vertexBuffer, uvBuffer);
 			sceneTileModel.setBufferLen(len);
 			offset += len;
 			if (sceneTileModel.getTriangleTextureId() != null)
@@ -187,65 +186,65 @@ class SceneUploader
 			}
 		}
 
-		WallObject wallObject = tile.getWallObject();
-		if (wallObject != null)
+		WallDecoration wallDecoration = tile.getWallDecoration();
+		if (wallDecoration != null)
 		{
-			Renderable renderable1 = wallObject.getRenderable1();
-			if (renderable1 instanceof Model)
+			ModelImpl modelA = wallDecoration.getModelA();
+			if (modelA != null)
 			{
-				uploadModel((Model) renderable1, vertexBuffer, uvBuffer);
+				uploadModel(modelA, vertexBuffer, uvBuffer);
 			}
 
-			Renderable renderable2 = wallObject.getRenderable2();
-			if (renderable2 instanceof Model)
+			ModelImpl modelB = wallDecoration.getModelB();
+			if (modelB != null)
 			{
-				uploadModel((Model) renderable2, vertexBuffer, uvBuffer);
+				uploadModel(modelB, vertexBuffer, uvBuffer);
 			}
 		}
 
-		GroundObject groundObject = tile.getGroundObject();
+		GroundObject groundObject = tile.getFloorDecoration();
 		if (groundObject != null)
 		{
 			Renderable renderable = groundObject.getRenderable();
-			if (renderable instanceof Model)
+			if (renderable.getModel() != null)
 			{
-				uploadModel((Model) renderable, vertexBuffer, uvBuffer);
+				uploadModel(renderable.getModel(), vertexBuffer, uvBuffer);
 			}
 		}
 
-		DecorativeObject decorativeObject = tile.getDecorativeObject();
-		if (decorativeObject != null)
-		{
-			Renderable renderable = decorativeObject.getRenderable();
-			if (renderable instanceof Model)
-			{
-				uploadModel((Model) renderable, vertexBuffer, uvBuffer);
-			}
-
-			Renderable renderable2 = decorativeObject.getRenderable2();
-			if (renderable2 instanceof Model)
-			{
-				uploadModel((Model) renderable2, vertexBuffer, uvBuffer);
-			}
-		}
-
-		GameObject[] gameObjects = tile.getGameObjects();
-		for (GameObject gameObject : gameObjects)
-		{
-			if (gameObject == null)
-			{
-				continue;
-			}
-
-			Renderable renderable = gameObject.getRenderable();
-			if (renderable instanceof Model)
-			{
-				uploadModel((Model) gameObject.getRenderable(), vertexBuffer, uvBuffer);
-			}
-		}
+//		DecorativeObject decorativeObject = tile.getDecorativeObject();
+//		if (decorativeObject != null)
+//		{
+//			Renderable renderable = decorativeObject.getRenderable();
+//			if (renderable instanceof Model)
+//			{
+//				uploadModel((Model) renderable, vertexBuffer, uvBuffer);
+//			}
+//
+//			Renderable renderable2 = decorativeObject.getRenderable2();
+//			if (renderable2 instanceof Model)
+//			{
+//				uploadModel((Model) renderable2, vertexBuffer, uvBuffer);
+//			}
+//		}
+//
+//		GameObject[] gameObjects = tile.getGameObjects();
+//		for (GameObject gameObject : gameObjects)
+//		{
+//			if (gameObject == null)
+//			{
+//				continue;
+//			}
+//
+//			Renderable renderable = gameObject.getRenderable();
+//			if (renderable instanceof Model)
+//			{
+//				uploadModel((Model) gameObject.getRenderable(), vertexBuffer, uvBuffer);
+//			}
+//		}
 	}
 
-	private int upload(TilePaint tile, int tileZ, int tileX, int tileY, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
+	private int upload(TilePaint tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer)
 	{
 		final int localX = 0;
 		final int localY = 0;
@@ -411,6 +410,7 @@ class SceneUploader
 
 		vertexBuffer.ensureCapacity(model.getTrianglesCount() * 12);
 		uvBuffer.ensureCapacity(model.getTrianglesCount() * 12);
+
 
 		final int triangleCount = model.getTrianglesCount();
 		int len = 0;

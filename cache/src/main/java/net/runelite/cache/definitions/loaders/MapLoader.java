@@ -32,6 +32,7 @@ import net.runelite.cache.fs.Index;
 import net.runelite.cache.fs.Storage;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.io.InputStream;
+import net.runelite.cache.region.HeightCalc;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,7 +49,6 @@ public class MapLoader
 	public MapLoader(Store store) {
 		this.store = store;
 		index = store.getIndex(IndexType.MAPS);
-
 		mapDefCache = new HashMap<>();
 	}
 
@@ -59,21 +59,33 @@ public class MapLoader
 	public Tile getWorldTile(int z, int x, int y) {
 		MapDefinition m = loadFromWorldCoordinates(x, y);
 		if (m == null) {
-			return null;
+			Tile t = new Tile();
+			t.height = 0;
+			return t;
 		}
 
-		return m.getTiles()[z][x][y];
+		x -= m.getRegionX();
+		y -= m.getRegionY();
+
+		Tile t = m.getTiles()[z][x][y];
+		if (t == null) {
+			t = new Tile();
+			t.height = 0;
+		}
+
+		return t;
 	}
 
 	public MapDefinition loadFromWorldCoordinates(int x, int y) {
-		x >>>= 6;
-		y >>>= 6;
-		int regionId = (x << 8) | y;
+		int regionId = (x >>> 6 << 8) | y >>> 6;
 		if (mapDefCache.containsKey(regionId)) {
 			return mapDefCache.get(regionId);
 		}
 
 		index = store.getIndex(IndexType.MAPS);
+
+		x = regionId >> 8;
+		y = regionId & 0xFF;
 
 		Storage storage = store.getStorage();
 		Archive map = index.findArchiveByName("m" + x + "_" + y);
@@ -91,7 +103,9 @@ public class MapLoader
 			e.printStackTrace();
 		}
 
-		MapDefinition mapDef = new MapLoader().load(x, y, data);
+		int baseX = ((regionId >> 8) & 0xFF) << 6; // local coords are in bottom 6 bits (64*64)
+		int baseY = (regionId & 0xFF) << 6;
+		MapDefinition mapDef = new MapLoader().load(baseX, baseY, data);
 
 		mapDefCache.put(regionId, mapDef);
 		return mapDef;
@@ -146,6 +160,33 @@ public class MapLoader
 						else
 						{
 							tile.underlayId = (byte) (attribute - 81);
+						}
+					}
+
+					if (tile.height == null)
+					{
+						if (z == 0)
+						{
+							tile.height = -HeightCalc.calculate(map.getRegionX() + x + 0xe3b7b, map.getRegionY() + y + 0x87cce) * 8;
+						}
+						else
+						{
+							tile.height = tiles[z - 1][x][y].height - 240;
+						}
+					} else {
+						int height = tile.getHeight();
+						if (height == 1)
+						{
+							height = 0;
+						}
+
+						if (z == 0)
+						{
+							tile.height = -height * 8;
+						}
+						else
+						{
+							tile.height = tiles[z - 1][x][y].height - height * 8;
 						}
 					}
 				}

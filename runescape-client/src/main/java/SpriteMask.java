@@ -66,7 +66,7 @@ public class SpriteMask extends DualNode {
 				var1.decode(new Buffer(var2));
 			}
 
-			VarbitDefinition.VarbitDefinition_cached.put(var1, (long)var0);
+			VarbitDefinition.VarbitDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

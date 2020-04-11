@@ -6,7 +6,7 @@ import net.runelite.mapping.ObfuscatedSignature;
 
 @ObfuscatedName("cv")
 @Implements("DynamicObject")
-public class DynamicObject extends Entity {
+public class DynamicObject extends Renderable {
 	@ObfuscatedName("x")
 	@ObfuscatedGetter(
 		intValue = -778595855
@@ -65,7 +65,7 @@ public class DynamicObject extends Entity {
 	@ObfuscatedSignature(
 		signature = "(IIIIIIIZLee;)V"
 	)
-	DynamicObject(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8, Entity var9) {
+	DynamicObject(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8, Renderable var9) {
 		this.id = var1;
 		this.type = var2;
 		this.orientation = var3;

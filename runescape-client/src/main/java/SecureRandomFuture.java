@@ -204,7 +204,7 @@ public class SecureRandomFuture {
 			}
 
 			if (!var5) {
-				ItemDefinition.ItemDefinition_cachedSprites.put(var8, var6);
+				ItemDefinition.ItemDefinition_cachedSprites.put(var6, var8);
 			}
 
 			Rasterizer2D.Rasterizer2D_replace(var12, var13, var14);

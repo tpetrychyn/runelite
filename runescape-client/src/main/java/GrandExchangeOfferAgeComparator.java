@@ -1002,23 +1002,23 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 
 									int overlayRgb = 0;
 									if (rgb != -2) {
-										overlayRgb = Rasterizer3D.Rasterizer3D_colorPalette[class297.method5332(rgb, 96)];
+										overlayRgb = Rasterizer3D.Rasterizer3D_colorPalette[class297.adjustHslListness(rgb, 96)];
 									}
 
 									if (overlayDefinition.secondaryRgb != -1) {
-										int var40 = overlayDefinition.secondaryHue + Tiles.field550 & 255;
-										int var41 = overlayDefinition.secondaryLightness + Tiles.field548;
-										if (var41 < 0) {
-											var41 = 0;
-										} else if (var41 > 255) {
-											var41 = 255;
+										int hue = overlayDefinition.secondaryHue + Tiles.field550 & 255;
+										int lightness = overlayDefinition.secondaryLightness + Tiles.field548;
+										if (lightness < 0) {
+											lightness = 0;
+										} else if (lightness > 255) {
+											lightness = 255;
 										}
 
-										rgb = DevicePcmPlayerProvider.hslToRgb(var40, overlayDefinition.secondarySaturation, var41);
-										overlayRgb = Rasterizer3D.Rasterizer3D_colorPalette[class297.method5332(rgb, 96)];
+										rgb = DevicePcmPlayerProvider.hslToRgb(hue, overlayDefinition.secondarySaturation, lightness);
+										overlayRgb = Rasterizer3D.Rasterizer3D_colorPalette[class297.adjustHslListness(rgb, 96)];
 									}
 
-									scene.addTile(z, xi, yi, overlayPath, overlayRotation, overlayTexture, swHeight, seHeight, neHeight, nwHeight, Strings.method4220(rgb, swColor), Strings.method4220(rgb, seColor), Strings.method4220(rgb, neColor), Strings.method4220(rgb, nwColor), class297.method5332(overlayHsl, swColor), class297.method5332(overlayHsl, seColor), class297.method5332(overlayHsl, neColor), class297.method5332(overlayHsl, nwColor), underlayRgb, overlayRgb);
+									scene.addTile(z, xi, yi, overlayPath, overlayRotation, overlayTexture, swHeight, seHeight, neHeight, nwHeight, Strings.method4220(rgb, swColor), Strings.method4220(rgb, seColor), Strings.method4220(rgb, neColor), Strings.method4220(rgb, nwColor), class297.adjustHslListness(overlayHsl, swColor), class297.adjustHslListness(overlayHsl, seColor), class297.adjustHslListness(overlayHsl, neColor), class297.adjustHslListness(overlayHsl, nwColor), underlayRgb, overlayRgb);
 								}
 							}
 						}

@@ -352,7 +352,7 @@ public class GrandExchangeEvent {
 											var47 = var43[var21];
 										}
 
-										PacketBuffer.method5554(var15, var40, var20, var9, var18, var17, var42, var47);
+										PacketBuffer.addLocationObjectToScene(var15, var40, var20, var9, var18, var17, var42, var47);
 									}
 								}
 							}
@@ -518,7 +518,7 @@ public class GrandExchangeEvent {
 																var34 = var39[var33];
 															}
 
-															PacketBuffer.method5554(var35, var31, var32, var20, var29 + var50 & 3, var28, var45, var34);
+															PacketBuffer.addLocationObjectToScene(var35, var31, var32, var20, var29 + var50 & 3, var28, var45, var34);
 														}
 													}
 												}

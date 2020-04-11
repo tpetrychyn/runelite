@@ -21,7 +21,7 @@ public class class231 {
 				var1.decode(new Buffer(var2));
 			}
 
-			InvDefinition.InvDefinition_cached.put(var1, (long)var0);
+			InvDefinition.InvDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

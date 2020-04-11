@@ -1,10 +1,15 @@
 plugins {
     java
+    id("org.openjfx.javafxplugin") version "0.0.8"
 }
 
 description = "RSPS Map Editor"
 
 dependencies {
+    api(project(":runelite-api"))
+    api(project(":cache"))
+    implementation(project(":http-api"))
+
     annotationProcessor(Libraries.lombok)
 
     compileOnly(Libraries.lombok)
@@ -25,4 +30,12 @@ dependencies {
     runtimeOnly(Libraries.jogampJoglLinuxI586)
     runtimeOnly(Libraries.jogampJoglWindowsAmd64)
     runtimeOnly(Libraries.jogampJoglWindowsI586)
+
+    api(files("lib/jogamp-fat.jar"))
+    implementation("com.jfoenix:jfoenix:9.0.9")
+}
+
+javafx {
+    version = "14"
+    modules = listOf("javafx.controls", "javafx.fxml")
 }

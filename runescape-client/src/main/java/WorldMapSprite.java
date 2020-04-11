@@ -50,7 +50,7 @@ public final class WorldMapSprite {
 				return null;
 			} else {
 				var1 = SecureRandomCallable.newScript(var2);
-				Script.Script_cached.put(var1, (long)var0);
+				Script.Script_cached.put((long)var0, var1);
 				return var1;
 			}
 		}

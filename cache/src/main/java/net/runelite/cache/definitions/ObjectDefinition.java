@@ -25,55 +25,224 @@
 
 package net.runelite.cache.definitions;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import net.runelite.cache.IndexType;
+import net.runelite.cache.definitions.loaders.ModelLoader;
+import net.runelite.cache.fs.Archive;
+import net.runelite.cache.fs.Index;
+import net.runelite.cache.fs.Storage;
+import net.runelite.cache.fs.Store;
+import net.runelite.cache.util.StoreLocation;
 
 @Data
-public class ObjectDefinition
-{
-	private int id;
-	private short[] retextureToFind;
-	private int decorDisplacement = 16;
-	private boolean isHollow = false;
-	private String name = "null";
-	private int[] objectModels;
-	private int[] objectTypes;
-	private short[] recolorToFind;
-	private int mapAreaId = -1;
-	private short[] textureToReplace;
-	private int sizeX = 1;
-	private int sizeY = 1;
-	private int anInt2083 = 0;
-	private int[] anIntArray2084;
-	private int offsetX = 0;
-	private boolean mergeNormals = false;
-	private int wallOrDoor = -1;
-	private int animationID = -1;
-	private int varbitID = -1;
-	private int ambient = 0;
-	private int contrast = 0;
-	private String[] actions = new String[5];
-	private int interactType = 2;
-	private int mapSceneID = -1;
-	private int blockingMask = 0;
-	private short[] recolorToReplace;
-	private boolean shadow = true;
-	private int modelSizeX = 128;
-	private int modelSizeHeight = 128;
-	private int modelSizeY = 128;
-	private int objectID;
-	private int offsetHeight = 0;
-	private int offsetY = 0;
-	private boolean obstructsGround = false;
-	private int contouredGround = -1;
-	private int supportsItems = -1;
-	private int[] configChangeDest;
-	private boolean isRotated = false;
-	private int varpID = -1;
-	private int ambientSoundId = -1;
-	private boolean aBool2111 = false;
-	private int anInt2112 = 0;
-	private int anInt2113 = 0;
-	private boolean blocksProjectile = true;
-	private Map<Integer, Object> params = null;
+public class ObjectDefinition {
+    protected int id;
+    protected short[] retextureToFind;
+    protected int decorDisplacement = 16;
+    protected boolean isHollow = false;
+    protected String name = "null";
+    protected int[] modelIds;
+    protected int[] models;
+    protected short[] recolorToFind;
+    protected int mapAreaId = -1;
+    protected short[] textureToReplace;
+    protected int sizeX = 1;
+    protected int sizeY = 1;
+    protected int anInt2083 = 0;
+    protected int[] anIntArray2084;
+    protected int offsetX = 0;
+    protected boolean mergeNormals = false;
+    protected int wallOrDoor = -1;
+    protected int animationID = -1;
+    protected int varbitID = -1;
+    protected int ambient = 0;
+    protected int contrast = 0;
+    protected String[] actions = new String[5];
+    protected int interactType = 2;
+    protected int mapSceneID = -1;
+    protected int blockingMask = 0;
+    protected short[] recolorToReplace;
+    protected boolean shadow = true;
+    protected int modelSizeX = 128;
+    protected int modelSizeHeight = 128;
+    protected int modelSizeY = 128;
+    protected int objectID;
+    protected int offsetHeight = 0;
+    protected int offsetY = 0;
+    protected boolean obstructsGround = false;
+    protected int contouredGround = -1;
+    protected int supportsItems = -1;
+    protected int[] configChangeDest;
+    protected boolean isRotated = false;
+    protected int varpID = -1;
+    protected int ambientSoundId = -1;
+    protected boolean aBool2111 = false;
+    protected int anInt2112 = 0;
+    protected int anInt2113 = 0;
+    protected boolean blocksProjectile = true;
+    protected Map<Integer, Object> params = null;
+
+    public static Map<Long, ModelDefinition> litModelCache = new HashMap<>();
+    public static Map<Integer, ModelDefinition> modelDefCache = new HashMap<>();
+
+    private static Store store;
+
+    // TODO: static store singleton probably
+    static {
+        try {
+            store = new Store(StoreLocation.LOCATION);
+            store.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ModelDefinition getModel(int type, int orientation) {
+        long modelTag;
+        if (this.models == null) {
+            modelTag = (long) (orientation + (this.id << 10));
+        } else {
+            modelTag = (long) (orientation + (type << 3) + (this.id << 10));
+        }
+
+        ModelDefinition litModel = litModelCache.get(modelTag);
+        if (litModel == null) {
+            litModel = getModelDefinition(type, orientation);
+            if (litModel == null) {
+                return null;
+            }
+
+            // TODO: flat shading
+
+            litModelCache.put(modelTag, litModel);
+        }
+
+        return litModel;
+    }
+
+    private ModelDefinition getModelDefinition(int type, int orientation) {
+        ModelDefinition modelDefinition = null;
+        if (this.models == null) {
+            if (type != 10 || this.modelIds == null) {
+                return null;
+            }
+
+            for (int i=0;i<modelIds.length;i++) {
+                int modelId = modelIds[i];
+                if (isRotated) {
+                    modelId += 65536;
+                }
+
+                modelDefinition = modelDefCache.get(modelId);
+                if (modelDefinition == null) {
+
+                    Storage storage = store.getStorage();
+                    Index index = store.getIndex(IndexType.MODELS);
+
+                    Archive archive = index.getArchive(modelId);
+                    if (archive == null) {
+                        return null;
+                    }
+
+                    byte[] contents;
+                    try {
+                        contents = archive.decompress(storage.loadArchive(archive));
+                    } catch (IOException e) {
+                        return null;
+                    }
+
+                    ModelLoader loader = new ModelLoader();
+                    modelDefinition = loader.load(modelId, contents);
+                    if (modelDefinition == null) {
+                        return null;
+                    }
+
+                    if (isRotated) {
+                        modelDefinition.rotateMulti();
+                    }
+
+                    modelDefCache.put(modelId, modelDefinition);
+                }
+            }
+        } else {
+            int modelIdx = -1;
+            for (int i = 0; i < this.models.length; i++) {
+                if (this.models[i] == type) {
+                    modelIdx = i;
+                    break;
+                }
+            }
+
+            if (modelIdx == -1) {
+                return null;
+            }
+
+            int modelId = modelIds[modelIdx];
+            boolean isRotated = this.isRotated ^ orientation > 3;
+            if (isRotated) {
+                modelId += 65536;
+            }
+
+            modelDefinition = modelDefCache.get(modelId);
+            if (modelDefinition == null) {
+                Storage storage = store.getStorage();
+                Index index = store.getIndex(IndexType.MODELS);
+
+                Archive archive = index.getArchive(modelId);
+                if (archive == null) {
+                    return null;
+                }
+
+                byte[] contents;
+                try {
+                    contents = archive.decompress(storage.loadArchive(archive));
+                } catch (IOException e) {
+                    return null;
+                }
+
+                ModelLoader loader = new ModelLoader();
+                modelDefinition = loader.load(modelId, contents);
+                if (modelDefinition == null) {
+                    return null;
+                }
+
+                if (isRotated) {
+                    modelDefinition.rotateMulti();
+                }
+
+                modelDefCache.put(modelId, modelDefinition);
+            }
+        }
+
+        ModelDefinition copy = new ModelDefinition(modelDefinition, orientation == 0, recolorToFind == null, retextureToFind == null);
+
+        orientation &= 0x3;
+        if (orientation == 1) {
+            copy.rotate1();
+        } else if (orientation == 2) {
+            copy.rotate2();
+        } else if (orientation == 3) {
+            copy.rotate3();
+        }
+
+        if (recolorToFind != null) {
+            for (int i = 0; i < recolorToFind.length; i++) {
+                copy.recolor(recolorToFind[i], recolorToReplace[i]);
+            }
+        }
+
+        if (retextureToFind != null) {
+            for (int i = 0; i < retextureToFind.length; i++) {
+                copy.retexture(retextureToFind[i], textureToReplace[i]);
+            }
+        }
+
+        return copy;
+    }
 }

@@ -65,6 +65,7 @@ public class ObjectManager
 		for (FSFile f : files.getFiles())
 		{
 			ObjectDefinition def = loader.load(f.getFileId(), f.getContents());
+
 			objects.put(f.getFileId(), def);
 		}
 	}

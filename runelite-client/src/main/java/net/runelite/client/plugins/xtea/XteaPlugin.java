@@ -26,6 +26,7 @@ package net.runelite.client.plugins.xtea;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -35,6 +36,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.http.api.xtea.XteaClient;
+import net.runelite.http.api.xtea.XteaKey;
 
 @PluginDescriptor(
 	name = "Xtea",
@@ -45,7 +47,7 @@ public class XteaPlugin extends Plugin
 {
 	private final XteaClient xteaClient = new XteaClient();
 
-	private HashMap<Integer, int[]> xteas;
+	private List<XteaKey> xteas;
 	{
 		try
 		{
@@ -81,7 +83,7 @@ public class XteaPlugin extends Plugin
 				continue;
 			}
 
-			xteas.put(region, keys);
+//			xteas.put(region, keys);
 
 			log.debug("Region {} keys {}, {}, {}, {}", region, keys[0], keys[1], keys[2], keys[3]);
 

@@ -46,7 +46,7 @@ final class GrandExchangeOfferUnitPriceComparator implements Comparator {
 				var1.decode(new Buffer(var2));
 			}
 
-			HitSplatDefinition.HitSplatDefinition_cached.put(var1, (long)var0);
+			HitSplatDefinition.HitSplatDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

@@ -6,7 +6,7 @@ import net.runelite.mapping.ObfuscatedSignature;
 
 @ObfuscatedName("ee")
 @Implements("Entity")
-public abstract class Entity extends DualNode {
+public abstract class Renderable extends DualNode {
 	@ObfuscatedName("ci")
 	@ObfuscatedGetter(
 		intValue = 566997565
@@ -14,7 +14,7 @@ public abstract class Entity extends DualNode {
 	@Export("height")
 	public int height;
 
-	protected Entity() {
+	protected Renderable() {
 		this.height = 1000;
 	}
 
@@ -31,10 +31,10 @@ public abstract class Entity extends DualNode {
 	@ObfuscatedName("cq")
 	@Export("draw")
 	void draw(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, long var9) {
-		Model var11 = this.getModel();
-		if (var11 != null) {
-			this.height = var11.height;
-			var11.draw(var1, var2, var3, var4, var5, var6, var7, var8, var9);
+		Model model = this.getModel();
+		if (model != null) {
+			this.height = model.height;
+			model.draw(var1, var2, var3, var4, var5, var6, var7, var8, var9);
 		}
 
 	}

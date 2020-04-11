@@ -1,14 +1,12 @@
-import impl.SceneImpl;
-import impl.TilePaintImpl;
-import impl.TileImpl;
-import net.runelite.api.Constants;
-import net.runelite.api.Scene;
+import impl.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import net.runelite.api.*;
 import net.runelite.cache.*;
 import net.runelite.cache.TextureManager;
-import net.runelite.cache.definitions.MapDefinition;
-import net.runelite.cache.definitions.OverlayDefinition;
-import net.runelite.cache.definitions.SpriteDefinition;
-import net.runelite.cache.definitions.UnderlayDefinition;
+import net.runelite.cache.definitions.*;
+import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.definitions.loaders.MapLoader;
 import net.runelite.cache.definitions.loaders.OverlayLoader;
 import net.runelite.cache.definitions.loaders.SpriteLoader;
@@ -16,6 +14,8 @@ import net.runelite.cache.definitions.loaders.UnderlayLoader;
 import net.runelite.cache.fs.*;
 import net.runelite.cache.item.ColorPalette;
 import net.runelite.cache.item.RSTextureProvider;
+import net.runelite.cache.region.Location;
+import net.runelite.cache.region.LocationType;
 import net.runelite.cache.region.Region;
 import net.runelite.cache.region.RegionLoader;
 import net.runelite.cache.util.Djb2;
@@ -26,18 +26,15 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapPreparer {
 
-    private static final Logger logger = LoggerFactory.getLogger(MapPreparer.class);
-
-    private static final int MAP_SCALE = 4; // this squared is the number of pixels per map square
     private static final int MAPICON_MAX_WIDTH = 5; // scale minimap icons down to this size so they fit..
     private static final int MAPICON_MAX_HEIGHT = 6;
-    private static final int BLEND = 5; // number of surrounding tiles for ground blending
 
-    private static int[] colorPalette = new ColorPalette(0.9d, 0, 512).getColorPalette();
+    private static int[] colorPalette = new ColorPalette(0.7d, 0, 512).getColorPalette();
 
     private static int[][] TILE_SHAPE_2D = new int[][]{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1}, {1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1}, {0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1}, {1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1}};
     private static int[][] TILE_ROTATION_2D = new int[][]{{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, {12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3}, {15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}, {3, 7, 11, 15, 2, 6, 10, 14, 1, 5, 9, 13, 0, 4, 8, 12}};
@@ -53,86 +50,73 @@ public class MapPreparer {
 
     private MapLoader mapLoader;
     private RegionLoader regionLoader;
-    private final AreaManager areas;
-    private final SpriteManager sprites;
+    private ObjectManager objectManager;
     private RSTextureProvider rsTextureProvider;
-    private final ObjectManager objectManager;
 
-    public MapPreparer(Store store) {
+    public MapPreparer(Store store, RSTextureProvider textureProvider) {
         this.store = store;
-        this.areas = new AreaManager(store);
-        this.sprites = new SpriteManager(store);
+        this.rsTextureProvider = textureProvider;
+        mapLoader = new MapLoader(store);
+        regionLoader = new RegionLoader(store);
         objectManager = new ObjectManager(store);
     }
 
     public void load() throws IOException {
         loadUnderlays(store);
         loadOverlays(store);
-        objectManager.load();
-
-        TextureManager textureManager = new TextureManager(store);
-        textureManager.load();
-        rsTextureProvider = new RSTextureProvider(textureManager, sprites);
-
-        mapLoader = new MapLoader(store);
-
-        loadRegions(store);
-        areas.load();
-        sprites.load();
         loadSprites();
+        objectManager.load();
     }
 
-    public void loadTiles(Region region, SceneImpl scene) {
-//        int x = 3500;
-//        int y = 3500;
-        int baseX = region.getBaseX();
-        int baseY = region.getBaseY();
+    public void loadTiles(SceneImpl scene, int midX, int midY) {
+        int baseX = midX - Constants.SCENE_SIZE/2; // half the scene size to paint 52 in all directions
+        int baseY = midY - Constants.SCENE_SIZE/2;
 
-        int len = 104;
+        int len = Constants.SCENE_SIZE;
         int[] hues = new int[len];
         int[] sats = new int[len];
         int[] light = new int[len];
         int[] mul = new int[len];
         int[] num = new int[len];
 
-        int[][] tileColors = new int[105][105];
+        int[][] tileColors = new int[Constants.SCENE_SIZE+1][Constants.SCENE_SIZE+1];
 
         int var9 = (int) Math.sqrt(5100.0D);
         int var10 = var9 * 768 >> 8;
 
         for (int z = 0; z < Constants.MAX_Z; z++) {
+            for (int y = 1; y < Constants.SCENE_SIZE-1; y++) {
+                for (int x = 1; x < Constants.SCENE_SIZE-1; x++) {
+                    int worldX = baseX + x;
+                    int worldY = baseY + y;
 
-            for (int y = 1; y < 103; y++) {
-                for (int x = 1; x < 103; x++) {
-//                    Tile t = mapLoader.getWorldTile(z, x, y);
-                    Region r = regionLoader.findRegionForWorldCoordinates(baseX + x, baseY + y);
 
-                    int xHeightDiff = r.getTileHeight(0, convert(x + 1), convert(y)) - r.getTileHeight(0, convert(x - 1), convert(y));
-                    int yHeightDiff = r.getTileHeight(0, convert(x), convert(y + 1)) - r.getTileHeight(0, convert(x), convert(y - 1));
+                    int xHeightDiff = mapLoader.getWorldTile(z, worldX + 1, worldY).height - mapLoader.getWorldTile(z, worldX - 1, worldY).height;
+                    int yHeightDiff = mapLoader.getWorldTile(z, worldX, worldY + 1).height - mapLoader.getWorldTile(z, worldX, worldY - 1).height;
                     int diff = (int) Math.sqrt((double) xHeightDiff * xHeightDiff + yHeightDiff * yHeightDiff + 65536);
                     int var16 = (xHeightDiff << 8) / diff;
                     int var17 = 65536 / diff;
                     int var18 = (yHeightDiff << 8) / diff;
                     int var19 = (var16 * -50 + var18 * -50 + var17 * -10) / var10 + 96;
 
-                    int wSetting = r.getTileSetting(0, convert(x - 1), convert(y));
-                    int sSetting = r.getTileSetting(0, convert(x), convert(y - 1));
-                    int eSetting = r.getTileSetting(0, convert(x + 1), convert(y));
-                    int nSetting = r.getTileSetting(0, convert(x), convert(y + 1));
-                    int mySetting = r.getTileSetting(0, convert(x), convert(y));
+                    int wSetting = mapLoader.getWorldTile(0, worldX - 1, worldY).settings;
+                    int sSetting = mapLoader.getWorldTile(0, worldX, worldY - 1).settings;
+                    int eSetting = mapLoader.getWorldTile(0, worldX + 1, worldY).settings;
+                    int nSetting = mapLoader.getWorldTile(0, worldX, worldY + 1).settings;
+                    int mySetting = mapLoader.getWorldTile(0, worldX, worldY).settings;
 
                     int var20 = (wSetting >> 2 + sSetting >> 2 + eSetting >> 3 + nSetting >> 3 + mySetting >> 1);
                     tileColors[x][y] = var19 - var20;
                 }
             }
 
-            for (int xi = -5; xi < 109; ++xi) {
-                for (int yi = 0; yi < 104; ++yi) {
+            for (int xi = -5; xi < Constants.SCENE_SIZE+5; ++xi) {
+                for (int yi = 0; yi < Constants.SCENE_SIZE; ++yi) {
                     int xr = xi + 5;
-                    if (xr >= 0 && xr < 104) {
-                        Region r = regionLoader.findRegionForWorldCoordinates(baseX + xr, baseY + yi);
-                        if (r != null) {
-                            int underlayId = r.getUnderlayId(z, convert(xr), convert(yi));
+                    if (xr >= 0 && xr < Constants.SCENE_SIZE) {
+                        MapDefinition.Tile tile = mapLoader.getWorldTile(z, baseX + xr, baseY + yi);
+                        if (tile != null) {
+                            int underlayId = tile.underlayId;
                             if (underlayId > 0) {
                                 UnderlayDefinition underlay = findUnderlay(underlayId - 1);
                                 hues[yi] += underlay.getHue();
@@ -145,10 +129,10 @@ public class MapPreparer {
                     }
 
                     int xl = xi - 5;
-                    if (xl >= 0 && xl < 104) {
-                        Region r = regionLoader.findRegionForWorldCoordinates(baseX + xl, baseY + yi);
-                        if (r != null) {
-                            int underlayId = r.getUnderlayId(z, convert(xl), convert(yi));
+                    if (xl >= 0 && xl < Constants.SCENE_SIZE) {
+                        MapDefinition.Tile tile = mapLoader.getWorldTile(z, baseX + xl, baseY + yi);
+                        if (tile != null) {
+                            int underlayId = tile.underlayId;
                             if (underlayId > 0) {
                                 UnderlayDefinition underlay = findUnderlay(underlayId - 1);
                                 hues[yi] -= underlay.getHue();
@@ -161,16 +145,16 @@ public class MapPreparer {
                     }
                 }
 
-                if (xi >= 1 && xi < 103) {
+                if (xi >= 1 && xi < Constants.SCENE_SIZE-1) {
                     int runningHues = 0;
                     int runningSat = 0;
                     int runningLight = 0;
                     int runningMultiplier = 0;
                     int runningNumber = 0;
 
-                    for (int yi = -5; yi < 109; ++yi) {
+                    for (int yi = -5; yi < Constants.SCENE_SIZE+5; ++yi) {
                         int yu = yi + 5;
-                        if (yu >= 0 && yu < 104) {
+                        if (yu >= 0 && yu < Constants.SCENE_SIZE) {
                             runningHues += hues[yu];
                             runningSat += sats[yu];
                             runningLight += light[yu];
@@ -179,7 +163,7 @@ public class MapPreparer {
                         }
 
                         int yd = yi - 5;
-                        if (yd >= 0 && yd < 104) {
+                        if (yd >= 0 && yd < Constants.SCENE_SIZE) {
                             runningHues -= hues[yd];
                             runningSat -= sats[yd];
                             runningLight -= light[yd];
@@ -187,17 +171,17 @@ public class MapPreparer {
                             runningNumber -= num[yd];
                         }
 
-                        if (yi >= 1 && yi < 103) {
-                            Region r = regionLoader.findRegionForWorldCoordinates(baseX + xi, baseY + yi);
-                            if (r != null) {
-                                int underlayId = r.getUnderlayId(z, convert(xi), convert(yi));
-                                int overlayId = r.getOverlayId(z, convert(xi), convert(yi));
+                        if (yi >= 1 && yi < Constants.SCENE_SIZE-1) {
+                            MapDefinition.Tile tile = mapLoader.getWorldTile(z, baseX + xi, baseY + yi);
+                            if (tile != null) {
+                                int underlayId = tile.getUnderlayId() & 0xFF;
+                                int overlayId = tile.getOverlayId() & 0xFF;
 
                                 if (underlayId > 0 || overlayId > 0) {
-                                    int swHeight = r.getTileHeight(z, convert(xi), convert(yi));
-                                    int seHeight = r.getTileHeight(z, convert(xi + 1), convert(yi));
-                                    int neHeight = r.getTileHeight(z, convert(xi + 1), convert(yi + 1));
-                                    int nwHeight = r.getTileHeight(z, convert(xi), convert(yi + 1));
+                                    int swHeight = mapLoader.getWorldTile(z, baseX + xi, baseY + yi).height;
+                                    int seHeight = mapLoader.getWorldTile(z, baseX + xi + 1, baseY + yi).height;
+                                    int neHeight = mapLoader.getWorldTile(z, baseX + xi + 1, baseY + yi + 1).height;
+                                    int nwHeight = mapLoader.getWorldTile(z, baseX + xi, baseY + yi + 1).height;
 
                                     int swColor = tileColors[xi][yi];
                                     int seColor = tileColors[xi + 1][yi];
@@ -207,9 +191,9 @@ public class MapPreparer {
                                     int underlayHsl = -1;
 
                                     if (underlayId > 0) {
-                                        int avgHue = runningHues * 256 / runningMultiplier;
-                                        int avgSat = runningSat / runningNumber;
-                                        int avgLight = runningLight / runningNumber;
+                                        int avgHue = runningHues * 256 / Math.max(1, runningMultiplier);
+                                        int avgSat = runningSat / Math.max(1, runningNumber);
+                                        int avgLight = runningLight / Math.max(1, runningNumber);
                                         // randomness is added to avgHue here
 
                                         rgb = hslToRgb(avgHue, avgSat, avgLight);
@@ -232,15 +216,12 @@ public class MapPreparer {
                                     if (overlayId == 0) {
                                         scene.addTile(z, xi, yi, 0, 0, -1, swHeight, seHeight, neHeight, nwHeight, method4220(rgb, swColor), method4220(rgb, seColor), method4220(rgb, neColor), method4220(rgb, nwColor), 0, 0, 0, 0, underlayRgb, 0);
                                     } else {
-                                        int overlayPath = r.getOverlayPath(z, convert(xi), convert(yi)) + 1;
-                                        int overlayRotation = r.getOverlayRotation(z, convert(xi), convert(yi));
+                                        int overlayPath = tile.getOverlayPath() + 1;
+                                        int overlayRotation = tile.getOverlayRotation();
 
                                         OverlayDefinition overlayDefinition = findOverlay(overlayId - 1);
                                         int overlayTexture = overlayDefinition.getTexture();
                                         int overlayHsl;
-
-                                        int field550 = (int) (Math.random() * 17.0D) - 8;
-                                        int field548 = (int) (Math.random() * 33.0D) - 16;
 
                                         if (overlayTexture >= 0) {
                                             rgb = rsTextureProvider.getAverageTextureRGB(overlayTexture);
@@ -252,8 +233,8 @@ public class MapPreparer {
                                         } else {
                                             overlayHsl = hslToRgb(overlayDefinition.getHue(), overlayDefinition.getSaturation(), overlayDefinition.getLightness());
 
-                                            int hue = overlayDefinition.getHue() + field550 & 255;
-                                            int lightness = overlayDefinition.getLightness() + field548;
+                                            int hue = overlayDefinition.getHue() & 255;
+                                            int lightness = overlayDefinition.getLightness();
                                             if (lightness < 0) {
                                                 lightness = 0;
                                             } else if (lightness > 255) {
@@ -270,8 +251,8 @@ public class MapPreparer {
                                         }
 
                                         if (overlayDefinition.getSecondaryRgbColor() != -1) {
-                                            int hue = overlayDefinition.getOtherHue() + field550 & 255;
-                                            int lightness = overlayDefinition.getOtherLightness() + field548;
+                                            int hue = overlayDefinition.getOtherHue() & 255;
+                                            int lightness = overlayDefinition.getOtherLightness();
                                             if (lightness < 0) {
                                                 lightness = 0;
                                             } else if (lightness > 255) {
@@ -291,100 +272,89 @@ public class MapPreparer {
                 }
             }
         }
+    }
 
-        int z = 1;
-        int var3 = 2;
-        int var4 = 4;
-        int var11 = 0;
-        int var12 = 0;
+    public void loadObjects(SceneImpl scene, int midX, int midY) {
+        int baseX = midX - Constants.SCENE_SIZE/2; // half the scene size to paint 52 in all directions
+        int baseY = midY - Constants.SCENE_SIZE/2;
 
-        int[][][] renderFlags = new int[4][105][105];
+        for (int y = 1; y < Constants.SCENE_SIZE-1; y++) {
+            for (int x = 1; x < Constants.SCENE_SIZE - 1; x++) {
+                int worldX = baseX + x;
+                int worldY = baseY + y;
 
-        for (int renderLevel = 0; renderLevel < 4; ++renderLevel) {
-            if (renderLevel > 0) {
-                z <<= 3;
-                var3 <<= 3;
-                var4 <<= 3;
-            }
+                Region r = regionLoader.loadRegionFromWorldCoordinates(worldX, worldY);
+                if (r == null) {
+                    continue;
+                }
 
-            for (int zi = 0; zi <= renderLevel; ++zi) {
-                for (int yi = 0; yi <= 104; ++yi) {
-                    for (int xi = 0; xi <= 104; ++xi) {
-                        short var46;
-                        if ((renderFlags[zi][xi][yi] & z) != 0) {
-                            var9 = yi;
-                            var10 = yi;
-                            var11 = zi;
+                List<Location> locations = r.getLocationsAt(0, worldX, worldY);
+                if (locations == null || locations.size() == 0) {
+                    continue;
+                }
 
-                            for (var12 = zi; var9 > 0 && (renderFlags[zi][xi][var9 - 1] & z) != 0; --var9) {
+                int finalX = x;
+                int finalY = y;
+                locations.forEach(loc -> {
+                    ObjectDefinition objectDefinition = objectManager.getObject(loc.getId());
+                    ModelDefinition modelDefinition = objectDefinition.getModel(loc.getType(), loc.getOrientation());
+
+//                    int width;
+//                    int length;
+//                    if (loc.getOrientation() != 1 && loc.getOrientation() != 3) {
+//                        width = objectDefinition.getSizeX();
+//                        length = objectDefinition.getSizeY();
+//                    } else {
+//                        width = objectDefinition.getSizeY();
+//                        length = objectDefinition.getSizeX();
+//                    }
+
+                    int z = loc.getPosition().getZ();
+//                    int xSize = (finalX << 7) + (width << 6);
+//                    int ySize = (finalY << 7) + (length << 6);
+
+                    int swHeight = mapLoader.getWorldTile(z, baseX + finalX, baseY + finalY).height;
+                    int seHeight = mapLoader.getWorldTile(z, baseX + finalX +1, baseY + finalY).height;
+                    int neHeight = mapLoader.getWorldTile(z, baseX + finalX +1, baseY + finalY + 1).height;
+                    int nwHeight = mapLoader.getWorldTile(z, baseX + finalX, baseY + finalY +1).height;
+
+                    int height = swHeight + seHeight + neHeight + nwHeight >> 2;
+
+                    if (loc.getType() == LocationType.FLOOR_DECORATION.getValue()) {
+                        if (modelDefinition != null) {
+                            ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+
+                            if (objectDefinition.getContouredGround() >= 0) {
+//                               model = model.contourGround(mapLoader, xSize, height, ySize, true, objectDefinition.getContouredGround(), worldX, worldY);
                             }
 
-                            while (var10 < 104 && (renderFlags[zi][xi][var10 + 1] & z) != 0) {
-                                ++var10;
-                            }
-
-                            label465:
-                            while (var11 > 0) {
-                                for (int var13 = var9; var13 <= var10; ++var13) {
-                                    if ((renderFlags[var11 - 1][xi][var13] & z) == 0) {
-                                        break label465;
-                                    }
-                                }
-
-                                --var11;
-                            }
-
-                            label454:
-                            while (var12 < renderLevel) {
-                                for (int var13 = var9; var13 <= var10; ++var13) {
-                                    if ((renderFlags[var12 + 1][xi][var13] & z) == 0) {
-                                        break label454;
-                                    }
-                                }
-
-                                ++var12;
-                            }
-
-                            int var13 = (var10 - var9 + 1) * (var12 + 1 - var11);
-                            if (var13 >= 8) {
-                                var46 = 240;
-                                Region r = regionLoader.findRegionForWorldCoordinates(baseX + xi, baseY + yi);
-
-                                int var15 = r.getTileHeight(var12, convert(xi), convert(var9)) - var46;
-                                int var16 = r.getTileHeight(var11, convert(xi), convert(var9));
-                                scene.addOccluder(renderLevel, 1, xi * 128, xi * 128, var9 * 128, var10 * 128 + 128, var15, var16);
-
-                                for (int var17 = var11; var17 <= var12; ++var17) {
-                                    for (int var18 = var9; var18 <= var10; ++var18) {
-                                        int[] var10000 = renderFlags[var17][xi];
-                                        var10000[var18] &= ~z;
-                                    }
-                                }
-                            }
+                            scene.newFloorDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, 0, 0);
                         }
                     }
-                }
+                    if (loc.getType() == LocationType.INTERACTABLE_WALL_DECORATION.getValue()) {
+                        if (modelDefinition != null) {
+                            ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                            int[] orientationTransform = {1, 2, 4, 8};
+                            scene.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, orientationTransform[loc.getOrientation()], 0, 0, 0);
+                        }
+                    }
+
+                    if (loc.getType() == LocationType.INTERACTABLE.getValue()) {
+                        if (modelDefinition != null) {
+                            ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                            scene.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, 0, 0);
+                        }
+                    }
+
+                    if (loc.getType() == LocationType.DIAGONAL_INTERACTABLE.getValue()) {
+                        if (modelDefinition != null) {
+                            ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                            scene.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, 0, 0);
+                        }
+                    }
+                });
             }
         }
-    }
-
-    private static int convert(int d) {
-        if (d >= 0) {
-            return d % 64;
-        } else {
-            return 64 - -(d % 64) - 1;
-        }
-    }
-
-    private void loadRegions(Store store) throws IOException {
-        regionLoader = new RegionLoader(store);
-        regionLoader.loadRegions();
-        regionLoader.calculateBounds();
-
-        logger.info("North most region: {}", regionLoader.getLowestY().getBaseY());
-        logger.info("South most region: {}", regionLoader.getHighestY().getBaseY());
-        logger.info("West most region:  {}", regionLoader.getLowestX().getBaseX());
-        logger.info("East most region:  {}", regionLoader.getHighestX().getBaseX());
     }
 
     private void loadUnderlays(Store store) throws IOException {

@@ -282,7 +282,7 @@ public class WorldMapElement extends DualNode {
 			} else {
 				var2 = MusicPatchNode2.SpriteBuffer_getSprite(WorldMapElement_archive, var1, 0);
 				if (var2 != null) {
-					WorldMapElement_cachedSprites.put(var2, (long)var1);
+					WorldMapElement_cachedSprites.put((long)var1, var2);
 				}
 
 				return var2;
@@ -317,7 +317,7 @@ public class WorldMapElement extends DualNode {
 				var1.decode(new Buffer(var2));
 			}
 
-			KitDefinition.KitDefinition_cached.put(var1, (long)var0);
+			KitDefinition.KitDefinition_cached.put((long)var0, var1);
 			return var1;
 		}
 	}

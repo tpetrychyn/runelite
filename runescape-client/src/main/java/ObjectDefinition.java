@@ -576,47 +576,47 @@ public class ObjectDefinition extends DualNode {
 		signature = "(II[[IIIII)Lee;",
 		garbageValue = "-557802915"
 	)
-	@Export("getEntity")
-	public final Entity getEntity(int var1, int var2, int[][] var3, int var4, int var5, int var6) {
-		long var7;
+	@Export("getRenderable")
+	public final Renderable getRenderable(int type, int orientation, int[][] tileHeights, int offsetX, int height, int offsetY) {
+		long modelTag;
 		if (this.models == null) {
-			var7 = (long)(var2 + (this.id << 10));
+			modelTag = (long)(orientation + (this.id << 10));
 		} else {
-			var7 = (long)(var2 + (var1 << 3) + (this.id << 10));
+			modelTag = (long)(orientation + (type << 3) + (this.id << 10));
 		}
 
-		Object var9 = (Entity)ObjectDefinition_cachedEntities.get(var7);
-		if (var9 == null) {
-			ModelData var10 = this.getModelData(var1, var2);
-			if (var10 == null) {
+		Object obj = (Renderable)ObjectDefinition_cachedEntities.get(modelTag);
+		if (obj == null) {
+			ModelData modelData = this.getModelData(type, orientation);
+			if (modelData == null) {
 				return null;
 			}
 
 			if (!this.nonFlatShading) {
-				var9 = var10.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
+				obj = modelData.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
 			} else {
-				var10.ambient = (short)(this.ambient + 64);
-				var10.contrast = (short)(this.contrast + 768);
-				var10.calculateVertexNormals();
-				var9 = var10;
+				modelData.ambient = (short)(this.ambient + 64);
+				modelData.contrast = (short)(this.contrast + 768);
+				modelData.calculateVertexNormals();
+				obj = modelData;
 			}
 
-			ObjectDefinition_cachedEntities.put((DualNode)var9, var7);
+			ObjectDefinition_cachedEntities.put(modelTag, (DualNode)obj);
 		}
 
 		if (this.nonFlatShading) {
-			var9 = ((ModelData)var9).method2885();
+			obj = ((ModelData)obj).method2885();
 		}
 
 		if (this.clipType >= 0) {
-			if (var9 instanceof Model) {
-				var9 = ((Model)var9).contourGround(var3, var4, var5, var6, true, this.clipType);
-			} else if (var9 instanceof ModelData) {
-				var9 = ((ModelData)var9).method2886(var3, var4, var5, var6, true, this.clipType);
+			if (obj instanceof Model) {
+				obj = ((Model)obj).contourGround(tileHeights, offsetX, height, offsetY, true, this.clipType);
+			} else if (obj instanceof ModelData) {
+				obj = ((ModelData)obj).method2886(tileHeights, offsetX, height, offsetY, true, this.clipType);
 			}
 		}
 
-		return (Entity)var9;
+		return (Renderable)obj;
 	}
 
 	@ObfuscatedName("t")
@@ -641,7 +641,7 @@ public class ObjectDefinition extends DualNode {
 			}
 
 			var9 = var10.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
-			ObjectDefinition_cachedModels.put(var9, var7);
+			ObjectDefinition_cachedModels.put(var7, var9);
 		}
 
 		if (this.clipType >= 0) {
@@ -673,7 +673,7 @@ public class ObjectDefinition extends DualNode {
 			}
 
 			var11 = var12.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
-			ObjectDefinition_cachedModels.put(var11, var9);
+			ObjectDefinition_cachedModels.put(var9, var11);
 		}
 
 		if (var7 == null && this.clipType == -1) {
@@ -699,13 +699,13 @@ public class ObjectDefinition extends DualNode {
 		garbageValue = "179271223"
 	)
 	@Export("getModelData")
-	final ModelData getModelData(int var1, int var2) {
-		ModelData var3 = null;
+	final ModelData getModelData(int type, int orientation) {
+		ModelData modelData = null;
 		boolean var4;
-		int var5;
+		int modelId;
 		int var7;
 		if (this.models == null) {
-			if (var1 != 10) {
+			if (type != 10) {
 				return null;
 			}
 
@@ -714,72 +714,72 @@ public class ObjectDefinition extends DualNode {
 			}
 
 			var4 = this.isRotated;
-			if (var1 == 2 && var2 > 3) {
+			if (type == 2 && orientation > 3) {
 				var4 = !var4;
 			}
 
-			var5 = this.modelIds.length;
+			modelId = this.modelIds.length;
 
-			for (int var6 = 0; var6 < var5; ++var6) {
-				var7 = this.modelIds[var6];
+			for (int i = 0; i < modelId; ++i) {
+				int modelId = this.modelIds[i];
 				if (var4) {
-					var7 += 65536;
+					modelId += 65536;
 				}
 
-				var3 = (ModelData)ObjectDefinition_cachedModelData.get((long)var7);
-				if (var3 == null) {
-					var3 = ModelData.ModelData_get(ObjectDefinition_modelsArchive, var7 & 65535, 0);
-					if (var3 == null) {
+				modelData = (ModelData)ObjectDefinition_cachedModelData.get((long)modelId);
+				if (modelData == null) {
+					modelData = ModelData.ModelData_get(ObjectDefinition_modelsArchive, modelId & 65535, 0);
+					if (modelData == null) {
 						return null;
 					}
 
 					if (var4) {
-						var3.method2895();
+						modelData.rotateModel();
 					}
 
-					ObjectDefinition_cachedModelData.put(var3, (long)var7);
+					ObjectDefinition_cachedModelData.put((long)modelId, modelData);
 				}
 
-				if (var5 > 1) {
-					field3376[var6] = var3;
+				if (modelId > 1) {
+					field3376[i] = modelData;
 				}
 			}
 
-			if (var5 > 1) {
-				var3 = new ModelData(field3376, var5);
+			if (modelId > 1) {
+				modelData = new ModelData(field3376, modelId);
 			}
 		} else {
-			int var9 = -1;
+			int modelIdx = -1;
 
-			for (var5 = 0; var5 < this.models.length; ++var5) {
-				if (this.models[var5] == var1) {
-					var9 = var5;
+			for (int i = 0; i < this.models.length; ++i) {
+				if (this.models[i] == type) {
+					modelIdx = i;
 					break;
 				}
 			}
 
-			if (var9 == -1) {
+			if (modelIdx == -1) {
 				return null;
 			}
 
-			var5 = this.modelIds[var9];
-			boolean var10 = this.isRotated ^ var2 > 3;
+			modelId = this.modelIds[modelIdx];
+			boolean var10 = this.isRotated ^ orientation > 3;
 			if (var10) {
-				var5 += 65536;
+				modelId += 65536;
 			}
 
-			var3 = (ModelData)ObjectDefinition_cachedModelData.get((long)var5);
-			if (var3 == null) {
-				var3 = ModelData.ModelData_get(ObjectDefinition_modelsArchive, var5 & 65535, 0);
-				if (var3 == null) {
+			modelData = (ModelData)ObjectDefinition_cachedModelData.get((long)modelId);
+			if (modelData == null) {
+				modelData = ModelData.ModelData_get(ObjectDefinition_modelsArchive, modelId & 65535, 0);
+				if (modelData == null) {
 					return null;
 				}
 
 				if (var10) {
-					var3.method2895();
+					modelData.rotateModel();
 				}
 
-				ObjectDefinition_cachedModelData.put(var3, (long)var5);
+				ObjectDefinition_cachedModelData.put((long)modelId, modelData);
 			}
 		}
 
@@ -796,18 +796,18 @@ public class ObjectDefinition extends DualNode {
 			var11 = true;
 		}
 
-		ModelData var8 = new ModelData(var3, var2 == 0 && !var4 && !var11, this.recolorFrom == null, this.retextureFrom == null, true);
-		if (var1 == 4 && var2 > 3) {
+		ModelData var8 = new ModelData(modelData, orientation == 0 && !var4 && !var11, this.recolorFrom == null, this.retextureFrom == null);
+		if (type == 4 && orientation > 3) {
 			var8.method2891(256);
 			var8.changeOffset(45, 0, -45);
 		}
 
-		var2 &= 3;
-		if (var2 == 1) {
+		orientation &= 3;
+		if (orientation == 1) {
 			var8.method2888();
-		} else if (var2 == 2) {
+		} else if (orientation == 2) {
 			var8.method2889();
-		} else if (var2 == 3) {
+		} else if (orientation == 3) {
 			var8.method2910();
 		}
 
