@@ -1,3 +1,5 @@
+package renderer;
+
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.KeyEvent;
@@ -8,23 +10,19 @@ import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.Animator;
 import config.AntiAliasingMode;
 import eventHandlers.MouseListener;
-import models.SceneImpl;
-import models.SceneTile;
-import models.WallDecoration;
 import jogamp.nativewindow.SurfaceScaleUtils;
 import layoutControllers.MainController;
 import lombok.extern.slf4j.Slf4j;
+import scene.SceneTile;
+import models.WallDecoration;
 import net.runelite.api.*;
 import net.runelite.cache.SpriteManager;
-import net.runelite.cache.definitions.TextureDefinition;
 import net.runelite.cache.fs.Store;
+import net.runelite.cache.fs.StoreProvider;
 import net.runelite.cache.item.RSTextureProvider;
-import net.runelite.cache.region.Region;
-import renderer.Camera;
+import scene.Scene;
 import scene.SceneRegionBuilder;
-import template.Template;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -36,42 +34,16 @@ public class MapEditor implements GLEventListener, KeyListener {
     private static final int MAX_TRIANGLE = 4096;
     private static final int SMALL_TRIANGLE_COUNT = 512;
     private static final int FLAG_SCENE_BUFFER = Integer.MIN_VALUE;
-    static final int MAX_DISTANCE = 950;
+    static final int MAX_DISTANCE = 240;
 
     private MouseListener mouseListener;
 
     private SceneUploader sceneUploader = new SceneUploader();
-    private SceneImpl scene = new SceneImpl();
     private TextureManager textureManager = new TextureManager();
     private RSTextureProvider textureProvider;
-    private MapPreparer mapPreparer;
+    private Scene scene;
 
     private GL4 gl;
-
-//    static final String LINUX_VERSION_HEADER =
-//            "#version 420\n" +
-//                    "#extension GL_ARB_compute_shader : require\n" +
-//                    "#extension GL_ARB_shader_storage_buffer_object : require\n" +
-//                    "#extension GL_ARB_explicit_attrib_location : require\n";
-//    static final String WINDOWS_VERSION_HEADER = "#version 430\n";
-//
-//    static final Shader PROGRAM = new Shader()
-//            .add(GL4.GL_VERTEX_SHADER, "gpu/vert.glsl")
-//            .add(GL4.GL_GEOMETRY_SHADER, "gpu/geom.glsl")
-//            .add(GL4.GL_FRAGMENT_SHADER, "gpu/frag.glsl");
-//
-//    static final Shader COMPUTE_PROGRAM = new Shader()
-//            .add(GL4.GL_COMPUTE_SHADER, "gpu/comp.glsl");
-//
-//    static final Shader SMALL_COMPUTE_PROGRAM = new Shader()
-//            .add(GL4.GL_COMPUTE_SHADER, "gpu/comp_small.glsl");
-//
-//    static final Shader UNORDERED_COMPUTE_PROGRAM = new Shader()
-//            .add(GL4.GL_COMPUTE_SHADER, "gpu/comp_unordered.glsl");
-//
-//    static final Shader UI_PROGRAM = new Shader()
-//            .add(GL4.GL_VERTEX_SHADER, "gpu/vertui.glsl")
-//            .add(GL4.GL_FRAGMENT_SHADER, "gpu/fragui.glsl");
 
     private int glProgram;
     private int glComputeProgram;
@@ -172,26 +144,26 @@ public class MapEditor implements GLEventListener, KeyListener {
     private int uniBlockMain;
     private int uniSmoothBanding;
 
-    private MainController mainController;
+    Animator animator;
+    SceneRegionBuilder sceneRegionBuilder;
 
-    public void LoadMap(MainController mainController) {
+    public NewtCanvasJFX LoadMap(MainController mainController) {
         try {
-            SceneRegionBuilder sceneRegionBuilder = new SceneRegionBuilder();
-            sceneRegionBuilder.loadTiles(10038);
-
-            File base = StoreLocation.LOCATION;
-            Store store = new Store(base);
-            store.load();
+            Store store = StoreProvider.getStore();
             SpriteManager sprites = new SpriteManager(store);
             net.runelite.cache.TextureManager textureManager = new net.runelite.cache.TextureManager(store);
+
             textureManager.load();
+
             textureProvider = new RSTextureProvider(textureManager, sprites);
             sprites.load();
 
-            mapPreparer = new MapPreparer(store, textureProvider);
-            mapPreparer.load();
+            sceneRegionBuilder = new SceneRegionBuilder(textureProvider);
+            scene = new Scene(sceneRegionBuilder, 10038, 5);
 
-            scene = new SceneImpl();
+            // center camera in scene
+            camera.setCameraX(Perspective.LOCAL_TILE_SIZE * Constants.REGION_SIZE * scene.getRadius() / 2);
+            camera.setCameraY(Perspective.LOCAL_TILE_SIZE * Constants.REGION_SIZE * scene.getRadius() / 2);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -235,27 +207,25 @@ public class MapEditor implements GLEventListener, KeyListener {
         });
         window.addMouseListener(mouseListener);
 
-
-//        window.setSize(800, 600);
-//        window.setVisible(true);
-
         NewtCanvasJFX glCanvas = new NewtCanvasJFX(window);
         glCanvas.setWidth(800);
         glCanvas.setHeight(600);
-        mainController.getGroup().getChildren().add(glCanvas);
 
-        this.mainController = mainController;
+        animator = new Animator(window);
+        animator.setUpdateFPSFrames(1, null);
+        animator.start();
+
         mainController.setCamera(camera);
         mainController.setMouseListener(mouseListener);
-
-        Animator animator = new Animator(window);
-        animator.start();
+        mainController.setAnimator(animator);
 
         lastViewportWidth = lastViewportHeight = lastCanvasWidth = lastCanvasHeight = -1;
         lastStretchedCanvasWidth = lastStretchedCanvasHeight = -1;
         lastAntiAliasingMode = null;
 
         textureArrayId = -1;
+
+        return glCanvas;
     }
 
     @Override
@@ -289,28 +259,28 @@ public class MapEditor implements GLEventListener, KeyListener {
 
         int cameraXTileMin = 0;
         int cameraYTileMin = 0;
-        int cameraXTileMax = Constants.SCENE_SIZE;
-        int cameraYTileMax = Constants.SCENE_SIZE;
+        int cameraXTileMax = scene.getRadius() * Constants.REGION_SIZE;
+        int cameraYTileMax = scene.getRadius() * Constants.REGION_SIZE;
 
-        SceneTile[][] tiles = scene.getTiles()[0];
-        SceneTile tile;
+        // from my position, which tiles can I see
         for (int x = -MAX_DISTANCE; x <= 0; x++) {
             int xMin = x + screenCenterX;
             int xMax = screenCenterX - x;
             if (xMin >= cameraXTileMin || xMax < cameraXTileMax) {
                 for (int y = -MAX_DISTANCE; y <= 0; y++) {
+                    SceneTile tile;
                     int yMin = y + screenCenterY;
                     int yMax = screenCenterY - y;
                     if (xMin >= cameraXTileMin) {
                         if (yMin >= cameraYTileMin) {
-                            tile = tiles[xMin][yMin];
+                            tile = scene.getTile(0, xMin, yMin);
                             if (tile != null) {
                                 this.drawTile(tile);
                             }
                         }
 
                         if (yMax < cameraYTileMax) {
-                            tile = tiles[xMin][yMax];
+                            tile = scene.getTile(0, xMin, yMax);
                             if (tile != null) {
                                 this.drawTile(tile);
                             }
@@ -319,14 +289,14 @@ public class MapEditor implements GLEventListener, KeyListener {
 
                     if (xMax < cameraXTileMax) {
                         if (yMin >= cameraYTileMin) {
-                            tile = tiles[xMax][yMin];
+                            tile = scene.getTile(0, xMax, yMin);
                             if (tile != null) {
                                 this.drawTile(tile);
                             }
                         }
 
                         if (yMax < cameraYTileMax) {
-                            tile = tiles[xMax][yMax];
+                            tile = scene.getTile(0, xMax, yMax);
                             if (tile != null) {
                                 this.drawTile(tile);
                             }
@@ -404,7 +374,7 @@ public class MapEditor implements GLEventListener, KeyListener {
                                 hoverTile = tile;
                             }
 
-                            drawScenePaint(tile.getTilePaint(), tile.getX(), tile.getY());
+                            drawScenePaint(tile.getTilePaint(), x, y);
                         }
                     }
                 }
@@ -415,39 +385,39 @@ public class MapEditor implements GLEventListener, KeyListener {
 
         FloorDecoration f = tile.getFloorDecoration();
         if (f != null) {
-            drawSceneRenderable(f.getModel(), 0, f.getHeight(), f.getX(), f.getY());
+            drawSceneRenderable(f.getModel(), 0, f.getHeight(), x, y);
         }
 
         WallDecoration w = tile.getWallDecoration();
         if (w != null) {
-            drawSceneRenderable(w.getModelA(), w.getOrientationA(), w.getHeight(), w.getX(), w.getY());
+            drawSceneRenderable(w.getModelA(), w.getOrientationA(), w.getHeight(), x, y);
         }
     }
 
-    void handleHover() {
-        if (hoverTile == lastHoverTile) {
-            return;
-        }
-
-        if (saveSw != 0) {
-            lastHoverTile.getTilePaint().setSwColor(saveSw);
-            lastHoverTile.getTilePaint().setSeColor(saveSe);
-            lastHoverTile.getTilePaint().setNeColor(saveNe);
-            lastHoverTile.getTilePaint().setNwColor(saveNw);
-        }
-
-        lastHoverTile = hoverTile;
-        saveSw = hoverTile.getTilePaint().getSwColor();
-        saveSe = hoverTile.getTilePaint().getSeColor();
-        saveNe = hoverTile.getTilePaint().getNeColor();
-        saveNw = hoverTile.getTilePaint().getNwColor();
-
-        hoverTile.getTilePaint().setSwColor(5555);
-        hoverTile.getTilePaint().setSeColor(5555);
-        hoverTile.getTilePaint().setNeColor(5555);
-        hoverTile.getTilePaint().setNwColor(5555);
-        uploadScene();
-    }
+//    void handleHover() {
+//        if (hoverTile == lastHoverTile) {
+//            return;
+//        }
+//
+//        if (saveSw != 0) {
+//            lastHoverTile.getTilePaint().setSwColor(saveSw);
+//            lastHoverTile.getTilePaint().setSeColor(saveSe);
+//            lastHoverTile.getTilePaint().setNeColor(saveNe);
+//            lastHoverTile.getTilePaint().setNwColor(saveNw);
+//        }
+//
+//        lastHoverTile = hoverTile;
+//        saveSw = hoverTile.getTilePaint().getSwColor();
+//        saveSe = hoverTile.getTilePaint().getSeColor();
+//        saveNe = hoverTile.getTilePaint().getNeColor();
+//        saveNw = hoverTile.getTilePaint().getNwColor();
+//
+//        hoverTile.getTilePaint().setSwColor(5555);
+//        hoverTile.getTilePaint().setSeColor(5555);
+//        hoverTile.getTilePaint().setNeColor(5555);
+//        hoverTile.getTilePaint().setNwColor(5555);
+//        uploadScene();
+//    }
 
     SceneTile lastHoverTile;
     SceneTile hoverTile;
@@ -473,24 +443,13 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
     }
 
-    void moveScene() {
-        if (lastX != xPos || lastY != yPos) {
-            scene.clearTiles();
-            mapPreparer.loadTiles(scene, xPos, yPos);
-            mapPreparer.loadObjects(scene, xPos, yPos);
-            uploadScene();
-
-            lastX = xPos;
-            lastY = yPos;
-        }
-    }
-
-
-
     @Override
     public void display(GLAutoDrawable drawable) {
-        handleKeys();
-        moveScene();
+        if (drawable.getAnimator() != null) {
+            handleKeys(drawable.getAnimator().getLastFPSPeriod());
+        }
+
+//        moveScene();
 //        handleHover();
         handleClick();
         drawTiles();
@@ -498,7 +457,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         gl = drawable.getGL().getGL4();
 
         if (windowWidth > 0 && windowHeight > 0 && (windowWidth != lastViewportWidth || windowHeight != lastViewportHeight)) {
-            createProjectionMatrix(0, windowWidth, windowHeight, 0, 0, Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE);
+            createProjectionMatrix(0, windowWidth, windowHeight, 0, 0, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             lastViewportWidth = windowWidth;
             lastViewportHeight = windowHeight;
         }
@@ -624,7 +583,7 @@ public class MapEditor implements GLEventListener, KeyListener {
                 textureArrayId = textureManager.initTextureArray(textureProvider, gl);
             }
 
-            final TextureDefinition[] textures = textureProvider.getTextureDefinitions();
+//            final TextureDefinition[] textures = textureProvider.getTextureDefinitions();
             int renderHeightOff = 0;
             int renderWidthOff = 0;
             int renderCanvasHeight = 800;
@@ -907,10 +866,14 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
     }
 
-    private void drawSceneRenderable(Model model, int orientation, int height, int x, int y) {
+    private void drawSceneRenderable(Model model, int orientation, int height, int tileX, int tileY) {
         if (model != null && model.getSceneId() == sceneUploader.sceneId) {
 //            model.calculateBoundsCylinder();
 //            model.calculateExtreme(orientation);
+
+            // draw in the middle of the tile otherwise camera clipping
+            int x = tileX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
+            int z = tileY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
 
             int tc = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
             int uvOffset = model.getUvBufferOffset();
@@ -924,7 +887,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             buffer.put(tc);
             buffer.put(targetBufferOffset);
             buffer.put(FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientation);
-            buffer.put(x).put(height).put(y);
+            buffer.put(x).put(height).put(z);
 
             targetBufferOffset += tc * 3;
         }
@@ -985,10 +948,10 @@ public class MapEditor implements GLEventListener, KeyListener {
     int lastX, xPos = 2520;
     int lastY, yPos = 3490;
 
-    void handleKeys() {
-        double xVec = -(double)camera.getYawSin() / 65535;
-        double yVec = (double)camera.getYawCos() / 65535;
-        double zVec = (double)camera.getPitchSin() / 65535;
+    void handleKeys(double dt) {
+        double xVec = -(double) camera.getYawSin() / 65535;
+        double yVec = (double) camera.getYawCos() / 65535;
+        double zVec = (double) camera.getPitchSin() / 65535;
 
         int speed = 1;
         if (keys[KeyEvent.VK_SHIFT]) {
@@ -996,67 +959,39 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
 
         if (keys[KeyEvent.VK_W]) {
-            if (camera.addX((int)(10 * xVec * speed))) {
-                xPos += Constants.SCENE_SIZE;
-            }
-            if (camera.addY((int)(10 * yVec * speed))) {
-                yPos += Constants.SCENE_SIZE;
-            }
-
-            camera.addZ((int)(10 * zVec * speed));
+            camera.addX((int) (dt * xVec * speed));
+            camera.addY((int) (dt * yVec * speed));
+            camera.addZ((int) (dt * zVec * speed));
         }
 
         if (keys[KeyEvent.VK_S]) {
-            if (camera.addX(-(int)(10 * xVec * speed))) {
-                xPos += Constants.SCENE_SIZE;
-            }
-            if (camera.addY(-(int)(10 * yVec * speed))) {
-                yPos += Constants.SCENE_SIZE;
-            }
-
-            camera.addZ(-(int)(10 * zVec * speed));
+            camera.addX(-(int) (dt * xVec * speed));
+            camera.addY(-(int) (dt * yVec * speed));
+            camera.addZ(-(int) (dt * zVec * speed));
         }
 
         if (keys[KeyEvent.VK_A]) {
-            if (camera.addY((int)(10 * xVec * speed))) {
-                xPos += Constants.SCENE_SIZE;
-            }
-            if (camera.addX(-(int)(10 * yVec * speed))) {
-                yPos += Constants.SCENE_SIZE;
-            }
+            // X uses yVec because we want to move perpendicular
+            camera.addX(-(int) (dt * yVec * speed));
+            camera.addY((int) (dt * xVec * speed));
         }
 
         if (keys[KeyEvent.VK_D]) {
-            if (camera.addY(-(int)(10 * xVec * speed))) {
-                xPos += Constants.SCENE_SIZE;
-            }
-            if (camera.addX((int)(10 * yVec * speed))) {
-                yPos += Constants.SCENE_SIZE;
-            }
+            camera.addX((int) (dt * yVec * speed));
+            camera.addY(-(int) (dt * xVec * speed));
         }
 
         if (keys[KeyEvent.VK_SPACE]) {
-            camera.addZ(-10*speed);
+            camera.addZ(-(int) dt * speed);
         }
 
         if (keys[KeyEvent.VK_X]) {
-            camera.addZ(10*speed);
-        }
-
-        if (keys[KeyEvent.VK_O]) {
-            camera.addYaw(2 * speed);
-        }
-
-        if (keys[KeyEvent.VK_P]) {
-            camera.addYaw(-2 * speed);
-        }
-
-        if (keys[KeyEvent.VK_I]) {
-            camera.addZ(-2 * speed);
+            camera.addZ((int) dt * speed);
         }
 
         if (keys[KeyEvent.VK_K]) {
-            camera.addZ(2 * speed);
+            scene = new Scene(sceneRegionBuilder, 10039, 3);
+            uploadScene();
         }
     }
 
@@ -1065,6 +1000,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             return;
         }
         if (mouseListener.isMouseClicked()) {
+            // FIXME: xpos is no longer accurate
             System.out.printf("clicked tile worldx %s worldY %s %s \n", xPos + hoverTile.getX() - 52, yPos + hoverTile.getY() - 52, hoverTile);
             mouseListener.setMouseClicked(false);
         }

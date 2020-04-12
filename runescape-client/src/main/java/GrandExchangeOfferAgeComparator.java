@@ -822,7 +822,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 		int var17;
 		int var18;
 		for (z = 0; z < 4; ++z) {
-			byte[][] var42 = SoundCache.field1462[z];
+			byte[][] tileSettings = SoundCache.field1462[z];
 			var9 = (int)Math.sqrt(5100.0D);
 			var10 = var9 * 768 >> 8;
 
@@ -838,7 +838,7 @@ final class GrandExchangeOfferAgeComparator implements Comparator {
 					var18 = (yHeightDiff << 8) / diff;
 					var19 = (var16 * -50 + var18 * -50 + var17 * -10) / var10 + 96;
 
-					var20 = (var42[x - 1][y] >> 2) + (var42[x][y - 1] >> 2) + (var42[x + 1][y] >> 3) + (var42[x][y + 1] >> 3) + (var42[x][y] >> 1);
+					var20 = (tileSettings[x - 1][y] >> 2) + (tileSettings[x][y - 1] >> 2) + (tileSettings[x + 1][y] >> 3) + (tileSettings[x][y + 1] >> 3) + (tileSettings[x][y] >> 1);
 					SceneRegion.tileColors[x][y] = var19 - var20;
 				}
 			}

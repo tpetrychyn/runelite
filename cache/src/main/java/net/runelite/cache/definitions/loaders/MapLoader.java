@@ -163,32 +163,32 @@ public class MapLoader
 						}
 					}
 
-					if (tile.height == null)
-					{
-						if (z == 0)
-						{
-							tile.height = -HeightCalc.calculate(map.getRegionX() + x + 0xe3b7b, map.getRegionY() + y + 0x87cce) * 8;
-						}
-						else
-						{
-							tile.height = tiles[z - 1][x][y].height - 240;
-						}
-					} else {
-						int height = tile.getHeight();
-						if (height == 1)
-						{
-							height = 0;
-						}
-
-						if (z == 0)
-						{
-							tile.height = -height * 8;
-						}
-						else
-						{
-							tile.height = tiles[z - 1][x][y].height - height * 8;
-						}
-					}
+//					if (tile.height == null)
+//					{
+//						if (z == 0)
+//						{
+//							tile.height = -HeightCalc.calculate(map.getRegionX() + x + 0xe3b7b, map.getRegionY() + y + 0x87cce) * 8;
+//						}
+//						else
+//						{
+//							tile.height = tiles[z - 1][x][y].height - 240;
+//						}
+//					} else {
+//						int height = tile.getHeight();
+//						if (height == 1)
+//						{
+//							height = 0;
+//						}
+//
+//						if (z == 0)
+//						{
+//							tile.height = -height * 8;
+//						}
+//						else
+//						{
+//							tile.height = tiles[z - 1][x][y].height - height * 8;
+//						}
+//					}
 				}
 			}
 		}

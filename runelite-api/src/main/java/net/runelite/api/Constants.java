@@ -70,7 +70,7 @@ public class Constants
 	/**
 	 * The width and length of the scene (13 chunks x 8 tiles).
 	 */
-	public static final int SCENE_SIZE = 104;
+	public static final int SCENE_SIZE = 100;
 
 	/**
 	 * The max allowed plane by the game.

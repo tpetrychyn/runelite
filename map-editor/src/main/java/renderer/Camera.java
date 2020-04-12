@@ -14,7 +14,6 @@ public class Camera {
     private int pitch = 220;
     private int scale = 540;
 
-    // lock camera to center of scene!
     private int cameraX = Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE / 2;
     private int cameraY = Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE / 2;
     private int cameraZ = -2500;
@@ -22,36 +21,12 @@ public class Camera {
     private int centerX = 400; // HALF OF VIEWPORT!
     private int centerY = 300; // HALF OF VIEWPORT!
 
-    public boolean addX(int amt) {
+    public void addX(int amt) {
         this.cameraX += amt;
-
-        if (cameraX >= Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE) {
-            cameraX = 0;
-            return true;
-        }
-
-        if (cameraX < 0) {
-            cameraX = Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE - Perspective.LOCAL_TILE_SIZE;
-            return true;
-        }
-
-        return false;
     }
 
-    // true if boundary edge triggered
-    public boolean addY(int amt) {
+    public void addY(int amt) {
         this.cameraY += amt;
-
-        if (cameraY >= Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE) {
-            cameraY = 0;
-            return true;
-        }
-
-        if (cameraY < 0) {
-            cameraY = Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE - Perspective.LOCAL_TILE_SIZE;
-            return true;
-        }
-        return false;
     }
 
     public void addZ(int amt) {

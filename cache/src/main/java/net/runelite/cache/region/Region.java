@@ -54,6 +54,7 @@ public class Region
 	private Tile[][][] tiles = new Tile[Z][X][Y];
 	private final List<Location> locations = new ArrayList<>();
 
+
 	public Region(int id)
 	{
 		this.regionID = id;

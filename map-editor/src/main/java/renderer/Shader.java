@@ -1,15 +1,15 @@
+package renderer;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.jogamp.opengl.GL4;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import template.Template;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Shader
 {
-
 	public static final String LINUX_VERSION_HEADER =
 			"#version 420\n" +
 					"#extension GL_ARB_compute_shader : require\n" +
@@ -18,22 +18,22 @@ public class Shader
 	static final String WINDOWS_VERSION_HEADER = "#version 430\n";
 
 	static final Shader PROGRAM = new Shader()
-			.add(GL4.GL_VERTEX_SHADER, "gpu/vert.glsl")
-			.add(GL4.GL_GEOMETRY_SHADER, "gpu/geom.glsl")
-			.add(GL4.GL_FRAGMENT_SHADER, "gpu/frag.glsl");
+			.add(GL4.GL_VERTEX_SHADER, "/gpu/vert.glsl")
+			.add(GL4.GL_GEOMETRY_SHADER, "/gpu/geom.glsl")
+			.add(GL4.GL_FRAGMENT_SHADER, "/gpu/frag.glsl");
 
 	static final Shader COMPUTE_PROGRAM = new Shader()
-			.add(GL4.GL_COMPUTE_SHADER, "gpu/comp.glsl");
+			.add(GL4.GL_COMPUTE_SHADER, "/gpu/comp.glsl");
 
 	static final Shader SMALL_COMPUTE_PROGRAM = new Shader()
-			.add(GL4.GL_COMPUTE_SHADER, "gpu/comp_small.glsl");
+			.add(GL4.GL_COMPUTE_SHADER, "/gpu/comp_small.glsl");
 
 	static final Shader UNORDERED_COMPUTE_PROGRAM = new Shader()
-			.add(GL4.GL_COMPUTE_SHADER, "gpu/comp_unordered.glsl");
+			.add(GL4.GL_COMPUTE_SHADER, "/gpu/comp_unordered.glsl");
 
 	static final Shader UI_PROGRAM = new Shader()
-			.add(GL4.GL_VERTEX_SHADER, "gpu/vertui.glsl")
-			.add(GL4.GL_FRAGMENT_SHADER, "gpu/fragui.glsl");
+			.add(GL4.GL_VERTEX_SHADER, "/gpu/vertui.glsl")
+			.add(GL4.GL_FRAGMENT_SHADER, "/gpu/fragui.glsl");
 
 	@VisibleForTesting
 	final List<Unit> units = new ArrayList<>();

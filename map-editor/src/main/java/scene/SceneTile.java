@@ -1,12 +1,16 @@
-package models;
+package scene;
 
 import lombok.Getter;
 import lombok.Setter;
+import models.TileModelImpl;
+import models.TilePaintImpl;
+import models.WallDecoration;
 import net.runelite.api.*;
+import net.runelite.cache.definitions.MapDefinition;
 
 @Getter
 @Setter
-public class SceneTile {
+public class SceneTile extends MapDefinition.Tile {
     private int plane;
     private int x;
     private int y;

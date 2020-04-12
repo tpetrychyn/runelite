@@ -86,18 +86,6 @@ public class ObjectDefinition {
     public static Map<Long, ModelDefinition> litModelCache = new HashMap<>();
     public static Map<Integer, ModelDefinition> modelDefCache = new HashMap<>();
 
-    private static Store store;
-
-    // TODO: static store singleton probably
-    static {
-        try {
-            store = new Store(StoreLocation.LOCATION);
-            store.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public ModelDefinition getModel(int type, int orientation) {
         long modelTag;
         if (this.models == null) {
@@ -136,8 +124,8 @@ public class ObjectDefinition {
 
                 modelDefinition = modelDefCache.get(modelId);
                 if (modelDefinition == null) {
-
-                    Storage storage = StoreProvider.getStore().getStorage();
+                    Store store = StoreProvider.getStore();
+                    Storage storage = store.getStorage();
                     Index index = store.getIndex(IndexType.MODELS);
 
                     Archive archive = index.getArchive(modelId);
@@ -186,6 +174,7 @@ public class ObjectDefinition {
 
             modelDefinition = modelDefCache.get(modelId);
             if (modelDefinition == null) {
+                Store store = StoreProvider.getStore();
                 Storage storage = store.getStorage();
                 Index index = store.getIndex(IndexType.MODELS);
 

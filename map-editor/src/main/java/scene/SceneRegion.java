@@ -1,20 +1,51 @@
-package models;
+package scene;
 
-import net.runelite.api.*;
+import lombok.Getter;
+import lombok.Setter;
+import models.ModelImpl;
+import models.TileModelImpl;
+import models.TilePaintImpl;
+import models.WallDecoration;
+import net.runelite.api.Constants;
+import net.runelite.api.Entity;
+import net.runelite.api.FloorDecoration;
+import net.runelite.api.Perspective;
+import net.runelite.cache.region.Location;
+import net.runelite.cache.region.Region;
 
-public class SceneImpl{
-    private Occluder[][] planeOccluders;
-    private int[] planeOccluderCounts;
-    private SceneTile[][][] tiles;
+import java.util.List;
 
-    public SceneImpl() {
-        tiles = new SceneTile[Constants.MAX_Z][Constants.SCENE_SIZE][Constants.SCENE_SIZE];
-        planeOccluders = new Occluder[4][500];
-        planeOccluderCounts = new int[4];
-    }
+@Getter
+@Setter
+public class SceneRegion {
+    private final int regionId;
+    private final int baseX;
+    private final int baseY;
 
-    public SceneTile[][][] getTiles() {
-        return tiles;
+    private SceneTile[][][] tiles = new SceneTile[Region.Z][Region.X][Region.Y];
+    private int[][] tileColors = new int[Region.X+1][Region.Y+1];
+
+    private int[][][] tileHeights;
+    private byte[][][] tileSettings;
+    private byte[][][] overlayIds;
+    private byte[][][] overlayPaths;
+    private byte[][][] overlayRotations;
+    private byte[][][] underlayIds;
+
+    private List<Location> locations;
+
+    public SceneRegion(Region region) {
+        this.regionId = region.getRegionID();
+        this.baseX = region.getBaseX();
+        this.baseY = region.getBaseY();
+
+        this.tileHeights = region.getTileHeights();
+        this.tileSettings = region.getTileSettings();
+        this.overlayIds = region.getOverlayIds();
+        this.overlayPaths = region.getOverlayPaths();
+        this.overlayRotations = region.getOverlayRotations();
+        this.underlayIds = region.getUnderlayIds();
+        this.locations = region.getLocations();
     }
 
     public void clearTiles() {
@@ -55,15 +86,6 @@ public class SceneImpl{
             this.tiles[z][x][y].getTilePaint().setNeHeight(neHeight);
             this.tiles[z][x][y].getTilePaint().setNwHeight(nwHeight);
         }
-    }
-
-    public void addOccluder(int plane, int type, int minX, int maxX, int minZ, int maxZ, int minY, int maxY) {
-        int minTileX = minX / 128;
-        int maxTileX = maxX / 128;
-        int minTileY = minZ / 128;
-        int maxTileY = maxZ / 128;
-        planeOccluders[plane][planeOccluderCounts[plane]] = new Occluder(minTileX, maxTileX, minTileY, maxTileY, type, minX, maxX, minZ, maxZ, minY, maxY);
-        planeOccluderCounts[plane]++;
     }
 
     public void newFloorDecoration(int z, int x, int y, int height, Entity entity, long tag, int flags) {

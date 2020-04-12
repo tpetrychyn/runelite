@@ -1,5 +1,5 @@
 /*
-   Hyllian's xBR-lv2 Shader
+   Hyllian's xBR-lv2 renderer.Shader
 
    Copyright (C) 2011-2016 Hyllian - sergiogdb@gmail.com
 

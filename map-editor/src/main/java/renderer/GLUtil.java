@@ -1,3 +1,5 @@
+package renderer;
+
 import com.jogamp.opengl.GL4;
 
 class GLUtil

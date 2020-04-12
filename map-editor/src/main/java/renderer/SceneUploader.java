@@ -1,4 +1,4 @@
-/*
+package renderer;/*
  * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
@@ -24,8 +24,9 @@
  */
 
 import models.*;
-import models.SceneTile;
+import scene.SceneTile;
 import net.runelite.api.*;
+import scene.Scene;
 
 class SceneUploader
 {
@@ -33,7 +34,7 @@ class SceneUploader
 	private int offset;
 	private int uvoffset;
 
-	void upload(SceneImpl scene, GpuIntBuffer vertexbuffer, GpuFloatBuffer uvBuffer)
+	void upload(Scene scene, GpuIntBuffer vertexbuffer, GpuFloatBuffer uvBuffer)
 	{
 		++sceneId;
 		offset = 0;
@@ -41,35 +42,41 @@ class SceneUploader
 		vertexbuffer.clear();
 		uvBuffer.clear();
 
-		for (int z = 0; z < Constants.MAX_Z; ++z)
-		{
-			for (int x = 0; x < Constants.SCENE_SIZE; ++x)
-			{
-				for (int y = 0; y < Constants.SCENE_SIZE; ++y)
+		for (int rx=0;rx<scene.getRadius();rx++) {
+			for (int ry=0;ry<scene.getRadius();ry++) {
+				for (int z = 0; z < Constants.MAX_Z; ++z)
 				{
-					SceneTile tile = scene.getTiles()[z][x][y];
-					if (tile != null)
+					for (int x = 0; x < Constants.REGION_SIZE; ++x)
 					{
-						reset(tile);
+						for (int y = 0; y < Constants.REGION_SIZE; ++y)
+						{
+							SceneTile tile = scene.getRegion(rx, ry).getTiles()[z][x][y];
+							if (tile != null)
+							{
+								reset(tile);
+							}
+						}
 					}
 				}
 			}
 		}
 
-		for (int z = 0; z < Constants.MAX_Z; ++z)
-		{
-			for (int x = 0; x < Constants.SCENE_SIZE; ++x)
-			{
-				for (int y = 0; y < Constants.SCENE_SIZE; ++y)
-				{
-					SceneTile tile = scene.getTiles()[z][x][y];
-					if (tile != null)
-					{
-						upload(tile, vertexbuffer, uvBuffer);
+		for (int rx=0;rx<scene.getRadius();rx++) {
+			for (int ry = 0; ry < scene.getRadius(); ry++) {
+				for (int z = 0; z < Constants.MAX_Z; ++z) {
+					for (int x = 0; x < Constants.REGION_SIZE; ++x) {
+						for (int y = 0; y < Constants.REGION_SIZE; ++y) {
+							SceneTile tile = scene.getRegion(rx, ry).getTiles()[z][x][y];
+							if (tile != null) {
+								upload(tile, vertexbuffer, uvBuffer);
+							}
+						}
 					}
 				}
 			}
 		}
+
+		scene.hasBeenUploaded = true;
 	}
 
 	private void reset(SceneTile tile)

@@ -97,9 +97,7 @@ public class FloorDecoration implements GroundObject, Renderable {
     }
 
     @Override
-    public void setModelHeight(int modelHeight) {
-
-    }
+    public void setModelHeight(int modelHeight) { }
 
     @Override
     public void draw(int orientation, int pitchSin, int pitchCos, int yawSin, int yawCos, int x, int y, int z, long hash) {
