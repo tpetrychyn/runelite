@@ -51,7 +51,11 @@ public class SceneRegionBuilder {
     // worldCoords to regionId
     // int regionId = (x >>> 6 << 8) | y >>> 6;
     public SceneRegion loadRegion(int regionId) {
-        SceneRegion sceneRegion = new SceneRegion(regionLoader.getRegion(regionId));
+        Region region = regionLoader.getRegion(regionId);
+        if (region == null) {
+            return null;
+        }
+        SceneRegion sceneRegion = new SceneRegion(region);
         int baseX = sceneRegion.getBaseX();
         int baseY = sceneRegion.getBaseY();
 
@@ -61,7 +65,8 @@ public class SceneRegionBuilder {
         boolean hasUpRegion = regionLoader.findRegionForWorldCoordinates(baseX, baseY + Region.Y) != null;
         boolean hasDownRegion = regionLoader.findRegionForWorldCoordinates(baseX, baseY - 1) != null;
 
-        int len = Constants.REGION_SIZE;
+        int blend = 5;
+        int len = Constants.REGION_SIZE * blend * 2;
         int[] hues = new int[len];
         int[] sats = new int[len];
         int[] light = new int[len];
@@ -90,36 +95,36 @@ public class SceneRegionBuilder {
                 }
             }
 
-            for (int xi = -5; xi < Constants.REGION_SIZE + 5; ++xi) {
-                for (int yi = 0; yi < Constants.REGION_SIZE; ++yi) {
+            for (int xi = -blend*2; xi < Constants.REGION_SIZE + blend*2; ++xi) {
+                for (int yi = -blend; yi < Constants.REGION_SIZE + blend; ++yi) {
                     int xr = xi + 5;
-                    if (xr >= 0 && xr < Constants.REGION_SIZE) {
+                    if (xr >= -blend && xr < Constants.REGION_SIZE + blend) {
                         Region r = regionLoader.findRegionForWorldCoordinates(baseX + xr, baseY + yi);
                         if (r != null) {
-                            int underlayId = r.getUnderlayId(z, xr, yi);
+                            int underlayId = r.getUnderlayId(z, convert(xr), convert(yi));
                             if (underlayId > 0) {
                                 UnderlayDefinition underlay = findUnderlay(underlayId - 1);
-                                hues[yi] += underlay.getHue();
-                                sats[yi] += underlay.getSaturation();
-                                light[yi] += underlay.getLightness();
-                                mul[yi] += underlay.getHueMultiplier();
-                                num[yi]++;
+                                hues[yi + blend] += underlay.getHue();
+                                sats[yi + blend] += underlay.getSaturation();
+                                light[yi + blend] += underlay.getLightness();
+                                mul[yi + blend] += underlay.getHueMultiplier();
+                                num[yi + blend]++;
                             }
                         }
                     }
 
                     int xl = xi - 5;
-                    if (xl >= 0 && xl < Constants.REGION_SIZE) {
-                        Region r = regionLoader.findRegionForWorldCoordinates(baseX + xr, baseY + yi);
+                    if (xl >= -blend && xl < Constants.REGION_SIZE + blend) {
+                        Region r = regionLoader.findRegionForWorldCoordinates(baseX + xl, baseY + yi);
                         if (r != null) {
-                            int underlayId = r.getUnderlayId(z, xl, yi);
+                            int underlayId = r.getUnderlayId(z, convert(xl), convert(yi));
                             if (underlayId > 0) {
                                 UnderlayDefinition underlay = findUnderlay(underlayId - 1);
-                                hues[yi] -= underlay.getHue();
-                                sats[yi] -= underlay.getSaturation();
-                                light[yi] -= underlay.getLightness();
-                                mul[yi] -= underlay.getHueMultiplier();
-                                num[yi]--;
+                                hues[yi + blend] -= underlay.getHue();
+                                sats[yi + blend] -= underlay.getSaturation();
+                                light[yi + blend] -= underlay.getLightness();
+                                mul[yi + blend] -= underlay.getHueMultiplier();
+                                num[yi + blend]--;
                             }
                         }
                     }
@@ -132,23 +137,23 @@ public class SceneRegionBuilder {
                     int runningMultiplier = 0;
                     int runningNumber = 0;
 
-                    for (int yi = -5; yi < Constants.REGION_SIZE + 5; ++yi) {
+                    for (int yi = -blend * 2; yi < Constants.REGION_SIZE + blend * 2; ++yi) {
                         int yu = yi + 5;
-                        if (yu >= 0 && yu < Constants.REGION_SIZE) {
-                            runningHues += hues[yu];
-                            runningSat += sats[yu];
-                            runningLight += light[yu];
-                            runningMultiplier += mul[yu];
-                            runningNumber += num[yu];
+                        if (yu >= -blend && yu < Constants.REGION_SIZE + blend) {
+                            runningHues += hues[yu + blend];
+                            runningSat += sats[yu + blend];
+                            runningLight += light[yu + blend];
+                            runningMultiplier += mul[yu + blend];
+                            runningNumber += num[yu + blend];
                         }
 
                         int yd = yi - 5;
-                        if (yd >= 0 && yd < Constants.REGION_SIZE) {
-                            runningHues -= hues[yd];
-                            runningSat -= sats[yd];
-                            runningLight -= light[yd];
-                            runningMultiplier -= mul[yd];
-                            runningNumber -= num[yd];
+                        if (yd >= -blend && yd < Constants.REGION_SIZE + blend) {
+                            runningHues -= hues[yd + blend];
+                            runningSat -= sats[yd + blend];
+                            runningLight -= light[yd + blend];
+                            runningMultiplier -= mul[yd + blend];
+                            runningNumber -= num[yd + blend];
                         }
 
                         if (yi >= 0 && yi < Constants.REGION_SIZE) {
@@ -176,9 +181,9 @@ public class SceneRegionBuilder {
 
                             int underlayHsl = -1;
                             if (underlayId > 0) {
-                                int avgHue = runningHues * 256 / Math.max(1, runningMultiplier);
-                                int avgSat = runningSat / Math.max(1, runningNumber);
-                                int avgLight = runningLight / Math.max(1, runningNumber);
+                                int avgHue = runningHues * 256 / runningMultiplier;
+                                int avgSat = runningSat / runningNumber;
+                                int avgLight = runningLight / runningNumber;
                                 rgb = hslToRgb(avgHue, avgSat, avgLight);
 
                                 if (avgLight < 0) {
@@ -367,6 +372,14 @@ public class SceneRegionBuilder {
 
     private OverlayDefinition findOverlay(int id) {
         return overlays.get(id);
+    }
+
+    private static int convert(int d) {
+        if (d >= 0) {
+            return d % 64;
+        } else {
+            return 64 - -(d % 64) - 1;
+        }
     }
 
     static int method4220(int var0, int var1) {

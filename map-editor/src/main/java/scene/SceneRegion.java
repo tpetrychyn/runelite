@@ -86,6 +86,25 @@ public class SceneRegion {
             this.tiles[z][x][y].getTilePaint().setNeHeight(neHeight);
             this.tiles[z][x][y].getTilePaint().setNwHeight(nwHeight);
         }
+
+
+        if (x > 0) {
+            SceneTile west = this.tiles[z][x-1][y] == null ? new SceneTile(z, x-1, y) : this.tiles[z][x-1][y];
+            west.setEast(this.tiles[z][x][y]);
+            this.tiles[z][x-1][y] = west;
+        }
+
+        if (x > 0 && y > 0) {
+            SceneTile southWest = this.tiles[z][x-1][y-1] == null ? new SceneTile(z, x-1, y-1) : this.tiles[z][x-1][y-1];
+            southWest.setNorthEast(this.tiles[z][x][y]);
+            this.tiles[z][x-1][y-1] = southWest;
+        }
+
+        if (y > 0) {
+            SceneTile south = this.tiles[z][x][y-1] == null ? new SceneTile(z, x, y-1) : this.tiles[z][x][y-1];
+            south.setNorth(this.tiles[z][x][y]);
+            this.tiles[z][x][y-1] = south;
+        }
     }
 
     public void newFloorDecoration(int z, int x, int y, int height, Entity entity, long tag, int flags) {

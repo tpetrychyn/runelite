@@ -5,8 +5,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import layoutControllers.MainController;
+import layoutControllers.MinimapController;
 import renderer.MapEditor;
 
 import java.io.IOException;
@@ -16,7 +22,7 @@ public class JfxApplication extends Application {
     public void start(Stage stage) throws Exception {
         stage.setTitle("FOSS Map Editor");
         // JFX
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("layout/main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/layout/main.fxml"));
         Parent root = loader.load();
 
         MainController controller = loader.getController();
@@ -25,14 +31,29 @@ public class JfxApplication extends Application {
         stage.setScene(jfxScene);
         stage.show();
 
-        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(controller) {
-            @Override
-            public NewtCanvasJFX call() {
-                return new MapEditor().LoadMap(controller);
-            }
-        };
-        loadTask.setOnSucceeded(e -> controller.getGroup().getChildren().add(loadTask.getValue()));
-        new Thread(loadTask).start();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout/minimap.fxml"));
+        Parent root1 = fxmlLoader.load();
+//        Stage stage2 = new Stage();
+//        stage2.initModality(Modality.NONE);
+//        stage2.setTitle("Minimap");
+//        stage2.setScene(new Scene(root1));
+//        stage2.show();
+
+
+
+        MinimapController minimapController = fxmlLoader.getController();
+        root1.setOnScroll(minimapController::onMouseWheelScroll);
+
+//        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(controller) {
+//            @Override
+//            public NewtCanvasJFX call() {
+//                return new MapEditor().LoadMap(controller, minimapController);
+//            }
+//        };
+//        loadTask.setOnSucceeded(e -> controller.getGroup().getChildren().add(loadTask.getValue()));
+//        new Thread(loadTask).start();
+//
+        controller.getGroup().getChildren().add(new MapEditor().LoadMap(controller, minimapController));
     }
 
 

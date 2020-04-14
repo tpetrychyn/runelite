@@ -69,9 +69,9 @@
                     <MenuItem mnemonicParsing="false" text="Delete" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Help">
+                <Menu mnemonicParsing="false" text="Tools">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
+                    <MenuItem fx:id="optMinimap" mnemonicParsing="false" text="Open Minimap Window" />
                   </items>
                 </Menu>
               </menus>

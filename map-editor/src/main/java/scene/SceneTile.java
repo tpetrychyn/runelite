@@ -18,6 +18,11 @@ public class SceneTile extends MapDefinition.Tile {
     private TileModelImpl tileModel;
     private FloorDecoration floorDecoration;
     private WallDecoration wallDecoration;
+    private boolean needsUpdate = false;
+
+    private SceneTile north;
+    private SceneTile northEast;
+    private SceneTile east;
 
     SceneTile(int z, int x, int y) {
         this.plane = z;

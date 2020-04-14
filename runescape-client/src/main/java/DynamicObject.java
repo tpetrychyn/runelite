@@ -65,13 +65,13 @@ public class DynamicObject extends Renderable {
 	@ObfuscatedSignature(
 		signature = "(IIIIIIIZLee;)V"
 	)
-	DynamicObject(int var1, int var2, int var3, int var4, int var5, int var6, int var7, boolean var8, Renderable var9) {
-		this.id = var1;
-		this.type = var2;
-		this.orientation = var3;
-		this.plane = var4;
-		this.x = var5;
-		this.y = var6;
+	DynamicObject(int id, int type, int orientation, int plane, int x, int y, int var7, boolean var8, Renderable var9) {
+		this.id = id;
+		this.type = type;
+		this.orientation = orientation;
+		this.plane = plane;
+		this.x = x;
+		this.y = y;
 		if (var7 != -1) {
 			this.sequenceDefinition = SpotAnimationDefinition.SequenceDefinition_get(var7);
 			this.frame = 0;

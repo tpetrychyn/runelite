@@ -163,7 +163,7 @@ public class PacketBuffer extends Buffer {
 		signature = "(IIIIIILej;Lfm;S)V",
 		garbageValue = "7907"
 	)
-	static final void addLocationObjectToScene(int z, int x, int y, int type, int orientation, int type, Scene scene, CollisionMap collisionMap) {
+	static final void addLocationObjectToScene(int z, int x, int y, int var5, int orientation, int type, Scene scene, CollisionMap collisionMap) {
 		if (!Client.isLowDetail || (SceneRegion.Tiles_renderFlags[0][x][y] & 2) != 0 || (SceneRegion.Tiles_renderFlags[z][x][y] & 16) == 0) {
 			if (z < SceneRegion.Tiles_minPlane) {
 				SceneRegion.Tiles_minPlane = z;
@@ -453,7 +453,7 @@ public class PacketBuffer extends Buffer {
 						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
 							renderable = objectDefinition.getRenderable(4, orientation, tileHeights, xSize, height, ySize);
 						} else {
-							renderable = new DynamicObject(type, 4, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
+							renderable = new DynamicObject(var5, 4, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
 						}
 
 						scene.newWallDecoration(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field544[orientation], 0, 0, 0, tag, flags);

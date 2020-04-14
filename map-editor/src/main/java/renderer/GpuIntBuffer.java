@@ -8,6 +8,12 @@ public class GpuIntBuffer
 {
 	private IntBuffer buffer = allocateDirect(65536);
 
+	public GpuIntBuffer() {}
+
+	public GpuIntBuffer(int size) {
+		this.buffer = allocateDirect(size);
+	}
+
 	void put(int x, int y, int z)
 	{
 		buffer.put(x).put(y).put(z);
@@ -16,6 +22,10 @@ public class GpuIntBuffer
 	void put(int x, int y, int z, int c)
 	{
 		buffer.put(x).put(y).put(z).put(c);
+	}
+
+	void putAt(int offset, int x, int y, int z, int c) {
+		buffer.put(offset, x).put(offset+1, y).put(offset+2, z).put(offset+3, c);
 	}
 
 	void flip()
