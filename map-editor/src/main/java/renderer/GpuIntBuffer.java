@@ -28,7 +28,7 @@ public class GpuIntBuffer
 		buffer.put(offset, x).put(offset+1, y).put(offset+2, z).put(offset+3, c);
 	}
 
-	void flip()
+	public void flip()
 	{
 		buffer.flip();
 	}
@@ -49,7 +49,7 @@ public class GpuIntBuffer
 		}
 	}
 
-	IntBuffer getBuffer()
+	public IntBuffer getBuffer()
 	{
 		return buffer;
 	}

@@ -35,7 +35,7 @@ centroid in float fHsl;
 in vec4 fUv;
 in float fogAmount;
 
-out vec4 FragColor;
+in vec3 vPosition;
 
 #include hsl_to_rgb.glsl
 
@@ -60,5 +60,8 @@ void main() {
   }
 
   vec3 mixedColor = mix(smoothColor.rgb, fogColor.rgb, fogAmount);
-  FragColor = vec4(mixedColor, smoothColor.a);
+
+  gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1);//fWorldPosition;
+  gl_FragColor = vec4(mixedColor, smoothColor.a);
+
 }

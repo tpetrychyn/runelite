@@ -32,7 +32,7 @@ import net.runelite.cache.item.RSTextureProvider;
 import java.nio.ByteBuffer;
 
 @Slf4j
-class TextureManager
+public class TextureManager
 {
 	private static final float PERC_64 = 1f / 64f;
 	private static final float PERC_128 = 1f / 128f;

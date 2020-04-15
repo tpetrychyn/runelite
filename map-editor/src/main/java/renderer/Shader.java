@@ -31,10 +31,6 @@ public class Shader
 	static final Shader UNORDERED_COMPUTE_PROGRAM = new Shader()
 			.add(GL4.GL_COMPUTE_SHADER, "/gpu/comp_unordered.glsl");
 
-	static final Shader UI_PROGRAM = new Shader()
-			.add(GL4.GL_VERTEX_SHADER, "/gpu/vertui.glsl")
-			.add(GL4.GL_FRAGMENT_SHADER, "/gpu/fragui.glsl");
-
 	@VisibleForTesting
 	final List<Unit> units = new ArrayList<>();
 

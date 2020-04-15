@@ -3,6 +3,10 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.8"
 }
 
+repositories {
+    maven("https://jitpack.io")
+}
+
 description = "RSPS Map Editor"
 
 dependencies {
@@ -33,6 +37,8 @@ dependencies {
 
     api(files("lib/jogamp-fat.jar"))
     implementation("com.jfoenix:jfoenix:9.0.9")
+
+    api("com.github.elect86:glm:471c2fd5d2002696e2721dde19fded16c01fab78")
 }
 
 javafx {

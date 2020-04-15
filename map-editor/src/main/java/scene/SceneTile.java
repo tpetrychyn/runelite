@@ -18,7 +18,7 @@ public class SceneTile extends MapDefinition.Tile {
     private TileModelImpl tileModel;
     private FloorDecoration floorDecoration;
     private WallDecoration wallDecoration;
-    private boolean needsUpdate = false;
+    private boolean needsUpdate = true;
 
     private SceneTile north;
     private SceneTile northEast;

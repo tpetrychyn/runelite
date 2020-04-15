@@ -35,7 +35,7 @@ public class MapEditor implements GLEventListener, KeyListener {
     private static final int MAX_TRIANGLE = 4096;
     private static final int SMALL_TRIANGLE_COUNT = 512;
     private static final int FLAG_SCENE_BUFFER = Integer.MIN_VALUE;
-    static final int MAX_DISTANCE = 100000;
+    static final int MAX_DISTANCE = 1000;
 
     private MouseListener mouseListener;
 
@@ -50,18 +50,15 @@ public class MapEditor implements GLEventListener, KeyListener {
     private int glComputeProgram;
     private int glSmallComputeProgram;
     private int glUnorderedComputeProgram;
-    private int glUiProgram;
 
     private int vaoHandle;
 
     private int interfaceTexture;
 
-    private int vaoUiHandle;
-    private int vboUiHandle;
-
     private int fboSceneHandle;
-    private int texSceneHandle;
+    private int colorTexSceneHandle;
     private int rboSceneHandle;
+    private int depthTexSceneHandle;
 
     // scene vertex buffer id
     private int bufferId;
@@ -178,7 +175,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             e.printStackTrace();
         }
 
-        bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId = -1;
+        bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId  = -1;
         unorderedModels = smallModels = largeModels = 0;
 
         vertexBuffer = new GpuIntBuffer();
@@ -194,6 +191,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         Screen screen = NewtFactory.createScreen(jfxNewtDisplay, 0);
         GLProfile glProfile = GLProfile.get(GLProfile.GL4);
         GLCapabilities glCaps = new GLCapabilities(glProfile);
+        glCaps.setDepthBits(24);
 
         GLWindow window = GLWindow.create(screen, glCaps);
         window.addGLEventListener(this);
@@ -243,6 +241,12 @@ public class MapEditor implements GLEventListener, KeyListener {
         try {
             gl = drawable.getGL().getGL4();
 
+            gl.glEnable(gl.GL_DEPTH_TEST);
+            gl.glDepthFunc(gl.GL_LEQUAL);
+            gl.glDepthRangef(1, 0);
+//            gl.glGetIntegerv(gl.GL_DEPTH_BITS, intBuf1);
+//            System.out.printf("depth bits %s \n", intBuf1.get(0));
+
             initVao();
             initProgram();
             initInterfaceTexture();
@@ -250,6 +254,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             initBuffers();
 
             uploadScene();
+            drawTiles();
         } catch (ShaderException e) {
             e.printStackTrace();
         }
@@ -261,60 +266,13 @@ public class MapEditor implements GLEventListener, KeyListener {
     }
 
     void drawTiles() {
-        int cameraX = camera.getCameraX();
-        int cameraY = camera.getCameraY();
-
-        int screenCenterX = cameraX / Perspective.LOCAL_TILE_SIZE;
-        int screenCenterY = cameraY / Perspective.LOCAL_TILE_SIZE;
-
-        int cameraXTileMin = 0;
-        int cameraYTileMin = 0;
-        int cameraXTileMax = scene.getRadius() * Constants.REGION_SIZE;
-        int cameraYTileMax = scene.getRadius() * Constants.REGION_SIZE;
-
-        // save some loops by only drawing tiles that are loaded
-        int maxTileDistance = Math.min(scene.getRadius() * Constants.REGION_SIZE, MAX_DISTANCE);
-
-        // from my position, which tiles can I see
-        for (int x = -maxTileDistance; x <= 0; x++) {
-            int xMin = x + screenCenterX;
-            int xMax = screenCenterX - x;
-            if (xMin >= cameraXTileMin || xMax < cameraXTileMax) {
-                for (int y = -maxTileDistance; y <= 0; y++) {
-                    SceneTile tile;
-                    int yMin = y + screenCenterY;
-                    int yMax = screenCenterY - y;
-                    if (xMin >= cameraXTileMin) {
-                        if (yMin >= cameraYTileMin) {
-                            tile = scene.getTile(0, xMin, yMin);
-                            if (tile != null) {
-                                this.drawTile(tile);
-                            }
-                        }
-
-                        if (yMax < cameraYTileMax) {
-                            tile = scene.getTile(0, xMin, yMax);
-                            if (tile != null) {
-                                this.drawTile(tile);
-                            }
-                        }
-                    }
-
-                    if (xMax < cameraXTileMax) {
-                        if (yMin >= cameraYTileMin) {
-                            tile = scene.getTile(0, xMax, yMin);
-                            if (tile != null) {
-                                this.drawTile(tile);
-                            }
-                        }
-
-                        if (yMax < cameraYTileMax) {
-                            tile = scene.getTile(0, xMax, yMax);
-                            if (tile != null) {
-                                this.drawTile(tile);
-                            }
-                        }
-                    }
+        targetBufferOffset = 0;
+        smallModels = largeModels = unorderedModels = 0;
+        for (int x = 0; x < scene.getRadius() * Constants.REGION_SIZE; x++) {
+            for (int y = 0; y < scene.getRadius() * Constants.REGION_SIZE; y++) {
+                SceneTile tile = scene.getTile(0, x, y);
+                if (tile != null) {
+                    this.drawTile(tile);
                 }
             }
         }
@@ -324,86 +282,92 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
     }
 
-    void drawTile(SceneTile tile) {
-        int x = tile.getX();
-        int y = tile.getY();
+    void checkHover() {
+        for (int x = 0; x < scene.getRadius() * Constants.REGION_SIZE; x++) {
+            for (int y = 0; y < scene.getRadius() * Constants.REGION_SIZE; y++) {
+                SceneTile tile = scene.getTile(0, x, y);
+                if (tile != null) {
+                    if (tile.getTilePaint() != null) {
+                        int pitchSin = camera.getPitchSin();
+                        int pitchCos = camera.getPitchCos();
+                        int yawSin = camera.getYawSin();
+                        int yawCos = camera.getYawCos();
 
-        int pitchSin = camera.getPitchSin();
-        int pitchCos = camera.getPitchCos();
-        int yawSin = camera.getYawSin();
-        int yawCos = camera.getYawCos();
+                        int var9;
+                        int var10 = var9 = (x << 7) - camera.getCameraX();
+                        int var11;
+                        int var12 = var11 = (y << 7) - camera.getCameraY();
+                        int var13;
+                        int var14 = var13 = var10 + Perspective.LOCAL_TILE_SIZE;
+                        int var15;
+                        int var16 = var15 = var12 + Perspective.LOCAL_TILE_SIZE;
+                        int var17 = tile.getTilePaint().getSwHeight() - camera.getCameraZ();
+                        int var18 = tile.getTilePaint().getSeHeight() - camera.getCameraZ();
+                        int var19 = tile.getTilePaint().getNeHeight() - camera.getCameraZ();
+                        int var20 = tile.getTilePaint().getNwHeight() - camera.getCameraZ();
+                        int var21 = var10 * yawCos + yawSin * var12 >> 16;
+                        var12 = var12 * yawCos - yawSin * var10 >> 16;
+                        var10 = var21;
+                        var21 = var17 * pitchCos - pitchSin * var12 >> 16;
+                        var12 = pitchSin * var17 + var12 * pitchCos >> 16;
+                        var17 = var21;
+                        if (var12 >= 50) {
+                            var21 = var14 * yawCos + yawSin * var11 >> 16;
+                            var11 = var11 * yawCos - yawSin * var14 >> 16;
+                            var14 = var21;
+                            var21 = var18 * pitchCos - pitchSin * var11 >> 16;
+                            var11 = pitchSin * var18 + var11 * pitchCos >> 16;
+                            var18 = var21;
+                            if (var11 >= 50) {
+                                var21 = var13 * yawCos + yawSin * var16 >> 16;
+                                var16 = var16 * yawCos - yawSin * var13 >> 16;
+                                var13 = var21;
+                                var21 = var19 * pitchCos - pitchSin * var16 >> 16;
+                                var16 = pitchSin * var19 + var16 * pitchCos >> 16;
+                                var19 = var21;
+                                if (var16 >= 50) {
+                                    var21 = var9 * yawCos + yawSin * var15 >> 16;
+                                    var15 = var15 * yawCos - yawSin * var9 >> 16;
+                                    var9 = var21;
+                                    var21 = var20 * pitchCos - pitchSin * var15 >> 16;
+                                    var15 = pitchSin * var20 + var15 * pitchCos >> 16;
+                                    if (var15 >= 50) {
 
-        if (tile.isNeedsUpdate()) {
-            updateTile(tile);
-            tile.setNeedsUpdate(false);
-        }
+                                        int dy = var10 * camera.getScale() / var12 + camera.getCenterX();
+                                        int dx = var17 * camera.getScale() / var12 + camera.getCenterY();
+                                        int cy = var14 * camera.getScale() / var11 + camera.getCenterX();
+                                        int cx = var18 * camera.getScale() / var11 + camera.getCenterY();
+                                        int ay = var13 * camera.getScale() / var16 + camera.getCenterX();
+                                        int ax = var19 * camera.getScale() / var16 + camera.getCenterY();
+                                        int by = var9 * camera.getScale() / var15 + camera.getCenterX();
+                                        int bx = var21 * camera.getScale() / var15 + camera.getCenterY();
 
-        if (tile.getTilePaint() != null) {
-//            drawScenePaint(tile.getTilePaint(), x, y);
-//            // FIXME: Something here does not work when draw distance > ~250
-            int var9;
-            int var10 = var9 = (x << 7) - camera.getCameraX();
-            int var11;
-            int var12 = var11 = (y << 7) - camera.getCameraY();
-            int var13;
-            int var14 = var13 = var10 + Perspective.LOCAL_TILE_SIZE;
-            int var15;
-            int var16 = var15 = var12 + Perspective.LOCAL_TILE_SIZE;
-            int var17 = tile.getTilePaint().getSwHeight() - camera.getCameraZ();
-            int var18 = tile.getTilePaint().getSeHeight() - camera.getCameraZ();
-            int var19 = tile.getTilePaint().getNeHeight() - camera.getCameraZ();
-            int var20 = tile.getTilePaint().getNwHeight() - camera.getCameraZ();
-            int var21 = var10 * yawCos + yawSin * var12 >> 16;
-            var12 = var12 * yawCos - yawSin * var10 >> 16;
-            var10 = var21;
-            var21 = var17 * pitchCos - pitchSin * var12 >> 16;
-            var12 = pitchSin * var17 + var12 * pitchCos >> 16;
-            var17 = var21;
-            if (var12 >= 50) {
-                var21 = var14 * yawCos + yawSin * var11 >> 16;
-                var11 = var11 * yawCos - yawSin * var14 >> 16;
-                var14 = var21;
-                var21 = var18 * pitchCos - pitchSin * var11 >> 16;
-                var11 = pitchSin * var18 + var11 * pitchCos >> 16;
-                var18 = var21;
-                if (var11 >= 50) {
-                    var21 = var13 * yawCos + yawSin * var16 >> 16;
-                    var16 = var16 * yawCos - yawSin * var13 >> 16;
-                    var13 = var21;
-                    var21 = var19 * pitchCos - pitchSin * var16 >> 16;
-                    var16 = pitchSin * var19 + var16 * pitchCos >> 16;
-                    var19 = var21;
-                    if (var16 >= 50) {
-                        var21 = var9 * yawCos + yawSin * var15 >> 16;
-                        var15 = var15 * yawCos - yawSin * var9 >> 16;
-                        var9 = var21;
-                        var21 = var20 * pitchCos - pitchSin * var15 >> 16;
-                        var15 = pitchSin * var20 + var15 * pitchCos >> 16;
-                        if (var15 >= 50) {
-
-                            int dy = var10 * camera.getScale() / var12 + camera.getCenterX();
-                            int dx = var17 * camera.getScale() / var12 + camera.getCenterY();
-                            int cy = var14 * camera.getScale() / var11 + camera.getCenterX();
-                            int cx = var18 * camera.getScale() / var11 + camera.getCenterY();
-                            int ay = var13 * camera.getScale() / var16 + camera.getCenterX();
-                            int ax = var19 * camera.getScale() / var16 + camera.getCenterY();
-                            int by = var9 * camera.getScale() / var15 + camera.getCenterX();
-                            int bx = var21 * camera.getScale() / var15 + camera.getCenterY();
-
-                            int mouseX2 = mouseListener.getMouseX();
-                            int mouseY2 = mouseListener.getMouseY();
-                            if (((ay - by) * (cx - bx) - (ax - bx) * (cy - by) > 0) && containsBounds(mouseX2, mouseY2, ax, bx, cx, ay, by, cy)) {
-                                hoverTile = tile;
-//                                updateTile(tile.getTilePaint());
-                            } else if (((dy - cy) * (bx - cx) - (dx - cx) * (by - cy) > 0) && containsBounds(mouseX2, mouseY2, dx, cx, bx, dy, cy, by)) {
-                                hoverTile = tile;
+                                        int mouseX2 = mouseListener.getMouseX();
+                                        int mouseY2 = mouseListener.getMouseY();
+                                        if (((ay - by) * (cx - bx) - (ax - bx) * (cy - by) > 0) && containsBounds(mouseX2, mouseY2, ax, bx, cx, ay, by, cy)) {
+                                            hoverTile = tile;
+                                        } else if (((dy - cy) * (bx - cx) - (dx - cx) * (by - cy) > 0) && containsBounds(mouseX2, mouseY2, dx, cx, bx, dy, cy, by)) {
+                                            hoverTile = tile;
+                                        }
+                                    }
+                                }
                             }
-
-                            drawScenePaint(tile.getTilePaint(), x, y);
                         }
                     }
                 }
             }
+        }
+
+    }
+
+    void drawTile(SceneTile tile) {
+        int x = tile.getX();
+        int y = tile.getY();
+
+//        if (tile.isNeedsUpdate()) {
+//            updateTile(tile);
+        if (tile.getTilePaint() != null) {
+            drawScenePaint(tile.getTilePaint(), x, y);
         } else if (tile.getTileModel() != null) {
             drawSceneModel(tile.getTileModel(), x, y);
         }
@@ -417,11 +381,15 @@ public class MapEditor implements GLEventListener, KeyListener {
         if (w != null) {
             drawSceneRenderable(w.getModelA(), w.getOrientationA(), w.getHeight(), x, y);
         }
+//            tile.setNeedsUpdate(false);
+//        }
     }
 
     SceneTile hoverTile;
 
     void updateTile(SceneTile tile) {
+        // FIXME: use buffersubdata to only upload the part of the intbuffer that needs to change
+        // uploading the entire buffer causes huge lag
 //        GpuIntBuffer buffer = new GpuIntBuffer(6 * Integer.BYTES);
 //        sceneUploader.modifyTilePaint(tile.getTilePaint(), vertexBuffer, uvBuffer);
 //        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
@@ -434,14 +402,14 @@ public class MapEditor implements GLEventListener, KeyListener {
 //        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
 
-        sceneUploader.upload(tile, vertexBuffer, uvBuffer);
-        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
-
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * Integer.BYTES, vertexBuffer, gl.GL_STATIC_COPY);
+//        sceneUploader.upload(tile, vertexBuffer, uvBuffer);
+//        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
 //
-        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, 0, vertexBuffer.limit() * Integer.BYTES, vertexBuffer);
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
+//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
+//        gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * Integer.BYTES, vertexBuffer, gl.GL_STATIC_COPY);
+////
+//        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, 0, vertexBuffer.limit() * Integer.BYTES, vertexBuffer);
+//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
     }
 
 
@@ -562,12 +530,12 @@ public class MapEditor implements GLEventListener, KeyListener {
     public void display(GLAutoDrawable drawable) {
         if (drawable.getAnimator() != null) {
             handleKeys(drawable.getAnimator().getLastFPSPeriod());
+            checkHover();
+            handleClick();
         }
-        handleClick();
-        drawTiles();
 
         if (canvasWidth > 0 && canvasHeight > 0 && (canvasWidth != lastViewportWidth || canvasHeight != lastViewportHeight)) {
-            createProjectionMatrix(0, canvasWidth, canvasHeight, 0, 0, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
+            createProjectionMatrix(0, canvasWidth, canvasHeight, 0, 1, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             lastViewportWidth = canvasWidth;
             lastViewportHeight = canvasHeight;
         }
@@ -603,7 +571,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         // Clear scene
         int sky = 9493480;
         gl.glClearColor((sky >> 16 & 0xFF) / 255f, (sky >> 8 & 0xFF) / 255f, (sky & 0xFF) / 255f, 1f);
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
 
         // Upload buffers
         vertexBuffer.flip();
@@ -693,8 +661,8 @@ public class MapEditor implements GLEventListener, KeyListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferSmallId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId); // vout[]
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId); //uvout[]
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
 
@@ -753,6 +721,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             // We just allow the GL to do face culling. Note this requires the priority renderer
             // to have logic to disregard culled faces in the priority depth testing.
             gl.glEnable(gl.GL_CULL_FACE);
+            gl.glCullFace(GL.GL_BACK);
 
             // Enable blending for alpha
             gl.glEnable(gl.GL_BLEND);
@@ -782,7 +751,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, 0);
             gl.glBlitFramebuffer(0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
                     0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
-                    gl.GL_COLOR_BUFFER_BIT, gl.GL_NEAREST);
+                    gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT, gl.GL_NEAREST);
 
             // Reset
             gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
@@ -794,19 +763,17 @@ public class MapEditor implements GLEventListener, KeyListener {
         modelBufferSmall.clear();
         modelBufferUnordered.clear();
 
-        targetBufferOffset = 0;
-        smallModels = largeModels = unorderedModels = 0;
+//        targetBufferOffset = 0;
+//        smallModels = largeModels = unorderedModels = 0;
         tempOffset = 0;
         tempUvOffset = 0;
-
-        // Texture on UI
-//        drawUi(canvasHeight, canvasWidth);
 
 //        minimapController.drawCanvas(scene);
     }
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+        drawable.getGL().getGL4().glViewport(x, y, width, height);
     }
 
     private void uploadScene() {
@@ -829,40 +796,13 @@ public class MapEditor implements GLEventListener, KeyListener {
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
-//        vertexBuffer.clear();
-//        uvBuffer.clear();
+        vertexBuffer.clear();
+        uvBuffer.clear();
     }
 
     private void initVao() {
         // Create VAO
         vaoHandle = GLUtil.glGenVertexArrays(gl);
-
-        // Create UI VAO
-        vaoUiHandle = GLUtil.glGenVertexArrays(gl);
-        // Create UI buffer
-        vboUiHandle = GLUtil.glGenBuffers(gl);
-        gl.glBindVertexArray(vaoUiHandle);
-
-        FloatBuffer vboUiBuf = GpuFloatBuffer.allocateDirect(5 * 4);
-        vboUiBuf.put(new float[]{
-                // positions     // texture coords
-                1f, 1f, 0.0f, 1.0f, 0f, // top right
-                1f, -1f, 0.0f, 1.0f, 1f, // bottom right
-                -1f, -1f, 0.0f, 0.0f, 1f, // bottom left
-                -1f, 1f, 0.0f, 0.0f, 0f  // top left
-        });
-        vboUiBuf.rewind();
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vboUiHandle);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, vboUiBuf.capacity() * Float.BYTES, vboUiBuf, gl.GL_STATIC_DRAW);
-
-        // position attribute
-        gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, false, 5 * Float.BYTES, 0);
-        gl.glEnableVertexAttribArray(0);
-
-        // texture coord attribute
-        gl.glVertexAttribPointer(1, 2, gl.GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
-        gl.glEnableVertexAttribArray(1);
-
         // unbind VBO
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
     }
@@ -882,7 +822,6 @@ public class MapEditor implements GLEventListener, KeyListener {
         glComputeProgram = Shader.COMPUTE_PROGRAM.compile(gl, template);
         glSmallComputeProgram = Shader.SMALL_COMPUTE_PROGRAM.compile(gl, template);
         glUnorderedComputeProgram = Shader.UNORDERED_COMPUTE_PROGRAM.compile(gl, template);
-        glUiProgram = Shader.UI_PROGRAM.compile(gl, template);
 
         initUniforms();
     }
@@ -896,10 +835,6 @@ public class MapEditor implements GLEventListener, KeyListener {
         uniFogDepth = gl.glGetUniformLocation(glProgram, "fogDepth");
         uniDrawDistance = gl.glGetUniformLocation(glProgram, "drawDistance");
 
-        uniTex = gl.glGetUniformLocation(glUiProgram, "tex");
-        uniTexSamplingMode = gl.glGetUniformLocation(glUiProgram, "samplingMode");
-        uniTexTargetDimensions = gl.glGetUniformLocation(glUiProgram, "targetDimensions");
-        uniTexSourceDimensions = gl.glGetUniformLocation(glUiProgram, "sourceDimensions");
         uniTextures = gl.glGetUniformLocation(glProgram, "textures");
         uniTextureOffsets = gl.glGetUniformLocation(glProgram, "textureOffsets");
 
@@ -951,7 +886,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         // create a standard orthographic projection
         float tx = -((right + left) / (right - left));
         float ty = -((top + bottom) / (top - bottom));
-        float tz = -((far + near) / (far - near));
+        float tz = ((far + near) / (far - near));
 
         gl.glUseProgram(glProgram);
 
@@ -977,13 +912,21 @@ public class MapEditor implements GLEventListener, KeyListener {
         gl.glRenderbufferStorageMultisample(gl.GL_RENDERBUFFER, aaSamples, gl.GL_RGBA, width, height);
         gl.glFramebufferRenderbuffer(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_RENDERBUFFER, rboSceneHandle);
 
-        // Create texture
-        texSceneHandle = GLUtil.glGenTexture(gl);
-        gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, texSceneHandle);
+        // Create color texture
+        colorTexSceneHandle = GLUtil.glGenTexture(gl);
+        gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, colorTexSceneHandle);
         gl.glTexImage2DMultisample(gl.GL_TEXTURE_2D_MULTISAMPLE, aaSamples, gl.GL_RGBA, width, height, true);
 
-        // Bind texture
-        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D_MULTISAMPLE, texSceneHandle, 0);
+        // Create depth texture
+        depthTexSceneHandle = GLUtil.glGenTexture(gl);
+        gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, depthTexSceneHandle);
+        gl.glTexImage2DMultisample(gl.GL_TEXTURE_2D_MULTISAMPLE, aaSamples, gl.GL_DEPTH_COMPONENT, width, height, true);
+
+        // Bind color tex
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D_MULTISAMPLE, colorTexSceneHandle, 0);
+
+        // bind depth tex
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_TEXTURE_2D_MULTISAMPLE, depthTexSceneHandle, 0);
 
         // Reset
         gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, 0);
@@ -1000,9 +943,6 @@ public class MapEditor implements GLEventListener, KeyListener {
             return modelBuffer;
         }
     }
-
-    int lastX, xPos = 2520;
-    int lastY, yPos = 3490;
 
     void handleKeys(double dt) {
         double xVec = -(double) camera.getYawSin() / 65535;
@@ -1048,6 +988,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         if (keys[KeyEvent.VK_K]) {
             scene = new Scene(sceneRegionBuilder, 10039, 6);
             uploadScene();
+            drawTiles();
         }
 
         if (keys[KeyEvent.VK_R]) {
@@ -1062,9 +1003,9 @@ public class MapEditor implements GLEventListener, KeyListener {
         if (mouseListener.isMouseClicked()) {
             int x = hoverTile.getX();
             int y = hoverTile.getY();
-            SceneTile north = scene.getTile(0, x, y+1);
-            SceneTile east = scene.getTile(0, x+1, y);
-            SceneTile northEast = scene.getTile(0, x+1, y+1);
+            SceneTile north = scene.getTile(0, x, y + 1);
+            SceneTile east = scene.getTile(0, x + 1, y);
+            SceneTile northEast = scene.getTile(0, x + 1, y + 1);
 
             SceneTile tile = scene.getTile(0, x, y);
             int newHeight = tile.getTilePaint().getNeHeight() + 10;

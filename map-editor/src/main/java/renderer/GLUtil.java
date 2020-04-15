@@ -2,7 +2,7 @@ package renderer;
 
 import com.jogamp.opengl.GL4;
 
-class GLUtil
+public class GLUtil
 {
 	private static final int ERR_LEN = 1024;
 
@@ -54,7 +54,7 @@ class GLUtil
 		gl.glDeleteVertexArrays(1, buf, 0);
 	}
 
-	static int glGenBuffers(GL4 gl)
+	public static int glGenBuffers(GL4 gl)
 	{
 		gl.glGenBuffers(1, buf, 0);
 		return buf[0];

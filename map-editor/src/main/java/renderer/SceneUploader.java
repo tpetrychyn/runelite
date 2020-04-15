@@ -31,12 +31,12 @@ import scene.Scene;
 
 import java.nio.IntBuffer;
 
-class SceneUploader {
+public class SceneUploader {
     int sceneId = (int) (System.currentTimeMillis() / 1000L);
     private int offset;
     private int uvoffset;
 
-    void upload(Scene scene, GpuIntBuffer vertexbuffer, GpuFloatBuffer uvBuffer) {
+    public void upload(Scene scene, GpuIntBuffer vertexbuffer, GpuFloatBuffer uvBuffer) {
         ++sceneId;
         offset = 0;
         uvoffset = 0;

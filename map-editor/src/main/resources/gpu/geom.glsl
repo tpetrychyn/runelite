@@ -50,6 +50,7 @@ in vec4 vColor[];
 in float vHsl[];
 in vec4 vUv[];
 in float vFogAmount[];
+in vec4 frag_worldPosition[];
 
 out vec4 Color;
 centroid out float fHsl;
@@ -64,7 +65,7 @@ void main() {
   vec3 screenB = toScreen(vPosition[1] - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
   vec3 screenC = toScreen(vPosition[2] - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
 
-  if (-screenA.z < 50 || -screenB.z < 50 || -screenC.z < 50) {
+  if (screenA.z < 50 || screenB.z < 50 || screenC.z < 50) {
     // the client does not draw a triangle if any vertex distance is <50
     return;
   }
