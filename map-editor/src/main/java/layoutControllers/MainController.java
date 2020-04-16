@@ -1,12 +1,7 @@
 package layoutControllers;
 
-import com.jfoenix.controls.JFXButton;
 import com.jogamp.opengl.util.Animator;
-import com.jogamp.opengl.util.FPSAnimator;
-import eventHandlers.MouseListener;
 import javafx.animation.AnimationTimer;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
@@ -17,10 +12,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import lombok.Getter;
 import lombok.Setter;
 import renderer.Camera;
+import renderer.InputHandler;
 
 import java.io.IOException;
 
@@ -28,7 +23,7 @@ import java.io.IOException;
 @Setter
 public class MainController {
     private Camera camera;
-    private MouseListener mouseListener;
+    private InputHandler inputHandler;
     private Animator animator;
 
     @FXML
@@ -83,8 +78,8 @@ public class MainController {
                 if (camera == null) {
                     return;
                 }
-                getLblMouseX().setText(String.valueOf(mouseListener.getMouseX()));
-                getLblMouseY().setText(String.valueOf(mouseListener.getMouseY()));
+                getLblMouseX().setText(String.valueOf(inputHandler.getMouseX()));
+                getLblMouseY().setText(String.valueOf(inputHandler.getMouseY()));
 
                 lblYaw.setText(String.valueOf(camera.getYaw()));
                 getLblPitch().setText(String.valueOf(camera.getPitch()));

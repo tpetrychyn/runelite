@@ -2,14 +2,11 @@ package renderer;
 
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
-import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.Animator;
-import config.AntiAliasingMode;
-import eventHandlers.MouseListener;
+import com.jogamp.opengl.util.GLBuffers;
 import layoutControllers.MainController;
 import layoutControllers.MinimapController;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +17,10 @@ import net.runelite.cache.SpriteManager;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.fs.StoreProvider;
 import net.runelite.cache.item.RSTextureProvider;
+import renderer.helpers.AntiAliasingMode;
+import renderer.helpers.GLUtil;
+import renderer.helpers.GpuFloatBuffer;
+import renderer.helpers.GpuIntBuffer;
 import scene.Scene;
 import scene.SceneRegionBuilder;
 import scene.SceneTile;
@@ -28,8 +29,10 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import static renderer.helpers.GLUtil.*;
+
 @Slf4j
-public class MapEditor implements GLEventListener, KeyListener {
+public class MapEditor implements GLEventListener {
 
     // This is the maximum number of triangles the compute shaders support
     private static final int MAX_TRIANGLE = 4096;
@@ -37,8 +40,7 @@ public class MapEditor implements GLEventListener, KeyListener {
     private static final int FLAG_SCENE_BUFFER = Integer.MIN_VALUE;
     static final int MAX_DISTANCE = 1000;
 
-    private MouseListener mouseListener;
-
+    private InputHandler inputHandler;
     private SceneUploader sceneUploader = new SceneUploader();
     private TextureManager textureManager = new TextureManager();
     private RSTextureProvider textureProvider;
@@ -52,8 +54,6 @@ public class MapEditor implements GLEventListener, KeyListener {
     private int glUnorderedComputeProgram;
 
     private int vaoHandle;
-
-    private int interfaceTexture;
 
     private int fboSceneHandle;
     private int colorTexSceneHandle;
@@ -87,16 +87,19 @@ public class MapEditor implements GLEventListener, KeyListener {
     private GpuIntBuffer modelBuffer;
 
     private int unorderedModels;
+    private boolean hasUnorderedUpdate = true;
 
     /**
      * number of models in small buffer
      */
     private int smallModels;
+    private boolean hasSmallUpdate = true;
 
     /**
      * number of models in large buffer
      */
     private int largeModels;
+    private boolean hasLargeUpdate = true;
 
     /**
      * offset in the target buffer for model
@@ -131,10 +134,6 @@ public class MapEditor implements GLEventListener, KeyListener {
     private int uniDrawDistance;
     private int uniProjectionMatrix;
     private int uniBrightness;
-    private int uniTex;
-    private int uniTexSamplingMode;
-    private int uniTexSourceDimensions;
-    private int uniTexTargetDimensions;
     private int uniTextures;
     private int uniTextureOffsets;
     private int uniBlockSmall;
@@ -161,11 +160,9 @@ public class MapEditor implements GLEventListener, KeyListener {
             sprites.load();
 
             sceneRegionBuilder = new SceneRegionBuilder(textureProvider);
-            scene = new Scene(sceneRegionBuilder, 12854, 1);
+            scene = new Scene(sceneRegionBuilder, 12854, 5);
 
-            // center camera in scene
-            camera.setCameraX(Perspective.LOCAL_TILE_SIZE * Constants.REGION_SIZE * scene.getRadius() / 2);
-            camera.setCameraY(Perspective.LOCAL_TILE_SIZE * Constants.REGION_SIZE * scene.getRadius() / 2);
+            // center camera in viewport
             camera.setCenterX(canvasWidth / 2);
             camera.setCenterY(canvasHeight / 2);
 
@@ -175,7 +172,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             e.printStackTrace();
         }
 
-        bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId  = -1;
+        bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId = -1;
         unorderedModels = smallModels = largeModels = 0;
 
         vertexBuffer = new GpuIntBuffer();
@@ -191,13 +188,13 @@ public class MapEditor implements GLEventListener, KeyListener {
         Screen screen = NewtFactory.createScreen(jfxNewtDisplay, 0);
         GLProfile glProfile = GLProfile.get(GLProfile.GL4);
         GLCapabilities glCaps = new GLCapabilities(glProfile);
-        glCaps.setDepthBits(24);
 
         GLWindow window = GLWindow.create(screen, glCaps);
         window.addGLEventListener(this);
-        window.addKeyListener(this);
-        mouseListener = new MouseListener();
-        window.addMouseListener(mouseListener);
+
+        inputHandler = new InputHandler(camera, this);
+        window.addKeyListener(inputHandler);
+        window.addMouseListener(inputHandler);
 
         NewtCanvasJFX glCanvas = new NewtCanvasJFX(window);
         glCanvas.setWidth(canvasWidth);
@@ -207,24 +204,8 @@ public class MapEditor implements GLEventListener, KeyListener {
         animator.setUpdateFPSFrames(3, null);
         animator.start();
 
-        mouseListener.getDragListeners().add(e -> {
-            int speed = 2;//(int)(2 * animator.getLastFPSPeriod() / 10);
-            if (mouseListener.getPreviousMouseX() < e.getX()) {
-                camera.addYaw(-speed);
-            } else if (mouseListener.getPreviousMouseX() > e.getX()) {
-                camera.addYaw(speed);
-            }
-
-            if (mouseListener.getPreviousMouseY() < e.getY()) {
-                camera.addPitch(1);
-            } else if (mouseListener.getPreviousMouseY() > e.getY()) {
-                camera.addPitch(-1);
-            }
-            return null;
-        });
-
         mainController.setCamera(camera);
-        mainController.setMouseListener(mouseListener);
+        mainController.setInputHandler(inputHandler);
         mainController.setAnimator(animator);
 
         lastViewportWidth = lastViewportHeight = lastCanvasWidth = lastCanvasHeight = -1;
@@ -249,12 +230,13 @@ public class MapEditor implements GLEventListener, KeyListener {
 
             initVao();
             initProgram();
-            initInterfaceTexture();
             initUniformBuffer();
             initBuffers();
 
             uploadScene();
-            drawTiles();
+
+            // disable vsync
+//            gl.setSwapInterval(0);
         } catch (ShaderException e) {
             e.printStackTrace();
         }
@@ -262,12 +244,69 @@ public class MapEditor implements GLEventListener, KeyListener {
 
     @Override
     public void dispose(GLAutoDrawable drawable) {
+        shutdownBuffers();
+        shutdownProgram();
+        shutdownVao();
+        shutdownAAFbo();
+    }
 
+    private void shutdownProgram()
+    {
+        gl.glDeleteProgram(glProgram);
+        glProgram = -1;
+
+        gl.glDeleteProgram(glComputeProgram);
+        glComputeProgram = -1;
+
+        gl.glDeleteProgram(glSmallComputeProgram);
+        glSmallComputeProgram = -1;
+
+        gl.glDeleteProgram(glUnorderedComputeProgram);
+        glUnorderedComputeProgram = -1;
+    }
+
+    private void shutdownVao()
+    {
+        glDeleteVertexArrays(gl, vaoHandle);
+        vaoHandle = -1;
+    }
+
+    private void shutdownAAFbo()
+    {
+        if (colorTexSceneHandle != -1)
+        {
+            glDeleteTexture(gl, colorTexSceneHandle);
+            colorTexSceneHandle = -1;
+        }
+
+        if (depthTexSceneHandle != -1)
+        {
+            glDeleteTexture(gl, depthTexSceneHandle);
+            depthTexSceneHandle = -1;
+        }
+
+        if (fboSceneHandle != -1)
+        {
+            glDeleteFrameBuffer(gl, fboSceneHandle);
+            fboSceneHandle = -1;
+        }
+
+        if (rboSceneHandle != -1)
+        {
+            glDeleteRenderbuffers(gl, rboSceneHandle);
+            rboSceneHandle = -1;
+        }
     }
 
     void drawTiles() {
-        targetBufferOffset = 0;
+        modelBuffer.clear();
+        modelBufferSmall.clear();
+        modelBufferUnordered.clear();
         smallModels = largeModels = unorderedModels = 0;
+        hasUnorderedUpdate = true;
+        hasSmallUpdate = true;
+        hasLargeUpdate = true;
+        targetBufferOffset = 0;
         for (int x = 0; x < scene.getRadius() * Constants.REGION_SIZE; x++) {
             for (int y = 0; y < scene.getRadius() * Constants.REGION_SIZE; y++) {
                 SceneTile tile = scene.getTile(0, x, y);
@@ -277,9 +316,14 @@ public class MapEditor implements GLEventListener, KeyListener {
             }
         }
 
-        if (hoverTile != null) {
-//            drawSceneTemporary(hoverTile.getTilePaint(), hoverTile.getX(), hoverTile.getY());
-        }
+        // Upload buffers
+        // Every frame used to flip and clear after,
+        // I'll just flip the first time and the draw will continuously use them
+        vertexBuffer.flip();
+        uvBuffer.flip();
+        modelBuffer.flip();
+        modelBufferSmall.flip();
+        modelBufferUnordered.flip();
     }
 
     void checkHover() {
@@ -342,8 +386,8 @@ public class MapEditor implements GLEventListener, KeyListener {
                                         int by = var9 * camera.getScale() / var15 + camera.getCenterX();
                                         int bx = var21 * camera.getScale() / var15 + camera.getCenterY();
 
-                                        int mouseX2 = mouseListener.getMouseX();
-                                        int mouseY2 = mouseListener.getMouseY();
+                                        int mouseX2 = inputHandler.getMouseX();
+                                        int mouseY2 = inputHandler.getMouseY();
                                         if (((ay - by) * (cx - bx) - (ax - bx) * (cy - by) > 0) && containsBounds(mouseX2, mouseY2, ax, bx, cx, ay, by, cy)) {
                                             hoverTile = tile;
                                         } else if (((dy - cy) * (bx - cx) - (dx - cx) * (by - cy) > 0) && containsBounds(mouseX2, mouseY2, dx, cx, bx, dy, cy, by)) {
@@ -357,18 +401,19 @@ public class MapEditor implements GLEventListener, KeyListener {
                 }
             }
         }
-
+        if (hoverTile != null) {
+//            drawSceneTemporary(hoverTile.getTilePaint(), hoverTile.getX(), hoverTile.getY());
+        }
     }
 
     void drawTile(SceneTile tile) {
         int x = tile.getX();
         int y = tile.getY();
 
-//        if (tile.isNeedsUpdate()) {
-//            updateTile(tile);
         if (tile.getTilePaint() != null) {
             drawScenePaint(tile.getTilePaint(), x, y);
-        } else if (tile.getTileModel() != null) {
+        }
+        if (tile.getTileModel() != null) {
             drawSceneModel(tile.getTileModel(), x, y);
         }
 
@@ -381,37 +426,9 @@ public class MapEditor implements GLEventListener, KeyListener {
         if (w != null) {
             drawSceneRenderable(w.getModelA(), w.getOrientationA(), w.getHeight(), x, y);
         }
-//            tile.setNeedsUpdate(false);
-//        }
     }
 
     SceneTile hoverTile;
-
-    void updateTile(SceneTile tile) {
-        // FIXME: use buffersubdata to only upload the part of the intbuffer that needs to change
-        // uploading the entire buffer causes huge lag
-//        GpuIntBuffer buffer = new GpuIntBuffer(6 * Integer.BYTES);
-//        sceneUploader.modifyTilePaint(tile.getTilePaint(), vertexBuffer, uvBuffer);
-//        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
-//
-//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
-//
-////        gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * Integer.BYTES, null, gl.GL_DYNAMIC_DRAW);
-//        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, tile.getTilePaint().getBufferOffset() * Integer.BYTES, tile.getTilePaint().getBufferLen() * Integer.BYTES, vertexBuffer);
-//
-//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
-
-
-//        sceneUploader.upload(tile, vertexBuffer, uvBuffer);
-//        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
-//
-//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
-//        gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * Integer.BYTES, vertexBuffer, gl.GL_STATIC_COPY);
-////
-//        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, 0, vertexBuffer.limit() * Integer.BYTES, vertexBuffer);
-//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
-    }
-
 
     boolean containsBounds(int i_0, int i_1, int i_2, int i_3, int i_4, int i_5, int i_6, int i_7) {
         if (i_1 < i_2 && i_1 < i_3 && i_1 < i_4) {
@@ -455,10 +472,6 @@ public class MapEditor implements GLEventListener, KeyListener {
 
             targetBufferOffset += tc * 3;
         }
-//        if (renderable instanceof Model && ((Model) renderable).getSceneId() == sceneUploader.sceneId)
-//        {
-
-//        }
     }
 
     private void drawScenePaint(TilePaint paint, int tileX, int tileY) {
@@ -526,10 +539,26 @@ public class MapEditor implements GLEventListener, KeyListener {
         targetBufferOffset += len;
     }
 
+    void updateTile(SceneTile tile) {
+        GpuIntBuffer modifyBuffer = new GpuIntBuffer();
+        GpuFloatBuffer modifyUvBuffer = new GpuFloatBuffer();
+        sceneUploader.modifyTilePaint(tile.getTilePaint(), modifyBuffer, modifyUvBuffer);
+
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
+//         tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4 ---- offset is 6 writes, 4 ints each
+        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4, modifyBuffer.getBuffer().limit(), modifyBuffer.getBuffer());
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
+
+        hasUnorderedUpdate = true;
+    }
+
     @Override
     public void display(GLAutoDrawable drawable) {
+        if (sceneChangeRequested) {
+            uploadScene();
+        }
+
         if (drawable.getAnimator() != null) {
-            handleKeys(drawable.getAnimator().getLastFPSPeriod());
             checkHover();
             handleClick();
         }
@@ -554,7 +583,7 @@ public class MapEditor implements GLEventListener, KeyListener {
             if (lastStretchedCanvasWidth != stretchedCanvasWidth
                     || lastStretchedCanvasHeight != stretchedCanvasHeight
                     || lastAntiAliasingMode != antiAliasingMode) {
-                final int maxSamples = GLUtil.glGetInteger(gl, gl.GL_MAX_SAMPLES);
+                final int maxSamples = glGetInteger(gl, gl.GL_MAX_SAMPLES);
                 final int samples = Math.min(antiAliasingMode.getSamples(), maxSamples);
 
                 initAAFbo(stretchedCanvasWidth, stretchedCanvasHeight, samples);
@@ -572,13 +601,6 @@ public class MapEditor implements GLEventListener, KeyListener {
         int sky = 9493480;
         gl.glClearColor((sky >> 16 & 0xFF) / 255f, (sky >> 8 & 0xFF) / 255f, (sky & 0xFF) / 255f, 1f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
-
-        // Upload buffers
-        vertexBuffer.flip();
-        uvBuffer.flip();
-        modelBuffer.flip();
-        modelBufferSmall.flip();
-        modelBufferUnordered.flip();
 
         IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
         FloatBuffer uvBuffer = this.uvBuffer.getBuffer();
@@ -632,6 +654,7 @@ public class MapEditor implements GLEventListener, KeyListener {
 
         // Draw 3d scene
         if (textureProvider != null && this.bufferId != -1) {
+
             gl.glUniformBlockBinding(glSmallComputeProgram, uniBlockSmall, 0);
             gl.glUniformBlockBinding(glComputeProgram, uniBlockLarge, 0);
 
@@ -643,43 +666,52 @@ public class MapEditor implements GLEventListener, KeyListener {
              */
 
             // unordered
-            gl.glUseProgram(glUnorderedComputeProgram);
+            if (unorderedModels > 0 && hasUnorderedUpdate) {
+                hasUnorderedUpdate = false;
+                gl.glUseProgram(glUnorderedComputeProgram);
 
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferUnorderedId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferUnorderedId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
 
-            gl.glDispatchCompute(unorderedModels, 1, 1);
+                gl.glDispatchCompute(unorderedModels, 1, 1);
+            }
 
             // small
-            gl.glUseProgram(glSmallComputeProgram);
+            if (smallModels > 0 && hasSmallUpdate) {
+                hasSmallUpdate = false;
+                gl.glUseProgram(glSmallComputeProgram);
 
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferSmallId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId); // vout[]
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId); //uvout[]
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferSmallId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId); // vout[]
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId); //uvout[]
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
 
-            gl.glDispatchCompute(smallModels, 1, 1);
+                gl.glDispatchCompute(smallModels, 1, 1);
+            }
 
             // large
-            gl.glUseProgram(glComputeProgram);
+            if (largeModels > 0 && hasLargeUpdate) {
+                hasLargeUpdate = false;
+                gl.glUseProgram(glComputeProgram);
 
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
-            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
+                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
 
-            gl.glDispatchCompute(largeModels, 1, 1);
+                gl.glDispatchCompute(largeModels, 1, 1);
+            }
 
             gl.glMemoryBarrier(gl.GL_SHADER_STORAGE_BARRIER_BIT);
 
@@ -757,11 +789,11 @@ public class MapEditor implements GLEventListener, KeyListener {
             gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
         }
 
-        vertexBuffer.clear();
-        uvBuffer.clear();
-        modelBuffer.clear();
-        modelBufferSmall.clear();
-        modelBufferUnordered.clear();
+//        vertexBuffer.clear();
+//        uvBuffer.clear();
+//        modelBuffer.clear();
+//        modelBufferSmall.clear();
+//        modelBufferUnordered.clear();
 
 //        targetBufferOffset = 0;
 //        smallModels = largeModels = unorderedModels = 0;
@@ -776,7 +808,13 @@ public class MapEditor implements GLEventListener, KeyListener {
         drawable.getGL().getGL4().glViewport(x, y, width, height);
     }
 
+    private boolean sceneChangeRequested = true;
+    public void changeScene(Scene scene) {
+        this.scene = scene;
+        sceneChangeRequested = true;
+    }
     private void uploadScene() {
+        sceneChangeRequested = false;
         vertexBuffer.clear();
         uvBuffer.clear();
 
@@ -789,7 +827,7 @@ public class MapEditor implements GLEventListener, KeyListener {
         FloatBuffer uvBuffer = this.uvBuffer.getBuffer();
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * Integer.BYTES, vertexBuffer, gl.GL_DYNAMIC_DRAW);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * GLBuffers.SIZEOF_INT, vertexBuffer, gl.GL_STATIC_COPY);
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, uvBufferId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, uvBuffer.limit() * Float.BYTES, uvBuffer, gl.GL_STATIC_COPY);
@@ -798,11 +836,14 @@ public class MapEditor implements GLEventListener, KeyListener {
 
         vertexBuffer.clear();
         uvBuffer.clear();
+
+        drawTiles();
+        gl.glFlush();
     }
 
     private void initVao() {
         // Create VAO
-        vaoHandle = GLUtil.glGenVertexArrays(gl);
+        vaoHandle = glGenVertexArrays(gl);
         // unbind VBO
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
     }
@@ -843,18 +884,8 @@ public class MapEditor implements GLEventListener, KeyListener {
         uniBlockMain = gl.glGetUniformBlockIndex(glProgram, "uniforms");
     }
 
-    private void initInterfaceTexture() {
-        interfaceTexture = GLUtil.glGenTexture(gl);
-        gl.glBindTexture(gl.GL_TEXTURE_2D, interfaceTexture);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR);
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR);
-        gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
-    }
-
     private void initUniformBuffer() {
-        uniformBufferId = GLUtil.glGenBuffers(gl);
+        uniformBufferId = glGenBuffers(gl);
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
         uniformBuffer.clear();
         uniformBuffer.put(new int[8]);
@@ -944,55 +975,60 @@ public class MapEditor implements GLEventListener, KeyListener {
         }
     }
 
-    void handleKeys(double dt) {
-        double xVec = -(double) camera.getYawSin() / 65535;
-        double yVec = (double) camera.getYawCos() / 65535;
-        double zVec = (double) camera.getPitchSin() / 65535;
-
-        int speed = 1;
-        if (keys[KeyEvent.VK_SHIFT]) {
-            speed = 4;
+    private void shutdownBuffers()
+    {
+        if (bufferId != -1)
+        {
+            glDeleteBuffer(gl, bufferId);
+            bufferId = -1;
         }
 
-        if (keys[KeyEvent.VK_W]) {
-            camera.addX((int) (dt * xVec * speed));
-            camera.addY((int) (dt * yVec * speed));
-            camera.addZ((int) (dt * zVec * speed));
+        if (uvBufferId != -1)
+        {
+            glDeleteBuffer(gl, uvBufferId);
+            uvBufferId = -1;
         }
 
-        if (keys[KeyEvent.VK_S]) {
-            camera.addX(-(int) (dt * xVec * speed));
-            camera.addY(-(int) (dt * yVec * speed));
-            camera.addZ(-(int) (dt * zVec * speed));
+        if (tmpBufferId != -1)
+        {
+            glDeleteBuffer(gl, tmpBufferId);
+            tmpBufferId = -1;
         }
 
-        if (keys[KeyEvent.VK_A]) {
-            // X uses yVec because we want to move perpendicular
-            camera.addX(-(int) (dt * yVec * speed));
-            camera.addY((int) (dt * xVec * speed));
+        if (tmpUvBufferId != -1)
+        {
+            glDeleteBuffer(gl, tmpUvBufferId);
+            tmpUvBufferId = -1;
         }
 
-        if (keys[KeyEvent.VK_D]) {
-            camera.addX((int) (dt * yVec * speed));
-            camera.addY(-(int) (dt * xVec * speed));
+        if (tmpModelBufferId != -1)
+        {
+            glDeleteBuffer(gl, tmpModelBufferId);
+            tmpModelBufferId = -1;
         }
 
-        if (keys[KeyEvent.VK_SPACE]) {
-            camera.addZ(-(int) dt * speed);
+        if (tmpModelBufferSmallId != -1)
+        {
+            glDeleteBuffer(gl, tmpModelBufferSmallId);
+            tmpModelBufferSmallId = -1;
         }
 
-        if (keys[KeyEvent.VK_X]) {
-            camera.addZ((int) dt * speed);
+        if (tmpModelBufferUnorderedId != -1)
+        {
+            glDeleteBuffer(gl, tmpModelBufferUnorderedId);
+            tmpModelBufferUnorderedId = -1;
         }
 
-        if (keys[KeyEvent.VK_K]) {
-            scene = new Scene(sceneRegionBuilder, 10039, 6);
-            uploadScene();
-            drawTiles();
+        if (tmpOutBufferId != -1)
+        {
+            glDeleteBuffer(gl, tmpOutBufferId);
+            tmpOutBufferId = -1;
         }
 
-        if (keys[KeyEvent.VK_R]) {
-            uploadScene();
+        if (tmpOutUvBufferId != -1)
+        {
+            glDeleteBuffer(gl, tmpOutUvBufferId);
+            tmpOutUvBufferId = -1;
         }
     }
 
@@ -1000,59 +1036,43 @@ public class MapEditor implements GLEventListener, KeyListener {
         if (hoverTile == null) {
             return;
         }
-        if (mouseListener.isMouseClicked()) {
+        if (inputHandler.isMouseClicked()) {
             int x = hoverTile.getX();
             int y = hoverTile.getY();
             SceneTile north = scene.getTile(0, x, y + 1);
             SceneTile east = scene.getTile(0, x + 1, y);
             SceneTile northEast = scene.getTile(0, x + 1, y + 1);
-
+//
             SceneTile tile = scene.getTile(0, x, y);
-            int newHeight = tile.getTilePaint().getNeHeight() + 10;
+            int newHeight = tile.getTilePaint().getNeHeight() - 10;
 
             if (north != null && north.getTilePaint() != null) {
                 TilePaintImpl tp = north.getTilePaint();
                 tp.setSeHeight(newHeight);
                 north.setHeight(newHeight);
-                north.setNeedsUpdate(true);
+                updateTile(north);
             }
             if (east != null && east.getTilePaint() != null) {
                 TilePaintImpl tp = east.getTilePaint();
                 tp.setNwHeight(newHeight);
                 east.setHeight(newHeight);
-                east.setNeedsUpdate(true);
+                updateTile(east);
             }
 
             if (northEast != null && northEast.getTilePaint() != null) {
                 TilePaintImpl tp = northEast.getTilePaint();
                 tp.setSwHeight(newHeight);
                 northEast.setHeight(newHeight);
-                northEast.setNeedsUpdate(true);
+                updateTile(northEast);
             }
 
             tile.setHeight(newHeight);
             tile.getTilePaint().setNeHeight(newHeight);
-            tile.getTilePaint().setNeColor(scene.calcTileColor(0, x, y));
-            tile.setNeedsUpdate(true);
+
+            updateTile(tile);
 
             System.out.printf("clicked tile %d %d\n", x, y);
-            mouseListener.setMouseClicked(false);
+            inputHandler.mouseClicked = false;
         }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        keys[e.getKeyCode()] = true;
-    }
-
-    boolean[] keys = new boolean[250];
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (e.isAutoRepeat()) {
-            return;
-        }
-
-        keys[e.getKeyCode()] = false;
     }
 }

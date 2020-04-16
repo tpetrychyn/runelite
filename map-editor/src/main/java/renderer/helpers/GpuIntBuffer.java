@@ -1,4 +1,6 @@
-package renderer;
+package renderer.helpers;
+
+import com.jogamp.opengl.util.GLBuffers;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -8,24 +10,14 @@ public class GpuIntBuffer
 {
 	private IntBuffer buffer = allocateDirect(65536);
 
-	public GpuIntBuffer() {}
-
-	public GpuIntBuffer(int size) {
-		this.buffer = allocateDirect(size);
-	}
-
 	void put(int x, int y, int z)
 	{
 		buffer.put(x).put(y).put(z);
 	}
 
-	void put(int x, int y, int z, int c)
+	public void put(int x, int y, int z, int c)
 	{
 		buffer.put(x).put(y).put(z).put(c);
-	}
-
-	void putAt(int offset, int x, int y, int z, int c) {
-		buffer.put(offset, x).put(offset+1, y).put(offset+2, z).put(offset+3, c);
 	}
 
 	public void flip()
@@ -38,7 +30,7 @@ public class GpuIntBuffer
 		buffer.clear();
 	}
 
-	void ensureCapacity(int size)
+	public void ensureCapacity(int size)
 	{
 		while (buffer.remaining() < size)
 		{
@@ -54,10 +46,8 @@ public class GpuIntBuffer
 		return buffer;
 	}
 
-	static IntBuffer allocateDirect(int size)
+	public static IntBuffer allocateDirect(int size)
 	{
-		return ByteBuffer.allocateDirect(size * Integer.BYTES)
-			.order(ByteOrder.nativeOrder())
-			.asIntBuffer();
+		return GLBuffers.newDirectIntBuffer(size * GLBuffers.SIZEOF_INT);
 	}
 }

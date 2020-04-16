@@ -24,12 +24,12 @@ package renderer;/*
  */
 
 import models.*;
+import renderer.helpers.GpuFloatBuffer;
+import renderer.helpers.GpuIntBuffer;
 import scene.SceneRegion;
 import scene.SceneTile;
 import net.runelite.api.*;
 import scene.Scene;
-
-import java.nio.IntBuffer;
 
 public class SceneUploader {
     int sceneId = (int) (System.currentTimeMillis() / 1000L);
@@ -150,22 +150,17 @@ public class SceneUploader {
 
         TilePaintImpl sceneTilePaint = tile.getTilePaint();
         if (sceneTilePaint != null) {
-            if (sceneTilePaint.getBufferOffset() > -1) {
-                // if already in vertex buffer, simply update it
-                modify(sceneTilePaint, vertexBuffer, uvBuffer);
+            sceneTilePaint.setBufferOffset(offset);
+            if (sceneTilePaint.getTexture() != -1) {
+                sceneTilePaint.setUvBufferOffset(uvoffset);
             } else {
-                sceneTilePaint.setBufferOffset(offset);
-                if (sceneTilePaint.getTexture() != -1) {
-                    sceneTilePaint.setUvBufferOffset(uvoffset);
-                } else {
-                    sceneTilePaint.setUvBufferOffset(-1);
-                }
-                int len = upload(sceneTilePaint, vertexBuffer, uvBuffer);
-                sceneTilePaint.setBufferLen(len);
-                offset += len;
-                if (sceneTilePaint.getTexture() != -1) {
-                    uvoffset += len;
-                }
+                sceneTilePaint.setUvBufferOffset(-1);
+            }
+            int len = upload(sceneTilePaint, vertexBuffer, uvBuffer);
+            sceneTilePaint.setBufferLen(len);
+            offset += len;
+            if (sceneTilePaint.getTexture() != -1) {
+                uvoffset += len;
             }
         }
 
@@ -177,7 +172,7 @@ public class SceneUploader {
             } else {
                 sceneTileModel.setUvBufferOffset(-1);
             }
-            int len = upload(sceneTileModel, tile.getX(), tile.getY(), vertexBuffer, uvBuffer);
+            int len = upload(sceneTileModel, vertexBuffer, uvBuffer);
             sceneTileModel.setBufferLen(len);
             offset += len;
             if (sceneTileModel.getTriangleTextureId() != null) {
@@ -239,10 +234,55 @@ public class SceneUploader {
     }
 
     public void modifyTilePaint(TilePaint tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
-//        int offset = tile.getBufferOffset()*Integer.BYTES; // each write to the vertex buffer is 4 values
-//        vertexBuffer.getBuffer().position(offset);
         upload(tile, vertexBuffer, uvBuffer);
-//        vertexBuffer.getBuffer().position(0);
+//        int swHeight = tile.getSwHeight();
+//        int seHeight = tile.getSeHeight();
+//        int neHeight = tile.getNeHeight();
+//        int nwHeight = tile.getNwHeight();
+//
+//        final int neColor = tile.getNeColor();
+//        final int nwColor = tile.getNwColor();
+//        final int seColor = tile.getSeColor();
+//        final int swColor = tile.getSwColor();
+//
+//        if (neColor == 12345678) {
+//            return;
+//        }
+//
+////        uvBuffer.ensureCapacity(24);
+//
+//        // 0,0
+//        int vertexDx = 0;
+//        int vertexDy = 0;
+//        int vertexDz = swHeight;
+//        final int c1 = swColor;
+//
+//        // 1,0
+//        int vertexCx = Perspective.LOCAL_TILE_SIZE;
+//        int vertexCy = 0;
+//        int vertexCz = seHeight;
+//        final int c2 = seColor;
+//
+//        // 1,1
+//        int vertexAx = Perspective.LOCAL_TILE_SIZE;
+//        int vertexAy = Perspective.LOCAL_TILE_SIZE;
+//        int vertexAz = neHeight;
+//        final int c3 = neColor;
+//
+//        // 0,1
+//        int vertexBx = 0;
+//        int vertexBy = Perspective.LOCAL_TILE_SIZE;
+//        int vertexBz = nwHeight;
+//        final int c4 = nwColor;
+//
+//        vertexBuffer.put(vertexAx).put(vertexAz).put(vertexAy).put(c3);
+//        vertexBuffer.put(vertexBx).put(vertexBz).put(vertexBy).put(c4);
+//        vertexBuffer.put(vertexCx).put(vertexCz).put(vertexCy).put(c2);
+//
+//        vertexBuffer.put(vertexDx).put(vertexDz).put(vertexDy).put(c1);
+//        vertexBuffer.put(vertexCx).put(vertexCz).put(vertexCy).put(c2);
+//        vertexBuffer.put(vertexBx).put(vertexBz).put(vertexBy).put(c4);
+
         vertexBuffer.flip();
     }
 
@@ -317,7 +357,7 @@ public class SceneUploader {
         return 6;
     }
 
-    private int upload(TileModel sceneTileModel, int tileX, int tileY, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
+    private int upload(TileModel sceneTileModel, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
         final int[] faceX = sceneTileModel.getFaceX();
         final int[] faceY = sceneTileModel.getFaceY();
         final int[] faceZ = sceneTileModel.getFaceZ();
@@ -337,9 +377,6 @@ public class SceneUploader {
         vertexBuffer.ensureCapacity(faceCount * 12);
         uvBuffer.ensureCapacity(faceCount * 12);
 
-        int baseX = Perspective.LOCAL_TILE_SIZE * tileX;
-        int baseY = Perspective.LOCAL_TILE_SIZE * tileY;
-
         int cnt = 0;
         for (int i = 0; i < faceCount; ++i) {
             final int triangleA = faceX[i];
@@ -356,14 +393,14 @@ public class SceneUploader {
 
             cnt += 3;
 
-            int vertexXA = vertexX[triangleA] - baseX;
-            int vertexZA = vertexZ[triangleA] - baseY;
+            int vertexXA = vertexX[triangleA];
+            int vertexZA = vertexZ[triangleA];
 
-            int vertexXB = vertexX[triangleB] - baseX;
-            int vertexZB = vertexZ[triangleB] - baseY;
+            int vertexXB = vertexX[triangleB];
+            int vertexZB = vertexZ[triangleB];
 
-            int vertexXC = vertexX[triangleC] - baseX;
-            int vertexZC = vertexZ[triangleC] - baseY;
+            int vertexXC = vertexX[triangleC];
+            int vertexZC = vertexZ[triangleC];
 
             vertexBuffer.put(vertexXA, vertexY[triangleA], vertexZA, colorA);
             vertexBuffer.put(vertexXB, vertexY[triangleB], vertexZB, colorB);

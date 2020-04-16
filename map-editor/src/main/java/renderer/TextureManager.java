@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Texture;
 import net.runelite.cache.definitions.TextureDefinition;
 import net.runelite.cache.item.RSTextureProvider;
+import renderer.helpers.GLUtil;
 
 import java.nio.ByteBuffer;
 

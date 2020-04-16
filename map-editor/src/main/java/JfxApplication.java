@@ -44,16 +44,16 @@ public class JfxApplication extends Application {
         MinimapController minimapController = fxmlLoader.getController();
         root1.setOnScroll(minimapController::onMouseWheelScroll);
 
-//        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(controller) {
-//            @Override
-//            public NewtCanvasJFX call() {
-//                return new MapEditor().LoadMap(controller, minimapController);
-//            }
-//        };
-//        loadTask.setOnSucceeded(e -> controller.getGroup().getChildren().add(loadTask.getValue()));
-//        new Thread(loadTask).start();
+        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(controller) {
+            @Override
+            public NewtCanvasJFX call() {
+                return new MapEditor().LoadMap(controller, minimapController);
+            }
+        };
+        loadTask.setOnSucceeded(e -> controller.getGroup().getChildren().add(loadTask.getValue()));
+        new Thread(loadTask).start();
 //
-        controller.getGroup().getChildren().add(new MapEditor().LoadMap(controller, minimapController));
+//        controller.getGroup().getChildren().add(new MapEditor().LoadMap(controller, minimapController));
     }
 
 

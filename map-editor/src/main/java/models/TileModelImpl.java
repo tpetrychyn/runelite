@@ -2,6 +2,7 @@ package models;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Perspective;
 import net.runelite.api.TileModel;
 
 @Getter
@@ -44,7 +45,7 @@ public class TileModelImpl implements TileModel {
         field1626 = new int[][]{{0, 1, 2, 3, 0, 0, 1, 3}, {1, 1, 2, 3, 1, 0, 1, 3}, {0, 1, 2, 3, 1, 0, 1, 3}, {0, 0, 1, 2, 0, 0, 2, 4, 1, 0, 4, 3}, {0, 0, 1, 4, 0, 0, 4, 3, 1, 1, 2, 4}, {0, 0, 4, 3, 1, 0, 1, 2, 1, 0, 2, 4}, {0, 1, 2, 4, 1, 0, 1, 4, 1, 0, 4, 3}, {0, 4, 1, 2, 0, 4, 2, 5, 1, 0, 4, 5, 1, 0, 5, 3}, {0, 4, 1, 2, 0, 4, 2, 3, 0, 4, 3, 5, 1, 0, 4, 5}, {0, 0, 4, 5, 1, 4, 1, 2, 1, 4, 2, 3, 1, 4, 3, 5}, {0, 0, 1, 5, 0, 1, 4, 5, 0, 1, 2, 4, 1, 0, 5, 3, 1, 5, 4, 3, 1, 4, 2, 3}, {1, 0, 1, 5, 1, 1, 4, 5, 1, 1, 2, 4, 0, 0, 5, 3, 0, 5, 4, 3, 0, 4, 2, 3}, {1, 0, 5, 4, 1, 0, 1, 5, 0, 0, 4, 3, 0, 4, 5, 3, 0, 5, 2, 3, 0, 1, 2, 5}};
     }
 
-    public TileModelImpl(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11, int var12, int var13, int var14, int var15, int var16, int var17, int var18, int var19) {
+    public TileModelImpl(int var1, int var2, int var3, int x, int y, int var6, int var7, int var8, int var9, int var10, int var11, int var12, int var13, int var14, int var15, int var16, int var17, int var18, int var19) {
         this.isFlat = true;
         if (var7 != var6 || var8 != var6 || var9 != var6) {
             this.isFlat = false;
@@ -65,8 +66,8 @@ public class TileModelImpl implements TileModel {
         this.vertexZ = new int[var25];
         int[] var26 = new int[var25];
         int[] var27 = new int[var25];
-        int var28 = var20 * var4;
-        int var29 = var5 * var20;
+        int var28 = var20 * x;
+        int var29 = y * var20;
 
         int var31;
         int var32;
@@ -186,9 +187,9 @@ public class TileModelImpl implements TileModel {
                 var36 = var17;
             }
 
-            this.vertexX[var30] = var32;
+            this.vertexX[var30] = var32 - x * Perspective.LOCAL_TILE_SIZE;
             this.vertexY[var30] = var34;
-            this.vertexZ[var30] = var33;
+            this.vertexZ[var30] = var33 - y * Perspective.LOCAL_TILE_SIZE;
             var26[var30] = var35;
             var27[var30] = var36;
         }

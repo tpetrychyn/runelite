@@ -4,9 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.jogamp.opengl.GL4;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import renderer.helpers.GLUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static renderer.helpers.GLUtil.glGetProgramInfoLog;
 
 public class Shader
 {
@@ -85,7 +88,7 @@ public class Shader
 
 			if (GLUtil.glGetProgram(gl, program, gl.GL_LINK_STATUS) == gl.GL_FALSE)
 			{
-				String err = GLUtil.glGetProgramInfoLog(gl, program);
+				String err = glGetProgramInfoLog(gl, program);
 				throw new ShaderException(err);
 			}
 
@@ -93,7 +96,7 @@ public class Shader
 
 			if (GLUtil.glGetProgram(gl, program, gl.GL_VALIDATE_STATUS) == gl.GL_FALSE)
 			{
-				String err = GLUtil.glGetProgramInfoLog(gl, program);
+				String err = glGetProgramInfoLog(gl, program);
 				throw new ShaderException(err);
 			}
 

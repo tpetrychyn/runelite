@@ -20,6 +20,8 @@ public class SceneTile extends MapDefinition.Tile {
     private WallDecoration wallDecoration;
     private boolean needsUpdate = true;
 
+    private int bufferIdx = 0;
+
     private SceneTile north;
     private SceneTile northEast;
     private SceneTile east;
