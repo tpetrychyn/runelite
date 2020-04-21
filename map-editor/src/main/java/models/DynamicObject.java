@@ -1,5 +1,6 @@
 package models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Entity;
@@ -19,6 +20,7 @@ import net.runelite.cache.fs.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -84,6 +86,8 @@ public class DynamicObject implements Entity {
     }
 
     private static final long clientStart = System.currentTimeMillis();
+
+    private static Map<DynamicObject, Model> modelFrameCache = new HashMap<>();
     @Override
     public Model getModel() {
         if (this.sequenceDefinition == null) {
@@ -114,6 +118,10 @@ public class DynamicObject implements Entity {
 
         this.cycleStart = clientCycle - var1;
 
+        if (modelFrameCache.containsKey(this)) {
+            return modelFrameCache.get(this);
+        }
+
         ObjectDefinition objectDefinition = objectManager.getObject(id);
         if (objectDefinition == null) {
             return null;
@@ -123,7 +131,9 @@ public class DynamicObject implements Entity {
         if (modelDefinition == null) {
             return null;
         }
-        return new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+        Model m = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+        modelFrameCache.put(this, m);
+        return m;
     }
 
     @Override
@@ -150,5 +160,15 @@ public class DynamicObject implements Entity {
     @Override
     public long getHash() {
         return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 19 * hash + id;
+        hash = 19 * hash + orientation;
+        hash = 19 * hash + type;
+        hash = 19 * hash + frame;
+        return hash;
     }
 }

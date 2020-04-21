@@ -325,6 +325,7 @@ public class MapEditor implements GLEventListener {
             hoverType = type;
             if (type == 2) {
                 FloorDecoration d = t.getFloorDecoration();
+                if (d != null)
                 debugText += d.toString();
             }
         }
@@ -363,15 +364,16 @@ public class MapEditor implements GLEventListener {
     private final List<Renderable> dynamicDecorations = new ArrayList<>();
 
     private void drawDynamic() {
-//        if (hoverTile != null && hoverType != -1) {
-//            if (hoverType == 0 && hoverTile.getTilePaint() != null) {
-//                TilePaintImpl paint = hoverTile.getTilePaint();
-//                paint.setNeColor(1111);
-//                paint.setNwColor(1111);
-//                paint.setSeColor(1111);
-//                paint.setSwColor(1111);
-//                drawSceneTemporary(paint, hoverTile.getX(), hoverTile.getY());
-//            }
+        if (hoverTile != null && hoverType != -1) {
+            if (hoverType == 0 && hoverTile.getTilePaint() != null) {
+                TilePaintImpl paint = hoverTile.getTilePaint();
+                paint.setNeColor(1111);
+                paint.setNwColor(1111);
+                paint.setSeColor(1111);
+                paint.setSwColor(1111);
+                drawSceneTemporary(paint, hoverTile.getX(), hoverTile.getY());
+            }
+        }
 //            if (hoverType == 2 && hoverTile.getFloorDecoration() != null) {
 //                FloorDecoration floorDecoration = hoverTile.getFloorDecoration();
 //                drawTemporaryFloorDecoration(floorDecoration, floorDecoration.getX(), floorDecoration.getY());
@@ -421,29 +423,29 @@ public class MapEditor implements GLEventListener {
 //        }
 //    }
 
-//    void drawSceneTemporary(TilePaintImpl tile, int tileX, int tileY) {
-//        int x = tileX * Perspective.LOCAL_TILE_SIZE;
-//        int y = 0;
-//        int z = tileY * Perspective.LOCAL_TILE_SIZE;
-//
-//        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
-//        int len = sceneUploader.upload(tile, vertexBuffer, uvBuffer);
-//
-//        GpuIntBuffer b = modelBufferUnordered;
-//        ++unorderedModels;
-//
-//        b.ensureCapacity(9);
-//        IntBuffer buffer = b.getBuffer();
-//        buffer.put(tempOffset);
-//        buffer.put(-1);
-//        buffer.put(2);
-//        buffer.put(targetBufferOffset + tempOffset);
-//        buffer.put(0);
-//        buffer.put(x).put(y).put(z);
-//        buffer.put(-1);
-//
-//        tempOffset += len;
-//    }
+    void drawSceneTemporary(TilePaintImpl tile, int tileX, int tileY) {
+        int x = tileX * Perspective.LOCAL_TILE_SIZE;
+        int y = 0;
+        int z = tileY * Perspective.LOCAL_TILE_SIZE;
+
+        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
+        int len = sceneUploader.upload(tile, modelBuffers.getVertexBuffer(), modelBuffers.getUvBuffer());
+
+        GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
+        modelBuffers.incUnorderedModels();
+
+        b.ensureCapacity(9);
+        IntBuffer buffer = b.getBuffer();
+        buffer.put(modelBuffers.getTempOffset());
+        buffer.put(-1);
+        buffer.put(2);
+        buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
+        buffer.put(0);
+        buffer.put(x).put(y).put(z);
+        buffer.put(-1);
+
+        modelBuffers.addTempOffset(len);
+    }
 
 //    void updateTile(SceneTile tile) {
 //        GpuIntBuffer modifyBuffer = new GpuIntBuffer();
@@ -721,14 +723,8 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
 
-//        modelBuffers.clearVertUv();
-//        modelBuffers.clear();
-
-        vertexBuffer.clear();
-        uvBuffer.clear();
-        modelBuffer.clear();
-        modelBufferSmall.clear();
-        modelBufferUnordered.clear();
+        modelBuffers.clearVertUv();
+        modelBuffers.clear();
 
 //        minimapController.drawCanvas(scene);
     }
@@ -747,6 +743,7 @@ public class MapEditor implements GLEventListener {
     }
 
     private void uploadScene() {
+        dynamicDecorations.clear();
         sceneChangeRequested = false;
         modelBuffers.clearVertUv();
 
@@ -765,8 +762,7 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
-        vertexBuffer.clear();
-        uvBuffer.clear();
+        modelBuffers.clearVertUv();
 
         drawTiles();
     }
