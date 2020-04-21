@@ -198,13 +198,13 @@ public class ObjectSaver
 			out.writeByte(82);
 			out.writeShort(obj.getMapAreaId());
 		}
-		if (obj.getConfigChangeDest() != null)
+		if (obj.getTransforms() != null)
 		{
 			out.writeByte(92);
-			out.writeShort(obj.getVarbitID());
-			out.writeShort(obj.getVarpID());
+			out.writeShort(obj.getTransformVarbit());
+			out.writeShort(obj.getTransformVarp());
 
-			int[] c = obj.getConfigChangeDest();
+			int[] c = obj.getTransforms();
 			out.writeShort(c[c.length - 1]);
 			out.writeByte(c.length - 2);
 			for (int i = 0; i <= c.length - 2; ++i)

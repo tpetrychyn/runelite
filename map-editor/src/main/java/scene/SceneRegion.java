@@ -2,13 +2,12 @@ package scene;
 
 import lombok.Getter;
 import lombok.Setter;
-import models.ModelImpl;
 import models.TileModelImpl;
 import models.TilePaintImpl;
 import models.WallDecoration;
 import net.runelite.api.Constants;
 import net.runelite.api.Entity;
-import net.runelite.api.FloorDecoration;
+import models.FloorDecoration;
 import net.runelite.api.Perspective;
 import net.runelite.cache.region.Location;
 import net.runelite.cache.region.Region;
@@ -115,9 +114,7 @@ public class SceneRegion {
         }
 
         FloorDecoration floorDecoration = new FloorDecoration();
-        floorDecoration.setEntity(entity);
         floorDecoration.setModel(entity.getModel());
-        floorDecoration.setRenderable(floorDecoration);
         floorDecoration.setX(x * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE);
         floorDecoration.setY(y * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE);
         floorDecoration.setHeight(height);
@@ -127,7 +124,7 @@ public class SceneRegion {
         this.tiles[z][x][y].setFloorDecoration(floorDecoration);
     }
 
-    public void newWallDecoration(int z, int x, int y, int height, ModelImpl modelA, ModelImpl modelB, int orientationA, int orientationB, long tag, int flags) {
+    public void newWallDecoration(int z, int x, int y, int height, Entity entityA, Entity entityB, int orientationA, int orientationB, long tag, int flags) {
         for (int iz = z; iz >= 0; --iz) {
             if (this.tiles[iz][x][y] == null) {
                 this.tiles[iz][x][y] = new SceneTile(iz, x, y);
@@ -139,8 +136,8 @@ public class SceneRegion {
                 x * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE,
                 y * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE,
                 height,
-                modelA,
-                modelB,
+                entityA,
+                entityB,
                 orientationA,
                 orientationB);
 

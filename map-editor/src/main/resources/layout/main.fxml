@@ -7,12 +7,14 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="layoutControllers.MainController">
    <children>
@@ -20,40 +22,50 @@
          <left>
             <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <content>
-                  <GridPane prefHeight="303.0" prefWidth="200.0">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Label text="MouseX" />
-                        <Label fx:id="lblMouseX" text="-1" GridPane.columnIndex="1" />
-                        <Label text="MouseY" GridPane.rowIndex="1" />
-                        <Label fx:id="lblMouseY" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Yaw" GridPane.rowIndex="2" />
-                        <Label text="Pitch" GridPane.rowIndex="3" />
-                        <Label text="CameraX" GridPane.rowIndex="4" />
-                        <Label text="CameraY" GridPane.rowIndex="5" />
-                        <Label text="CameraZ" GridPane.rowIndex="6" />
-                        <Label fx:id="lblYaw" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label fx:id="lblPitch" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label fx:id="lblCameraX" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <Label fx:id="lblCameraY" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                        <Label fx:id="lblCameraZ" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                        <Label text="FPS" GridPane.rowIndex="7" />
-                        <Label fx:id="lblFps" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <VBox minHeight="-Infinity" prefHeight="605.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+                           <children>
+                              <GridPane prefHeight="164.0" prefWidth="200.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                 <children>
+                                    <Label text="MouseX" />
+                                    <Label fx:id="lblMouseX" text="-1" GridPane.columnIndex="1" />
+                                    <Label text="MouseY" GridPane.rowIndex="1" />
+                                    <Label fx:id="lblMouseY" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label text="Yaw" GridPane.rowIndex="2" />
+                                    <Label text="Pitch" GridPane.rowIndex="3" />
+                                    <Label text="CameraX" GridPane.rowIndex="4" />
+                                    <Label text="CameraY" GridPane.rowIndex="5" />
+                                    <Label text="CameraZ" GridPane.rowIndex="6" />
+                                    <Label fx:id="lblYaw" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Label fx:id="lblPitch" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Label fx:id="lblCameraX" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label fx:id="lblCameraY" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                                    <Label fx:id="lblCameraZ" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                    <Label text="FPS" GridPane.rowIndex="7" />
+                                    <Label fx:id="lblFps" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                 </children>
+                                 <rowConstraints>
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" />
+                                 </rowConstraints>
+                              </GridPane>
+                              <TextArea fx:id="debugText" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
+                           </children>
+                        </VBox>
                      </children>
-                     <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" />
-                     </rowConstraints>
-                  </GridPane>
+                  </HBox>
                </content></ScrollPane>
          </left>
          <top>
@@ -114,9 +126,6 @@
                </children>
             </AnchorPane>
          </center>
-         <bottom>
-            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-         </bottom>
       </BorderPane>
    </children>
 </AnchorPane>

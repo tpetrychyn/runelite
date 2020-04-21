@@ -681,18 +681,18 @@ public class Model extends Renderable {
 		signature = "(Lef;I)V"
 	)
 	@Export("animate")
-	public void animate(Frames var1, int var2) {
+	public void animate(Frames frames, int frame) {
 		if (this.vertexLabels != null) {
-			if (var2 != -1) {
-				Animation var3 = var1.frames[var2];
-				Skeleton var4 = var3.skeleton;
+			if (frame != -1) {
+				Animation animation = frames.frames[frame];
+				Skeleton skeleton = animation.skeleton;
 				Model_transformTempX = 0;
 				Model_transformTempY = 0;
 				Model_transformTempZ = 0;
 
-				for (int var5 = 0; var5 < var3.transformCount; ++var5) {
-					int var6 = var3.transformSkeletonLabels[var5];
-					this.transform(var4.transformTypes[var6], var4.labels[var6], var3.transformXs[var5], var3.transformYs[var5], var3.transformZs[var5]);
+				for (int var5 = 0; var5 < animation.transformCount; ++var5) {
+					int var6 = animation.transformSkeletonLabels[var5];
+					this.transform(skeleton.transformTypes[var6], skeleton.labels[var6], animation.transformXs[var5], animation.transformYs[var5], animation.transformZs[var5]);
 				}
 
 				this.resetBounds();

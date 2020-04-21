@@ -1,7 +1,9 @@
 package scene;
 
-import models.ModelImpl;
+import models.DynamicObject;
+import models.StaticObject;
 import net.runelite.api.Constants;
+import net.runelite.api.Entity;
 import net.runelite.cache.ConfigType;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.ObjectManager;
@@ -278,7 +280,7 @@ public class SceneRegionBuilder {
 
             if (loc.getType() == LocationType.FLOOR_DECORATION.getValue()) {
                 if (modelDefinition != null) {
-                    ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                    StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
 
                     if (objectDefinition.getContouredGround() >= 0) {
 //                               model = model.contourGround(mapLoader, xSize, height, ySize, true, objectDefinition.getContouredGround(), worldX, worldY);
@@ -289,11 +291,17 @@ public class SceneRegionBuilder {
             }
 
             if (loc.getType() == LocationType.INTERACTABLE_WALL_DECORATION.getValue()) {
-                if (modelDefinition != null) {
-                    ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-                    int[] orientationTransform = {1, 2, 4, 8};
-                    sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, orientationTransform[loc.getOrientation()], 0, 0, 0);
+                Entity entity;
+                if (objectDefinition.getAnimationID() == -1 && modelDefinition != null) {
+                    entity = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                } else if (objectDefinition.getAnimationID() > 0) {
+                    entity = new DynamicObject(objectManager, loc.getId(), loc.getType(), loc.getOrientation(), height, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, objectDefinition.getAnimationID(), true, null);
+                } else {
+                    return;
                 }
+
+                int[] orientationTransform = {1, 2, 4, 8};
+                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, entity, null, orientationTransform[loc.getOrientation()], 0, 0, 0);
             }
 
 

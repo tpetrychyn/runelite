@@ -1,5 +1,6 @@
 package renderer;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
@@ -10,13 +11,14 @@ import com.jogamp.opengl.util.GLBuffers;
 import layoutControllers.MainController;
 import layoutControllers.MinimapController;
 import lombok.extern.slf4j.Slf4j;
-import models.TilePaintImpl;
-import models.WallDecoration;
+import models.*;
+import models.DynamicObject;
 import net.runelite.api.*;
 import net.runelite.cache.SpriteManager;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.fs.StoreProvider;
 import net.runelite.cache.item.RSTextureProvider;
+import org.joml.Matrix4f;
 import renderer.helpers.AntiAliasingMode;
 import renderer.helpers.GLUtil;
 import renderer.helpers.GpuFloatBuffer;
@@ -26,8 +28,10 @@ import scene.SceneRegionBuilder;
 import scene.SceneTile;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.*;
 
 import static renderer.helpers.GLUtil.*;
 
@@ -35,14 +39,15 @@ import static renderer.helpers.GLUtil.*;
 public class MapEditor implements GLEventListener {
 
     // This is the maximum number of triangles the compute shaders support
+    private static final int MAX_TEMP_VERTICES = 65535;
     private static final int MAX_TRIANGLE = 4096;
     private static final int SMALL_TRIANGLE_COUNT = 512;
     private static final int FLAG_SCENE_BUFFER = Integer.MIN_VALUE;
     static final int MAX_DISTANCE = 1000;
 
     private InputHandler inputHandler;
-    private SceneUploader sceneUploader = new SceneUploader();
-    private TextureManager textureManager = new TextureManager();
+    private final SceneUploader sceneUploader = new SceneUploader();
+    private final TextureManager textureManager = new TextureManager();
     private RSTextureProvider textureProvider;
     private Scene scene;
 
@@ -52,6 +57,13 @@ public class MapEditor implements GLEventListener {
     private int glComputeProgram;
     private int glSmallComputeProgram;
     private int glUnorderedComputeProgram;
+
+    private int fboMainRenderer;
+    private int rboDepthMain;
+    private int texColorMain;
+    private int texPickerMain;
+    private int[] pboIds = new int[2];
+    private int pboIndex;
 
     private int vaoHandle;
 
@@ -72,11 +84,12 @@ public class MapEditor implements GLEventListener {
     private int tmpModelBufferUnorderedId;
     private int tmpOutBufferId; // target vertex buffer for compute shaders
     private int tmpOutUvBufferId; // target uv buffer for compute shaders
+    private int colorPickerBufferId; // target uv buffer for compute shaders
 
     private int textureArrayId;
 
     private int uniformBufferId;
-    private final IntBuffer uniformBuffer = GpuIntBuffer.allocateDirect(5 + 3 + 2048 * 4);
+    private final IntBuffer uniformBuffer = GpuIntBuffer.allocateDirect(5 + 3);
     private final float[] textureOffsets = new float[128];
 
     private GpuIntBuffer vertexBuffer;
@@ -87,19 +100,16 @@ public class MapEditor implements GLEventListener {
     private GpuIntBuffer modelBuffer;
 
     private int unorderedModels;
-    private boolean hasUnorderedUpdate = true;
 
     /**
      * number of models in small buffer
      */
     private int smallModels;
-    private boolean hasSmallUpdate = true;
 
     /**
      * number of models in large buffer
      */
     private int largeModels;
-    private boolean hasLargeUpdate = true;
 
     /**
      * offset in the target buffer for model
@@ -125,7 +135,7 @@ public class MapEditor implements GLEventListener {
     private AntiAliasingMode lastAntiAliasingMode;
 
 
-    private Camera camera = new Camera();
+    private final Camera camera = new Camera();
 
     // Uniforms
     private int uniUseFog;
@@ -160,7 +170,7 @@ public class MapEditor implements GLEventListener {
             sprites.load();
 
             sceneRegionBuilder = new SceneRegionBuilder(textureProvider);
-            scene = new Scene(sceneRegionBuilder, 12854, 5);
+            scene = new Scene(sceneRegionBuilder, 12085, 1);
 
             // center camera in viewport
             camera.setCenterX(canvasWidth / 2);
@@ -174,6 +184,7 @@ public class MapEditor implements GLEventListener {
 
         bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId = -1;
         unorderedModels = smallModels = largeModels = 0;
+        colorPickerBufferId = -1;
 
         vertexBuffer = new GpuIntBuffer();
         uvBuffer = new GpuFloatBuffer();
@@ -188,6 +199,7 @@ public class MapEditor implements GLEventListener {
         Screen screen = NewtFactory.createScreen(jfxNewtDisplay, 0);
         GLProfile glProfile = GLProfile.get(GLProfile.GL4);
         GLCapabilities glCaps = new GLCapabilities(glProfile);
+        glCaps.setAlphaBits(8);
 
         GLWindow window = GLWindow.create(screen, glCaps);
         window.addGLEventListener(this);
@@ -224,7 +236,7 @@ public class MapEditor implements GLEventListener {
 
             gl.glEnable(gl.GL_DEPTH_TEST);
             gl.glDepthFunc(gl.GL_LEQUAL);
-            gl.glDepthRangef(1, 0);
+            gl.glDepthRangef(0, 1);
 //            gl.glGetIntegerv(gl.GL_DEPTH_BITS, intBuf1);
 //            System.out.printf("depth bits %s \n", intBuf1.get(0));
 
@@ -232,6 +244,7 @@ public class MapEditor implements GLEventListener {
             initProgram();
             initUniformBuffer();
             initBuffers();
+            initPickerBuffer();
 
             uploadScene();
 
@@ -250,8 +263,7 @@ public class MapEditor implements GLEventListener {
         shutdownAAFbo();
     }
 
-    private void shutdownProgram()
-    {
+    private void shutdownProgram() {
         gl.glDeleteProgram(glProgram);
         glProgram = -1;
 
@@ -265,34 +277,28 @@ public class MapEditor implements GLEventListener {
         glUnorderedComputeProgram = -1;
     }
 
-    private void shutdownVao()
-    {
+    private void shutdownVao() {
         glDeleteVertexArrays(gl, vaoHandle);
         vaoHandle = -1;
     }
 
-    private void shutdownAAFbo()
-    {
-        if (colorTexSceneHandle != -1)
-        {
+    private void shutdownAAFbo() {
+        if (colorTexSceneHandle != -1) {
             glDeleteTexture(gl, colorTexSceneHandle);
             colorTexSceneHandle = -1;
         }
 
-        if (depthTexSceneHandle != -1)
-        {
+        if (depthTexSceneHandle != -1) {
             glDeleteTexture(gl, depthTexSceneHandle);
             depthTexSceneHandle = -1;
         }
 
-        if (fboSceneHandle != -1)
-        {
+        if (fboSceneHandle != -1) {
             glDeleteFrameBuffer(gl, fboSceneHandle);
             fboSceneHandle = -1;
         }
 
-        if (rboSceneHandle != -1)
-        {
+        if (rboSceneHandle != -1) {
             glDeleteRenderbuffers(gl, rboSceneHandle);
             rboSceneHandle = -1;
         }
@@ -303,9 +309,6 @@ public class MapEditor implements GLEventListener {
         modelBufferSmall.clear();
         modelBufferUnordered.clear();
         smallModels = largeModels = unorderedModels = 0;
-        hasUnorderedUpdate = true;
-        hasSmallUpdate = true;
-        hasLargeUpdate = true;
         targetBufferOffset = 0;
         for (int x = 0; x < scene.getRadius() * Constants.REGION_SIZE; x++) {
             for (int y = 0; y < scene.getRadius() * Constants.REGION_SIZE; y++) {
@@ -316,94 +319,69 @@ public class MapEditor implements GLEventListener {
             }
         }
 
-        // Upload buffers
-        // Every frame used to flip and clear after,
-        // I'll just flip the first time and the draw will continuously use them
-        vertexBuffer.flip();
-        uvBuffer.flip();
-        modelBuffer.flip();
-        modelBufferSmall.flip();
-        modelBufferUnordered.flip();
+        // allocate enough size in the outputBuffer for the static verts + the dynamic verts -- each vertex is an ivec4, 4 ints
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutBufferId);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (targetBufferOffset + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT * 4, null, gl.GL_DYNAMIC_DRAW);
+
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutUvBufferId);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (targetBufferOffset + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_FLOAT * 4, null, gl.GL_DYNAMIC_DRAW);
+
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (targetBufferOffset + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
     }
 
     void checkHover() {
-        for (int x = 0; x < scene.getRadius() * Constants.REGION_SIZE; x++) {
-            for (int y = 0; y < scene.getRadius() * Constants.REGION_SIZE; y++) {
-                SceneTile tile = scene.getTile(0, x, y);
-                if (tile != null) {
-                    if (tile.getTilePaint() != null) {
-                        int pitchSin = camera.getPitchSin();
-                        int pitchCos = camera.getPitchCos();
-                        int yawSin = camera.getYawSin();
-                        int yawCos = camera.getYawCos();
+        String debugText = "";
+        int mouseX = inputHandler.getMouseX();
+        int mouseY = inputHandler.getMouseY();
 
-                        int var9;
-                        int var10 = var9 = (x << 7) - camera.getCameraX();
-                        int var11;
-                        int var12 = var11 = (y << 7) - camera.getCameraY();
-                        int var13;
-                        int var14 = var13 = var10 + Perspective.LOCAL_TILE_SIZE;
-                        int var15;
-                        int var16 = var15 = var12 + Perspective.LOCAL_TILE_SIZE;
-                        int var17 = tile.getTilePaint().getSwHeight() - camera.getCameraZ();
-                        int var18 = tile.getTilePaint().getSeHeight() - camera.getCameraZ();
-                        int var19 = tile.getTilePaint().getNeHeight() - camera.getCameraZ();
-                        int var20 = tile.getTilePaint().getNwHeight() - camera.getCameraZ();
-                        int var21 = var10 * yawCos + yawSin * var12 >> 16;
-                        var12 = var12 * yawCos - yawSin * var10 >> 16;
-                        var10 = var21;
-                        var21 = var17 * pitchCos - pitchSin * var12 >> 16;
-                        var12 = pitchSin * var17 + var12 * pitchCos >> 16;
-                        var17 = var21;
-                        if (var12 >= 50) {
-                            var21 = var14 * yawCos + yawSin * var11 >> 16;
-                            var11 = var11 * yawCos - yawSin * var14 >> 16;
-                            var14 = var21;
-                            var21 = var18 * pitchCos - pitchSin * var11 >> 16;
-                            var11 = pitchSin * var18 + var11 * pitchCos >> 16;
-                            var18 = var21;
-                            if (var11 >= 50) {
-                                var21 = var13 * yawCos + yawSin * var16 >> 16;
-                                var16 = var16 * yawCos - yawSin * var13 >> 16;
-                                var13 = var21;
-                                var21 = var19 * pitchCos - pitchSin * var16 >> 16;
-                                var16 = pitchSin * var19 + var16 * pitchCos >> 16;
-                                var19 = var21;
-                                if (var16 >= 50) {
-                                    var21 = var9 * yawCos + yawSin * var15 >> 16;
-                                    var15 = var15 * yawCos - yawSin * var9 >> 16;
-                                    var9 = var21;
-                                    var21 = var20 * pitchCos - pitchSin * var15 >> 16;
-                                    var15 = pitchSin * var20 + var15 * pitchCos >> 16;
-                                    if (var15 >= 50) {
+        pboIndex = (pboIndex + 1) % 2;
+        int nextIndex = (pboIndex + 1) % 2;
 
-                                        int dy = var10 * camera.getScale() / var12 + camera.getCenterX();
-                                        int dx = var17 * camera.getScale() / var12 + camera.getCenterY();
-                                        int cy = var14 * camera.getScale() / var11 + camera.getCenterX();
-                                        int cx = var18 * camera.getScale() / var11 + camera.getCenterY();
-                                        int ay = var13 * camera.getScale() / var16 + camera.getCenterX();
-                                        int ax = var19 * camera.getScale() / var16 + camera.getCenterY();
-                                        int by = var9 * camera.getScale() / var15 + camera.getCenterX();
-                                        int bx = var21 * camera.getScale() / var15 + camera.getCenterY();
+        // Read from pixel buffer object async to get pixels without blocking render
+        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, fboMainRenderer);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[pboIndex]);
+        gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT1);
+        gl.glReadPixels(mouseX, canvasHeight - mouseY, 1, 1, gl.GL_RED_INTEGER, gl.GL_INT, 0);
 
-                                        int mouseX2 = inputHandler.getMouseX();
-                                        int mouseY2 = inputHandler.getMouseY();
-                                        if (((ay - by) * (cx - bx) - (ax - bx) * (cy - by) > 0) && containsBounds(mouseX2, mouseY2, ax, bx, cx, ay, by, cy)) {
-                                            hoverTile = tile;
-                                        } else if (((dy - cy) * (bx - cx) - (dx - cx) * (by - cy) > 0) && containsBounds(mouseX2, mouseY2, dx, cx, bx, dy, cy, by)) {
-                                            hoverTile = tile;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[nextIndex]);
+        ByteBuffer srcBuf = gl.glMapBuffer(gl.GL_PIXEL_PACK_BUFFER, gl.GL_READ_ONLY);
+
+        byte[] pboBytes = new byte[4];
+        srcBuf.get(pboBytes);
+        int pickerId = (pboBytes[3] & 0xFF) << 24 | (pboBytes[2] & 0xFF) << 16 | (pboBytes[1] & 0xFF) << 8 | (pboBytes[0] & 0xFF);
+        gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT0);
+        gl.glUnmapBuffer(gl.GL_PIXEL_PACK_BUFFER);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0);
+        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
+
+        if (pickerId == -1) {
+            return;
+        }
+
+        //int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | objectId & 0xF;
+        int x = (pickerId >> 20) & 0xFFF;
+        int y = (pickerId >> 4) & 0xFFF;
+        int type = pickerId & 0xF;
+
+        debugText += String.format("id %d\n x %d y %d objId %d \n", pickerId, x, y, type);
+
+        SceneTile t = scene.getTile(0, x, y);
+        if (t != null) {
+            hoverTile = t;
+            hoverType = type;
+            if (type == 2) {
+                FloorDecoration d = t.getFloorDecoration();
+                debugText += d.toString();
             }
         }
-        if (hoverTile != null) {
-//            drawSceneTemporary(hoverTile.getTilePaint(), hoverTile.getX(), hoverTile.getY());
-        }
+        camera.setDebugText(debugText);
+    }
+
+    private int calcPickerId(int x, int y, int type) {
+        // pack x tile in top 14 bits, y in next 14, objectId in bottom 4
+        // NOTE: signed int so x can really only use 13 bits!!
+        return ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | type & 0xF;
     }
 
     void drawTile(SceneTile tile) {
@@ -413,55 +391,68 @@ public class MapEditor implements GLEventListener {
         if (tile.getTilePaint() != null) {
             drawScenePaint(tile.getTilePaint(), x, y);
         }
+
         if (tile.getTileModel() != null) {
             drawSceneModel(tile.getTileModel(), x, y);
         }
 
         FloorDecoration f = tile.getFloorDecoration();
         if (f != null) {
-            drawSceneRenderable(f.getModel(), 0, f.getHeight(), x, y);
+            drawSceneRenderable(f.getModel(), 0, f.getHeight(), x, y, calcPickerId(x, y, 2));
         }
 
         WallDecoration w = tile.getWallDecoration();
         if (w != null) {
-            drawSceneRenderable(w.getModelA(), w.getOrientationA(), w.getHeight(), x, y);
+            if (w.getEntityA() instanceof StaticObject) {
+                drawSceneRenderable(w.getEntityA().getModel(), w.getOrientationA(), w.getHeight(), x, y, calcPickerId(x, y, 3));
+            } else if (w.getEntityA() instanceof DynamicObject) {
+                w.setX(x);
+                w.setY(y);
+                dynamicDecorations.add(w);
+            }
+        }
+    }
+
+    private final List<WallDecoration> dynamicDecorations = new ArrayList<>();
+
+    private void drawDynamic() {
+        if (hoverTile != null && hoverType != -1) {
+            if (hoverType == 0 && hoverTile.getTilePaint() != null) {
+                TilePaintImpl paint = hoverTile.getTilePaint();
+                paint.setNeColor(1111);
+                paint.setNwColor(1111);
+                paint.setSeColor(1111);
+                paint.setSwColor(1111);
+                drawSceneTemporary(paint, hoverTile.getX(), hoverTile.getY());
+            }
+            if (hoverType == 2 && hoverTile.getFloorDecoration() != null) {
+                FloorDecoration floorDecoration = hoverTile.getFloorDecoration();
+                drawTemporaryFloorDecoration(floorDecoration, floorDecoration.getX(), floorDecoration.getY());
+            }
+        }
+        for (WallDecoration w : dynamicDecorations) {
+            drawSceneRenderable(w.getEntityA().getModel(), w.getOrientationA(), w.getHeight(), w.getX(), w.getY(), calcPickerId(w.getX(), w.getY(), 3));
         }
     }
 
     SceneTile hoverTile;
+    private int hoverType = -1;
 
-    boolean containsBounds(int i_0, int i_1, int i_2, int i_3, int i_4, int i_5, int i_6, int i_7) {
-        if (i_1 < i_2 && i_1 < i_3 && i_1 < i_4) {
-            return false;
-        } else if (i_1 > i_2 && i_1 > i_3 && i_1 > i_4) {
-            return false;
-        } else if (i_0 < i_5 && i_0 < i_6 && i_0 < i_7) {
-            return false;
-        } else if (i_0 > i_5 && i_0 > i_6 && i_0 > i_7) {
-            return false;
-        } else {
-            int i_8 = (i_1 - i_2) * (i_6 - i_5) - (i_0 - i_5) * (i_3 - i_2);
-            int i_9 = (i_7 - i_6) * (i_1 - i_3) - (i_0 - i_6) * (i_4 - i_3);
-            int i_10 = (i_5 - i_7) * (i_1 - i_4) - (i_2 - i_4) * (i_0 - i_7);
-            return i_8 == 0 ? (i_9 != 0 ? (i_9 < 0 ? i_10 <= 0 : i_10 >= 0) : true) : (i_8 < 0 ? i_9 <= 0 && i_10 <= 0 : i_9 >= 0 && i_10 >= 0);
-        }
-    }
+    private void drawSceneRenderable(Model model, int orientation, int height, int tileX, int tileY, int pickerId) {
+        // draw in the middle of the tile otherwise camera clipping
+        int x = tileX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
+        int z = tileY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
 
-    private void drawSceneRenderable(Model model, int orientation, int height, int tileX, int tileY) {
         if (model != null && model.getSceneId() == sceneUploader.sceneId) {
 //            model.calculateBoundsCylinder();
 //            model.calculateExtreme(orientation);
-
-            // draw in the middle of the tile otherwise camera clipping
-            int x = tileX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
-            int z = tileY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
 
             int tc = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
             int uvOffset = model.getUvBufferOffset();
 
             GpuIntBuffer b = bufferForTriangles(tc);
 
-            b.ensureCapacity(8);
+            b.ensureCapacity(9);
             IntBuffer buffer = b.getBuffer();
             buffer.put(model.getBufferOffset());
             buffer.put(uvOffset);
@@ -469,13 +460,73 @@ public class MapEditor implements GLEventListener {
             buffer.put(targetBufferOffset);
             buffer.put(FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientation);
             buffer.put(x).put(height).put(z);
+            buffer.put(pickerId);
 
             targetBufferOffset += tc * 3;
+        } else {
+            if (model != null) {
+                int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
+                vertexBuffer.ensureCapacity(12 * faces);
+                uvBuffer.ensureCapacity(12 * faces);
+                int len = 0;
+                for (int i = 0; i < faces; ++i) {
+                    len += sceneUploader.pushFace(model, i, vertexBuffer, uvBuffer);
+                }
+                GpuIntBuffer b = bufferForTriangles(faces);
+
+                b.ensureCapacity(9);
+                IntBuffer buffer = b.getBuffer();
+                buffer.put(tempOffset);
+                buffer.put(-1);
+                buffer.put(len / 3);
+                buffer.put(targetBufferOffset + tempOffset);
+                buffer.put((model.getRadius() << 12) | orientation);
+                buffer.put(x).put(height).put(z);
+                buffer.put(pickerId);
+
+                tempOffset += len;
+            }
         }
     }
 
-    private void drawScenePaint(TilePaint paint, int tileX, int tileY) {
-        if (paint.getBufferLen() > 0) {
+    void drawTemporaryFloorDecoration(FloorDecoration fd, int tileX, int tileY) {
+        int x = tileX;// * Perspective.LOCAL_TILE_SIZE;
+        int y = 0;
+        int z = tileY;// * Perspective.LOCAL_TILE_SIZE;
+
+        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
+//        sceneUploader.upload(fd, vertexBuffer, uvBuffer);
+
+        Model model = fd.getModel();
+        if (model != null) {
+            int[] fc1 = new int[model.getFaceColors1().length];
+            Arrays.fill(fc1, 1111);
+            model.setFaceColors1(fc1);
+            int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
+            vertexBuffer.ensureCapacity(12 * faces);
+            uvBuffer.ensureCapacity(12 * faces);
+            int len = 0;
+            for (int i = 0; i < faces; ++i) {
+                len += sceneUploader.pushFace(model, i, vertexBuffer, uvBuffer);
+            }
+            GpuIntBuffer b = bufferForTriangles(faces);
+
+            b.ensureCapacity(9);
+            IntBuffer buffer = b.getBuffer();
+            buffer.put(tempOffset);
+            buffer.put(-1);
+            buffer.put(len / 3);
+            buffer.put(targetBufferOffset + tempOffset);
+            buffer.put((model.getRadius() << 12) | 0);
+            buffer.put(x).put(fd.getHeight()).put(z);
+            buffer.put(-1);
+
+            tempOffset += len;
+        }
+    }
+
+    private void drawScenePaint(TilePaintImpl tilePaint, int tileX, int tileY) {
+        if (tilePaint.getBufferLen() > 0) {
             int x = tileX * Perspective.LOCAL_TILE_SIZE;
             int y = 0;
             int z = tileY * Perspective.LOCAL_TILE_SIZE;
@@ -483,15 +534,17 @@ public class MapEditor implements GLEventListener {
             GpuIntBuffer b = modelBufferUnordered;
             ++unorderedModels;
 
-            b.ensureCapacity(8);
+            b.ensureCapacity(9);
             IntBuffer buffer = b.getBuffer();
-            buffer.put(paint.getBufferOffset());
-            buffer.put(paint.getUvBufferOffset());
+            buffer.put(tilePaint.getBufferOffset());
+            buffer.put(tilePaint.getUvBufferOffset());
             buffer.put(2);
             buffer.put(targetBufferOffset);
             buffer.put(FLAG_SCENE_BUFFER);
             buffer.put(x).put(y).put(z);
+            buffer.put(calcPickerId(tileX, tileY, 0));
 
+            tilePaint.setTargetBufferOffset(targetBufferOffset);
             targetBufferOffset += 2 * 3;
         }
     }
@@ -505,7 +558,7 @@ public class MapEditor implements GLEventListener {
             GpuIntBuffer b = modelBufferUnordered;
             ++unorderedModels;
 
-            b.ensureCapacity(8);
+            b.ensureCapacity(9);
             IntBuffer buffer = b.getBuffer();
             buffer.put(model.getBufferOffset());
             buffer.put(model.getUvBufferOffset());
@@ -513,6 +566,7 @@ public class MapEditor implements GLEventListener {
             buffer.put(targetBufferOffset);
             buffer.put(FLAG_SCENE_BUFFER);
             buffer.put(x).put(y).put(z);
+            buffer.put(calcPickerId(tileX, tileY, 1));
 
             targetBufferOffset += model.getBufferLen();
         }
@@ -522,34 +576,54 @@ public class MapEditor implements GLEventListener {
         int x = tileX * Perspective.LOCAL_TILE_SIZE;
         int y = 0;
         int z = tileY * Perspective.LOCAL_TILE_SIZE;
+
+        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
         int len = sceneUploader.upload(tile, vertexBuffer, uvBuffer);
 
-        GpuIntBuffer b = bufferForTriangles(2);
+        GpuIntBuffer b = modelBufferUnordered;
+        ++unorderedModels;
 
-        b.ensureCapacity(8);
+        b.ensureCapacity(9);
         IntBuffer buffer = b.getBuffer();
         buffer.put(tempOffset);
         buffer.put(-1);
-        buffer.put(len / 3);
-        buffer.put(targetBufferOffset);
+        buffer.put(2);
+        buffer.put(targetBufferOffset + tempOffset);
         buffer.put(0);
         buffer.put(x).put(y).put(z);
+        buffer.put(-1);
 
         tempOffset += len;
-        targetBufferOffset += len;
     }
 
     void updateTile(SceneTile tile) {
         GpuIntBuffer modifyBuffer = new GpuIntBuffer();
         GpuFloatBuffer modifyUvBuffer = new GpuFloatBuffer();
-        sceneUploader.modifyTilePaint(tile.getTilePaint(), modifyBuffer, modifyUvBuffer);
+        sceneUploader.upload(tile.getTilePaint(), modifyBuffer, modifyUvBuffer);
+        modifyBuffer.flip();
 
+        // modify the persistent vertex buffer on the GPU
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
 //         tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4 ---- offset is 6 writes, 4 ints each
         gl.glBufferSubData(gl.GL_ARRAY_BUFFER, tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4, modifyBuffer.getBuffer().limit(), modifyBuffer.getBuffer());
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
-        hasUnorderedUpdate = true;
+        int x = tile.getX() * Perspective.LOCAL_TILE_SIZE;
+        int y = 0;
+        int z = tile.getY() * Perspective.LOCAL_TILE_SIZE;
+
+        GpuIntBuffer b = modelBufferUnordered;
+        ++unorderedModels;
+
+        b.ensureCapacity(9);
+        IntBuffer buffer = b.getBuffer();
+        buffer.put(tile.getTilePaint().getBufferOffset());
+        buffer.put(tile.getTilePaint().getUvBufferOffset());
+        buffer.put(2);
+        buffer.put(tile.getTilePaint().getTargetBufferOffset());
+        buffer.put(FLAG_SCENE_BUFFER);
+        buffer.put(x).put(y).put(z);
+        buffer.put(calcPickerId(tile.getX(), tile.getY(), 0));
     }
 
     @Override
@@ -558,16 +632,19 @@ public class MapEditor implements GLEventListener {
             uploadScene();
         }
 
-        if (drawable.getAnimator() != null) {
-            checkHover();
-            handleClick();
-        }
+        checkHover();
+        handleClick();
+
+        drawDynamic();
 
         if (canvasWidth > 0 && canvasHeight > 0 && (canvasWidth != lastViewportWidth || canvasHeight != lastViewportHeight)) {
             createProjectionMatrix(0, canvasWidth, canvasHeight, 0, 1, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             lastViewportWidth = canvasWidth;
             lastViewportHeight = canvasHeight;
         }
+
+        // base FBO to enable picking
+        gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, fboMainRenderer);
 
         // Setup anti-aliasing
         final AntiAliasingMode antiAliasingMode = AntiAliasingMode.MSAA_4;
@@ -594,13 +671,21 @@ public class MapEditor implements GLEventListener {
 
             gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, fboSceneHandle);
         }
-
         lastAntiAliasingMode = antiAliasingMode;
+
+        IntBuffer i = GLBuffers.newDirectIntBuffer(new int[]{gl.GL_COLOR_ATTACHMENT0, gl.GL_COLOR_ATTACHMENT1});
+        gl.glDrawBuffers(2, i);
 
         // Clear scene
         int sky = 9493480;
         gl.glClearColor((sky >> 16 & 0xFF) / 255f, (sky >> 8 & 0xFF) / 255f, (sky & 0xFF) / 255f, 1f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
+
+        vertexBuffer.flip();
+        uvBuffer.flip();
+        modelBuffer.flip();
+        modelBufferSmall.flip();
+        modelBufferUnordered.flip();
 
         IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
         FloatBuffer uvBuffer = this.uvBuffer.getBuffer();
@@ -622,18 +707,6 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpModelBufferUnorderedId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, modelBufferUnordered.limit() * Integer.BYTES, modelBufferUnordered, gl.GL_DYNAMIC_DRAW);
-
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutBufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER,
-                targetBufferOffset * 16, // each vertex is an ivec4, which is 16 bytes
-                null,
-                gl.GL_STREAM_DRAW);
-
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutUvBufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER,
-                targetBufferOffset * 16,
-                null,
-                gl.GL_STREAM_DRAW);
 
         // UBO
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
@@ -666,52 +739,46 @@ public class MapEditor implements GLEventListener {
              */
 
             // unordered
-            if (unorderedModels > 0 && hasUnorderedUpdate) {
-                hasUnorderedUpdate = false;
-                gl.glUseProgram(glUnorderedComputeProgram);
+            gl.glUseProgram(glUnorderedComputeProgram);
 
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferUnorderedId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferUnorderedId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
 
-                gl.glDispatchCompute(unorderedModels, 1, 1);
-            }
+            gl.glDispatchCompute(unorderedModels, 1, 1);
 
             // small
-            if (smallModels > 0 && hasSmallUpdate) {
-                hasSmallUpdate = false;
-                gl.glUseProgram(glSmallComputeProgram);
+            gl.glUseProgram(glSmallComputeProgram);
 
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferSmallId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId); // vout[]
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId); //uvout[]
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferSmallId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId); // vout[]
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId); //uvout[]
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
 
-                gl.glDispatchCompute(smallModels, 1, 1);
-            }
+            gl.glDispatchCompute(smallModels, 1, 1);
 
             // large
-            if (largeModels > 0 && hasLargeUpdate) {
-                hasLargeUpdate = false;
-                gl.glUseProgram(glComputeProgram);
+            gl.glUseProgram(glComputeProgram);
 
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
-                gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 0, tmpModelBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 1, this.bufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 2, tmpBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 3, tmpOutBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 4, tmpOutUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
+            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
 
-                gl.glDispatchCompute(largeModels, 1, 1);
-            }
+            gl.glDispatchCompute(largeModels, 1, 1);
 
             gl.glMemoryBarrier(gl.GL_SHADER_STORAGE_BARRIER_BIT);
 
@@ -770,7 +837,11 @@ public class MapEditor implements GLEventListener {
             gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutUvBufferId);
             gl.glVertexAttribPointer(1, 4, gl.GL_FLOAT, false, 0, 0);
 
-            gl.glDrawArrays(gl.GL_TRIANGLES, 0, targetBufferOffset);
+            gl.glEnableVertexAttribArray(2);
+            gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
+            gl.glVertexAttribIPointer(2, 1, gl.GL_INT, 0, 0);
+
+            gl.glDrawArrays(gl.GL_TRIANGLES, 0, targetBufferOffset + tempOffset);
 
             gl.glDisable(gl.GL_BLEND);
             gl.glDisable(gl.GL_CULL_FACE);
@@ -780,23 +851,37 @@ public class MapEditor implements GLEventListener {
 
         if (aaEnabled) {
             gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, fboSceneHandle);
-            gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, 0);
+            gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, fboMainRenderer);
             gl.glBlitFramebuffer(0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
                     0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
                     gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT, gl.GL_NEAREST);
 
+            gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT1);
+            gl.glDrawBuffer(gl.GL_COLOR_ATTACHMENT1);
+            gl.glBlitFramebuffer(0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
+                    0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
+                    gl.GL_COLOR_BUFFER_BIT, gl.GL_NEAREST);
+
             // Reset
-            gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
+            gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT0);
+            gl.glDrawBuffer(gl.GL_COLOR_ATTACHMENT0);
         }
 
-//        vertexBuffer.clear();
-//        uvBuffer.clear();
-//        modelBuffer.clear();
-//        modelBufferSmall.clear();
-//        modelBufferUnordered.clear();
+        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, fboMainRenderer);
+        gl.glBindFramebuffer(gl.GL_DRAW_FRAMEBUFFER, 0);
+        gl.glBlitFramebuffer(0, 0, canvasWidth, canvasHeight,
+                0, 0, canvasWidth, canvasHeight,
+                gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT, gl.GL_NEAREST);
 
-//        targetBufferOffset = 0;
-//        smallModels = largeModels = unorderedModels = 0;
+        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
+
+        vertexBuffer.clear();
+        uvBuffer.clear();
+        modelBuffer.clear();
+        modelBufferSmall.clear();
+        modelBufferUnordered.clear();
+
+        smallModels = largeModels = unorderedModels = 0;
         tempOffset = 0;
         tempUvOffset = 0;
 
@@ -805,14 +890,17 @@ public class MapEditor implements GLEventListener {
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-        drawable.getGL().getGL4().glViewport(x, y, width, height);
+        gl = drawable.getGL().getGL4();
+        gl.glViewport(x, y, width, height);
     }
 
     private boolean sceneChangeRequested = true;
+
     public void changeScene(Scene scene) {
         this.scene = scene;
         sceneChangeRequested = true;
     }
+
     private void uploadScene() {
         sceneChangeRequested = false;
         vertexBuffer.clear();
@@ -830,7 +918,7 @@ public class MapEditor implements GLEventListener {
         gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * GLBuffers.SIZEOF_INT, vertexBuffer, gl.GL_STATIC_COPY);
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, uvBufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, uvBuffer.limit() * Float.BYTES, uvBuffer, gl.GL_STATIC_COPY);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, uvBuffer.limit() * GLBuffers.SIZEOF_FLOAT, uvBuffer, gl.GL_STATIC_COPY);
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
@@ -838,7 +926,6 @@ public class MapEditor implements GLEventListener {
         uvBuffer.clear();
 
         drawTiles();
-        gl.glFlush();
     }
 
     private void initVao() {
@@ -889,16 +976,52 @@ public class MapEditor implements GLEventListener {
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
         uniformBuffer.clear();
         uniformBuffer.put(new int[8]);
-        final int[] pad = new int[2];
-        for (int i = 0; i < 2048; i++) {
-            uniformBuffer.put(Perspective.SINE[i]);
-            uniformBuffer.put(Perspective.COSINE[i]);
-            uniformBuffer.put(pad);
-        }
         uniformBuffer.flip();
 
         gl.glBufferData(gl.GL_UNIFORM_BUFFER, uniformBuffer.limit() * Integer.BYTES, uniformBuffer, gl.GL_DYNAMIC_DRAW);
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, 0);
+    }
+
+    private void initPickerBuffer() {
+        fboMainRenderer = GLUtil.glGenFrameBuffer(gl);
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fboMainRenderer);
+
+        // create depth buffer
+        rboDepthMain = GLUtil.glGenRenderbuffer(gl);
+        gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, rboDepthMain);
+        gl.glRenderbufferStorage(gl.GL_RENDERBUFFER, gl.GL_DEPTH_COMPONENT, canvasWidth, canvasHeight);
+        gl.glFramebufferRenderbuffer(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_RENDERBUFFER, rboDepthMain);
+
+        // Create color texture
+        texColorMain = GLUtil.glGenTexture(gl);
+        gl.glBindTexture(gl.GL_TEXTURE_2D, texColorMain);
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, canvasWidth, canvasHeight, 0, gl.GL_RGBA, gl.GL_FLOAT, null);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D, texColorMain, 0);
+
+        texPickerMain = GLUtil.glGenTexture(gl);
+        gl.glBindTexture(gl.GL_TEXTURE_2D, texPickerMain);
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_R32I, canvasWidth, canvasHeight, 0, gl.GL_RED_INTEGER, gl.GL_INT, null);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT1, gl.GL_TEXTURE_2D, texPickerMain, 0);
+
+        // init pbo
+        gl.glGenBuffers(2, pboIds, 0);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[0]);
+        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, canvasWidth * canvasHeight * GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[1]);
+        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, canvasWidth * canvasHeight * GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0);
+
+        int status = gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER);
+        if (status != gl.GL_FRAMEBUFFER_COMPLETE) {
+            System.out.println("bad picker fbo");
+        }
+        gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
+        gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0);
+        gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
     }
 
     private void initBuffers() {
@@ -911,23 +1034,17 @@ public class MapEditor implements GLEventListener {
         tmpModelBufferUnorderedId = GLUtil.glGenBuffers(gl);
         tmpOutBufferId = GLUtil.glGenBuffers(gl);
         tmpOutUvBufferId = GLUtil.glGenBuffers(gl);
+        colorPickerBufferId = GLUtil.glGenBuffers(gl);
     }
 
     private void createProjectionMatrix(float left, float right, float bottom, float top, float near, float far) {
-        // create a standard orthographic projection
-        float tx = -((right + left) / (right - left));
-        float ty = -((top + bottom) / (top - bottom));
-        float tz = ((far + near) / (far - near));
-
         gl.glUseProgram(glProgram);
 
-        float[] matrix = new float[]{
-                2 / (right - left), 0, 0, 0,
-                0, 2 / (top - bottom), 0, 0,
-                0, 0, -2 / (far - near), 0,
-                tx, ty, tz, 1
-        };
-        gl.glUniformMatrix4fv(uniProjectionMatrix, 1, false, matrix, 0);
+        FloatBuffer fb = Buffers.newDirectFloatBuffer(16);
+        new Matrix4f()
+                .setOrtho(left, right, bottom, top, near, far)
+                .get(fb);
+        gl.glUniformMatrix4fv(uniProjectionMatrix, 1, false, fb);
 
         gl.glUseProgram(0);
     }
@@ -947,17 +1064,27 @@ public class MapEditor implements GLEventListener {
         colorTexSceneHandle = GLUtil.glGenTexture(gl);
         gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, colorTexSceneHandle);
         gl.glTexImage2DMultisample(gl.GL_TEXTURE_2D_MULTISAMPLE, aaSamples, gl.GL_RGBA, width, height, true);
+        // Bind color tex
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D_MULTISAMPLE, colorTexSceneHandle, 0);
 
         // Create depth texture
         depthTexSceneHandle = GLUtil.glGenTexture(gl);
         gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, depthTexSceneHandle);
         gl.glTexImage2DMultisample(gl.GL_TEXTURE_2D_MULTISAMPLE, aaSamples, gl.GL_DEPTH_COMPONENT, width, height, true);
-
-        // Bind color tex
-        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D_MULTISAMPLE, colorTexSceneHandle, 0);
-
         // bind depth tex
         gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_TEXTURE_2D_MULTISAMPLE, depthTexSceneHandle, 0);
+
+        // Create picker texture
+        int texPickerHandle = GLUtil.glGenTexture(gl);
+        gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, texPickerHandle);
+        gl.glTexImage2DMultisample(gl.GL_TEXTURE_2D_MULTISAMPLE, aaSamples, gl.GL_R32I, width, height, true);
+        // Bind color tex
+        gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT1, gl.GL_TEXTURE_2D_MULTISAMPLE, texPickerHandle, 0);
+
+        int status = gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER);
+        if (status != gl.GL_FRAMEBUFFER_COMPLETE) {
+            System.out.println("bad picker fbo");
+        }
 
         // Reset
         gl.glBindTexture(gl.GL_TEXTURE_2D_MULTISAMPLE, 0);
@@ -975,58 +1102,48 @@ public class MapEditor implements GLEventListener {
         }
     }
 
-    private void shutdownBuffers()
-    {
-        if (bufferId != -1)
-        {
+    private void shutdownBuffers() {
+        if (bufferId != -1) {
             glDeleteBuffer(gl, bufferId);
             bufferId = -1;
         }
 
-        if (uvBufferId != -1)
-        {
+        if (uvBufferId != -1) {
             glDeleteBuffer(gl, uvBufferId);
             uvBufferId = -1;
         }
 
-        if (tmpBufferId != -1)
-        {
+        if (tmpBufferId != -1) {
             glDeleteBuffer(gl, tmpBufferId);
             tmpBufferId = -1;
         }
 
-        if (tmpUvBufferId != -1)
-        {
+        if (tmpUvBufferId != -1) {
             glDeleteBuffer(gl, tmpUvBufferId);
             tmpUvBufferId = -1;
         }
 
-        if (tmpModelBufferId != -1)
-        {
+        if (tmpModelBufferId != -1) {
             glDeleteBuffer(gl, tmpModelBufferId);
             tmpModelBufferId = -1;
         }
 
-        if (tmpModelBufferSmallId != -1)
-        {
+        if (tmpModelBufferSmallId != -1) {
             glDeleteBuffer(gl, tmpModelBufferSmallId);
             tmpModelBufferSmallId = -1;
         }
 
-        if (tmpModelBufferUnorderedId != -1)
-        {
+        if (tmpModelBufferUnorderedId != -1) {
             glDeleteBuffer(gl, tmpModelBufferUnorderedId);
             tmpModelBufferUnorderedId = -1;
         }
 
-        if (tmpOutBufferId != -1)
-        {
+        if (tmpOutBufferId != -1) {
             glDeleteBuffer(gl, tmpOutBufferId);
             tmpOutBufferId = -1;
         }
 
-        if (tmpOutUvBufferId != -1)
-        {
+        if (tmpOutUvBufferId != -1) {
             glDeleteBuffer(gl, tmpOutUvBufferId);
             tmpOutUvBufferId = -1;
         }
@@ -1042,9 +1159,9 @@ public class MapEditor implements GLEventListener {
             SceneTile north = scene.getTile(0, x, y + 1);
             SceneTile east = scene.getTile(0, x + 1, y);
             SceneTile northEast = scene.getTile(0, x + 1, y + 1);
-//
+
             SceneTile tile = scene.getTile(0, x, y);
-            int newHeight = tile.getTilePaint().getNeHeight() - 10;
+            int newHeight = tile.getTilePaint().getNeHeight() + 10;
 
             if (north != null && north.getTilePaint() != null) {
                 TilePaintImpl tp = north.getTilePaint();

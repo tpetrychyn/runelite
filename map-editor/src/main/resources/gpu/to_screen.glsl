@@ -41,7 +41,7 @@ vec3 toScreen(ivec3 vertex, int cameraYaw, int cameraPitch, int centerX, int cen
 
   float x = rotatedX * zoom / var12 + centerX;
   float y = var13 * zoom / var12 + centerY;
-  float z = var12; // in OpenGL depth is negative // Tay - changed this to positive along with the projectionMatrix tz
+  float z = -var12; // in OpenGL depth is negative
 
   return vec3(x, y, z);
 }

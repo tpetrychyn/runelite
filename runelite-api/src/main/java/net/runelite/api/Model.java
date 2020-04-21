@@ -69,6 +69,8 @@ public interface Model extends Entity
 
 	int[] getFaceColors3();
 
+	void setFaceColors1(int[] faceColors1);
+
 	byte[] getTriangleTransparencies();
 
 	int getSceneId();

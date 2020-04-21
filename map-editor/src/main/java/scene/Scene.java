@@ -9,8 +9,6 @@ public class Scene {
     private SceneRegion[][] regions;
     private int radius;
 
-    public boolean hasBeenUploaded;
-
     public Scene(SceneRegionBuilder sceneRegionBuilder, int centerRegionId, int radius) {
         this.radius = radius;
         this.regions = new SceneRegion[radius][radius];

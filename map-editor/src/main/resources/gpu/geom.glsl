@@ -40,7 +40,6 @@ layout(std140) uniform uniforms {
   int cameraX;
   int cameraY;
   int cameraZ;
-  ivec2 sinCosTable[2048];
 };
 
 uniform mat4 projectionMatrix;
@@ -50,12 +49,14 @@ in vec4 vColor[];
 in float vHsl[];
 in vec4 vUv[];
 in float vFogAmount[];
-in vec4 frag_worldPosition[];
 
 out vec4 Color;
 centroid out float fHsl;
 out vec4 fUv;
 out float fogAmount;
+
+flat in int o_pickerId[];
+flat out int frag_pickerId;
 
 #include to_screen.glsl
 
@@ -65,7 +66,7 @@ void main() {
   vec3 screenB = toScreen(vPosition[1] - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
   vec3 screenC = toScreen(vPosition[2] - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
 
-  if (screenA.z < 50 || screenB.z < 50 || screenC.z < 50) {
+  if (-screenA.z < 50 || -screenB.z < 50 || -screenC.z < 50) {
     // the client does not draw a triangle if any vertex distance is <50
     return;
   }
@@ -76,6 +77,7 @@ void main() {
   fUv = vUv[0];
   fogAmount = vFogAmount[0];
   gl_Position  = projectionMatrix * tmp;
+  frag_pickerId = o_pickerId[0];
   EmitVertex();
 
   tmp = vec4(screenB.xyz, 1.0);
@@ -84,6 +86,7 @@ void main() {
   fUv = vUv[1];
   fogAmount = vFogAmount[1];
   gl_Position  = projectionMatrix * tmp;
+  frag_pickerId = o_pickerId[1];
   EmitVertex();
 
   tmp = vec4(screenC.xyz, 1.0);
@@ -92,6 +95,7 @@ void main() {
   fUv = vUv[2];
   fogAmount = vFogAmount[2];
   gl_Position  = projectionMatrix * tmp;
+  frag_pickerId = o_pickerId[2];
   EmitVertex();
 
   EndPrimitive();

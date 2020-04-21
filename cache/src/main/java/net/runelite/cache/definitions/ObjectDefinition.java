@@ -33,7 +33,6 @@ import lombok.Data;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.definitions.loaders.ModelLoader;
 import net.runelite.cache.fs.*;
-import net.runelite.cache.util.StoreLocation;
 
 @Data
 public class ObjectDefinition {
@@ -55,7 +54,7 @@ public class ObjectDefinition {
     protected boolean mergeNormals = false;
     protected int wallOrDoor = -1;
     protected int animationID = -1;
-    protected int varbitID = -1;
+    protected int transformVarbit = -1;
     protected int ambient = 0;
     protected int contrast = 0;
     protected String[] actions = new String[5];
@@ -73,9 +72,9 @@ public class ObjectDefinition {
     protected boolean obstructsGround = false;
     protected int contouredGround = -1;
     protected int supportsItems = -1;
-    protected int[] configChangeDest;
+    protected int[] transforms;
     protected boolean isRotated = false;
-    protected int varpID = -1;
+    protected int transformVarp = -1;
     protected int ambientSoundId = -1;
     protected boolean aBool2111 = false;
     protected int anInt2112 = 0;
@@ -89,9 +88,9 @@ public class ObjectDefinition {
     public ModelDefinition getModel(int type, int orientation) {
         long modelTag;
         if (this.models == null) {
-            modelTag = (long) (orientation + (this.id << 10));
+            modelTag = orientation + (this.id << 10);
         } else {
-            modelTag = (long) (orientation + (type << 3) + (this.id << 10));
+            modelTag = orientation + (type << 3) + (this.id << 10);
         }
 
         ModelDefinition litModel = litModelCache.get(modelTag);
@@ -105,6 +104,35 @@ public class ObjectDefinition {
 
             litModelCache.put(modelTag, litModel);
         }
+
+        return litModel;
+    }
+
+    public ModelDefinition getModelDynamic(int type, int orientation, SequenceDefinition sequenceDefinition, int frame) {
+        long modelTag;
+        if (this.models == null) {
+            modelTag = orientation + (this.id << 10);
+        } else {
+            modelTag = orientation + (type << 3) + (this.id << 10);
+        }
+
+        ModelDefinition litModel = litModelCache.get(modelTag);
+        if (litModel == null) {
+            litModel = getModelDefinition(type, orientation);
+            if (litModel == null) {
+                return null;
+            }
+
+            // TODO: flat shading
+
+            litModelCache.put(modelTag, litModel);
+        }
+
+        if (sequenceDefinition == null) {
+            return litModel;
+        }
+
+        litModel = sequenceDefinition.transformObjectModel(litModel, frame, orientation);
 
         return litModel;
     }
@@ -204,15 +232,16 @@ public class ObjectDefinition {
             }
         }
 
+        assert modelDefinition != null;
         ModelDefinition copy = new ModelDefinition(modelDefinition, orientation == 0, recolorToFind == null, retextureToFind == null);
 
         orientation &= 0x3;
         if (orientation == 1) {
-            copy.rotate1();
+            copy.rotateY90Ccw();
         } else if (orientation == 2) {
-            copy.rotate2();
+            copy.rotateY180();
         } else if (orientation == 3) {
-            copy.rotate3();
+            copy.rotateY270Ccw();
         }
 
         if (recolorToFind != null) {
@@ -229,4 +258,11 @@ public class ObjectDefinition {
 
         return copy;
     }
+
+//    public ObjectDefinition transform() {
+//        int var1 = -1;
+//        if (this.transformVarbit != -1) {
+//            var1 = getVa
+//        }
+//    }
 }

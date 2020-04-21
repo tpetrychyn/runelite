@@ -253,14 +253,14 @@ public class ObjectLoader
 			{
 				varpID = -1;
 			}
-			def.setVarbitID(varpID);
+			def.setTransformVarbit(varpID);
 
 			int configId = is.readUnsignedShort();
 			if (configId == 0xFFFF)
 			{
 				configId = -1;
 			}
-			def.setVarpID(configId);
+			def.setTransformVarp(configId);
 
 			int length = is.readUnsignedByte();
 			int[] configChangeDest = new int[length + 2];
@@ -276,7 +276,7 @@ public class ObjectLoader
 
 			configChangeDest[length + 1] = -1;
 
-			def.setConfigChangeDest(configChangeDest);
+			def.setTransforms(configChangeDest);
 		}
 		else if (opcode == 78)
 		{
@@ -308,19 +308,19 @@ public class ObjectLoader
 		}
 		else if (opcode == 92)
 		{
-			int varpID = is.readUnsignedShort();
-			if (varpID == 0xFFFF)
+			int transformVarbit = is.readUnsignedShort();
+			if (transformVarbit == 0xFFFF)
 			{
-				varpID = -1;
+				transformVarbit = -1;
 			}
-			def.setVarbitID(varpID);
+			def.setTransformVarbit(transformVarbit);
 
-			int configId = is.readUnsignedShort();
-			if (configId == 0xFFFF)
+			int transformVarp = is.readUnsignedShort();
+			if (transformVarp == 0xFFFF)
 			{
-				configId = -1;
+				transformVarp = -1;
 			}
-			def.setVarpID(configId);
+			def.setTransformVarp(transformVarp);
 
 
 			int var = is.readUnsignedShort();
@@ -330,20 +330,20 @@ public class ObjectLoader
 			}
 
 			int length = is.readUnsignedByte();
-			int[] configChangeDest = new int[length + 2];
+			int[] transforms = new int[length + 2];
 
 			for (int index = 0; index <= length; ++index)
 			{
-				configChangeDest[index] = is.readUnsignedShort();
-				if (0xFFFF == configChangeDest[index])
+				transforms[index] = is.readUnsignedShort();
+				if (0xFFFF == transforms[index])
 				{
-					configChangeDest[index] = -1;
+					transforms[index] = -1;
 				}
 			}
 
-			configChangeDest[length + 1] = var;
+			transforms[length + 1] = var;
 
-			def.setConfigChangeDest(configChangeDest);
+			def.setTransforms(transforms);
 		}
 		else if (opcode == 249)
 		{

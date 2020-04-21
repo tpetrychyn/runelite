@@ -32,8 +32,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import net.runelite.cache.definitions.FrameDefinition;
-import net.runelite.cache.definitions.FramemapDefinition;
+import net.runelite.cache.definitions.AnimationDefinition;
+import net.runelite.cache.definitions.SkeletonDefinition;
 import net.runelite.cache.definitions.loaders.FrameLoader;
 import net.runelite.cache.definitions.loaders.FramemapLoader;
 import net.runelite.cache.fs.Archive;
@@ -77,7 +77,7 @@ public class FrameDumper
 
 			for (Archive archive : frameIndex.getArchives())
 			{
-				List<FrameDefinition> frames = new ArrayList<>();
+				List<AnimationDefinition> frames = new ArrayList<>();
 
 				byte[] archiveData = storage.loadArchive(archive);
 
@@ -93,10 +93,10 @@ public class FrameDumper
 					byte[] framemapContents = framemapArchive.decompress(archiveData);
 
 					FramemapLoader fmloader = new FramemapLoader();
-					FramemapDefinition framemap = fmloader.load(framemapArchive.getArchiveId(), framemapContents);
+					SkeletonDefinition framemap = fmloader.load(framemapArchive.getArchiveId(), framemapContents);
 
 					FrameLoader frameLoader = new FrameLoader();
-					FrameDefinition frame = frameLoader.load(framemap, archiveFile.getFileId(), contents);
+					AnimationDefinition frame = frameLoader.load(framemap, archiveFile.getFileId(), contents);
 
 					frames.add(frame);
 				}

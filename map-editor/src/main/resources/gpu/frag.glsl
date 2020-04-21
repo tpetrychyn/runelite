@@ -29,6 +29,7 @@ uniform vec2 textureOffsets[64];
 uniform float brightness;
 uniform float smoothBanding;
 uniform vec4 fogColor;
+uniform bool colorPickerRender;
 
 in vec4 Color;
 centroid in float fHsl;
@@ -36,6 +37,11 @@ in vec4 fUv;
 in float fogAmount;
 
 in vec3 vPosition;
+
+flat in int frag_pickerId;
+
+layout(location = 0) out vec4 fragColor;
+layout(location = 1) out int pickerId;
 
 #include hsl_to_rgb.glsl
 
@@ -61,7 +67,7 @@ void main() {
 
   vec3 mixedColor = mix(smoothColor.rgb, fogColor.rgb, fogAmount);
 
-  gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1);//fWorldPosition;
-  gl_FragColor = vec4(mixedColor, smoothColor.a);
+  fragColor = vec4(mixedColor, smoothColor.a);
 
+  pickerId = frag_pickerId;
 }

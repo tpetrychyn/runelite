@@ -3,6 +3,7 @@ package models;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Entity;
 
 @Getter
 @Setter
@@ -13,10 +14,8 @@ public class WallDecoration {
     private int x;
     private int y;
     private int height;
-    private ModelImpl modelA;
-    private ModelImpl modelB;
+    private Entity entityA;
+    private Entity entityB;
     private int orientationA;
     private int orientationB;
-//    private int xOff;
-//    private int yOff;
 }

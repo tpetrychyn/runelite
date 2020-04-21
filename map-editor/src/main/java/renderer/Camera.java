@@ -10,9 +10,12 @@ import net.runelite.api.Perspective;
 @Setter
 public class Camera {
 
+    private String debugText = "";
+
+
     private int yaw = 0; // yaw 0 true north, same with 2047 and 1
     private int pitch = 220;
-    private int scale = 540;
+    private int scale = 550;
 
     private int cameraX = Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE / 2;
     private int cameraY = Constants.SCENE_SIZE * Perspective.LOCAL_TILE_SIZE / 2;
@@ -48,8 +51,9 @@ public class Camera {
 
     public void addPitch(int amt) {
         int newPitch = this.pitch + amt;
-        // straight down is 500, straight up is 1500 roughly
-        if (newPitch > 550 && newPitch < 1500) {
+        // If camera goes below 434 tile hover stops working
+        // straight down is 434, straight up is 1500 roughly
+        if (newPitch > 434 && newPitch < 1500) {
             return;
         }
 

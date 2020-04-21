@@ -27,14 +27,10 @@ package net.runelite.cache.definitions;
 import lombok.Data;
 
 @Data
-public class FrameDefinition
+public class SkeletonDefinition
 {
-	public int id; // file id
-	public FramemapDefinition framemap;
-	public int[] translator_x;
-	public int[] translator_y;
-	public int[] translator_z;
-	public int translatorCount = -1;
-	public int[] indexFrameIds;
-	public boolean showing;
+	public int id;
+	public int count;
+	public int[] transformTypes;
+	public int[][] labels;
 }

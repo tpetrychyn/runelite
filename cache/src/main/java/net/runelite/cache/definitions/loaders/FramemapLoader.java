@@ -24,37 +24,37 @@
  */
 package net.runelite.cache.definitions.loaders;
 
-import net.runelite.cache.definitions.FramemapDefinition;
+import net.runelite.cache.definitions.SkeletonDefinition;
 import net.runelite.cache.io.InputStream;
 
 public class FramemapLoader
 {
-	public FramemapDefinition load(int id, byte[] b)
+	public SkeletonDefinition load(int id, byte[] b)
 	{
-		FramemapDefinition def = new FramemapDefinition();
+		SkeletonDefinition def = new SkeletonDefinition();
 		InputStream in = new InputStream(b);
 
 		def.id = id;
 
-		def.length = in.readUnsignedByte();
-		def.types = new int[def.length];
-		def.frameMaps = new int[def.length][];
+		def.count = in.readUnsignedByte();
+		def.transformTypes = new int[def.count];
+		def.labels = new int[def.count][];
 
-		for (int i = 0; i < def.length; ++i)
+		for (int i = 0; i < def.count; ++i)
 		{
-			def.types[i] = in.readUnsignedByte();
+			def.transformTypes[i] = in.readUnsignedByte();
 		}
 
-		for (int i = 0; i < def.length; ++i)
+		for (int i = 0; i < def.count; ++i)
 		{
-			def.frameMaps[i] = new int[in.readUnsignedByte()];
+			def.labels[i] = new int[in.readUnsignedByte()];
 		}
 
-		for (int i = 0; i < def.length; ++i)
+		for (int i = 0; i < def.count; ++i)
 		{
-			for (int j = 0; j < def.frameMaps[i].length; ++j)
+			for (int j = 0; j < def.labels[i].length; ++j)
 			{
-				def.frameMaps[i][j] = in.readUnsignedByte();
+				def.labels[i][j] = in.readUnsignedByte();
 			}
 		}
 

@@ -89,23 +89,23 @@ public class GrandExchangeEvents {
 		garbageValue = "1600674213"
 	)
 	@Export("getFrames")
-	static Frames getFrames(int var0) {
-		Frames var1 = (Frames)SequenceDefinition.SequenceDefinition_cachedFrames.get((long)var0);
-		if (var1 != null) {
-			return var1;
+	static Frames getFrames(int id) {
+		Frames frames = (Frames)SequenceDefinition.SequenceDefinition_cachedFrames.get((long)id);
+		if (frames != null) {
+			return frames;
 		} else {
-			AbstractArchive var3 = GZipDecompressor.SequenceDefinition_animationsArchive;
-			AbstractArchive var4 = class92.SequenceDefinition_skeletonsArchive;
+			AbstractArchive animationsArchive = GZipDecompressor.SequenceDefinition_animationsArchive;
+			AbstractArchive skeletonsArchive = class92.SequenceDefinition_skeletonsArchive;
 			boolean var5 = true;
-			int[] var6 = var3.getGroupFileIds(var0);
+			int[] fileIds = animationsArchive.getGroupFileIds(id);
 
-			for (int var7 = 0; var7 < var6.length; ++var7) {
-				byte[] var8 = var3.getFile(var0, var6[var7]);
-				if (var8 == null) {
+			for (int i = 0; i < fileIds.length; ++i) {
+				byte[] contents = animationsArchive.getFile(id, fileIds[i]);
+				if (contents == null) {
 					var5 = false;
 				} else {
-					int var9 = (var8[0] & 255) << 8 | var8[1] & 255;
-					byte[] var10 = var4.getFile(var9, 0);
+					int fileId = (contents[0] & 255) << 8 | contents[1] & 255;
+					byte[] var10 = skeletonsArchive.getFile(fileId, 0);
 					if (var10 == null) {
 						var5 = false;
 					}
@@ -117,14 +117,14 @@ public class GrandExchangeEvents {
 				var2 = null;
 			} else {
 				try {
-					var2 = new Frames(var3, var4, var0, false);
+					var2 = new Frames(animationsArchive, skeletonsArchive, id);
 				} catch (Exception var12) {
 					var2 = null;
 				}
 			}
 
 			if (var2 != null) {
-				SequenceDefinition.SequenceDefinition_cachedFrames.put((long)var0, var2);
+				SequenceDefinition.SequenceDefinition_cachedFrames.put((long)id, var2);
 			}
 
 			return var2;

@@ -34,6 +34,7 @@
 
 layout (location = 0) in ivec4 VertexPosition;
 layout (location = 1) in vec4 uv;
+layout (location = 2) in int pickerId;
 
 layout(std140) uniform uniforms {
     int cameraYaw;
@@ -44,7 +45,6 @@ layout(std140) uniform uniforms {
     int cameraX;
     int cameraY;
     int cameraZ;
-    ivec2 sinCosTable[2048];
 };
 
 uniform float brightness;
@@ -57,6 +57,8 @@ out vec4 vColor;
 out float vHsl;
 out vec4 vUv;
 out float vFogAmount;
+
+flat out int o_pickerId;
 
 #include hsl_to_rgb.glsl
 
@@ -73,7 +75,7 @@ void main()
 
     vec3 rgb = hslToRgb(hsl);
 
-    vPosition = vertex;
+    vPosition = ivec3(vertex.x, vertex.y, vertex.z);
     vColor = vec4(rgb, 1.f - a);
     vHsl = float(hsl);
     vUv = uv;
@@ -93,4 +95,6 @@ void main()
     (secondNearestEdgeDistance + FOG_CORNER_ROUNDING_SQUARED));
 
     vFogAmount = fogFactorLinear(fogDistance, 0, fogDepth * TILE_SIZE) * useFog;
+
+    o_pickerId = pickerId;
 }

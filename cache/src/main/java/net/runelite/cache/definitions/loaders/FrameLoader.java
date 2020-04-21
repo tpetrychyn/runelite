@@ -24,20 +24,20 @@
  */
 package net.runelite.cache.definitions.loaders;
 
-import net.runelite.cache.definitions.FrameDefinition;
-import net.runelite.cache.definitions.FramemapDefinition;
+import net.runelite.cache.definitions.AnimationDefinition;
+import net.runelite.cache.definitions.SkeletonDefinition;
 import net.runelite.cache.io.InputStream;
 
 public class FrameLoader
 {
-	public FrameDefinition load(FramemapDefinition framemap, int id, byte[] b)
+	public AnimationDefinition load(SkeletonDefinition framemap, int id, byte[] b)
 	{
-		FrameDefinition def = new FrameDefinition();
+		AnimationDefinition def = new AnimationDefinition();
 		InputStream in = new InputStream(b);
 		InputStream data = new InputStream(b);
 
 		def.id = id;
-		def.framemap = framemap;
+		def.skeleton = framemap;
 
 		int framemapArchiveIndex = in.readUnsignedShort();
 		int length = in.readUnsignedByte();
@@ -60,11 +60,11 @@ public class FrameLoader
 				continue;
 			}
 
-			if (def.framemap.types[i] != 0)
+			if (def.skeleton.transformTypes[i] != 0)
 			{
 				for (int var10 = i - 1; var10 > lastI; --var10)
 				{
-					if (def.framemap.types[var10] == 0)
+					if (def.skeleton.transformTypes[var10] == 0)
 					{
 						indexFrameIds[index] = var10;
 						scratchTranslatorX[index] = 0;
@@ -78,7 +78,7 @@ public class FrameLoader
 
 			indexFrameIds[index] = i;
 			short var11 = 0;
-			if (def.framemap.types[i] == 3)
+			if (def.skeleton.transformTypes[i] == 3)
 			{
 				var11 = 128;
 			}
@@ -112,9 +112,9 @@ public class FrameLoader
 
 			lastI = i;
 			++index;
-			if (def.framemap.types[i] == 5)
+			if (def.skeleton.transformTypes[i] == 5)
 			{
-				def.showing = true;
+				def.hasAlphaTransform = true;
 			}
 		}
 
@@ -123,18 +123,18 @@ public class FrameLoader
 			throw new RuntimeException();
 		}
 
-		def.translatorCount = index;
-		def.indexFrameIds = new int[index];
-		def.translator_x = new int[index];
-		def.translator_y = new int[index];
-		def.translator_z = new int[index];
+		def.transformCount = index;
+		def.transformSkeletonLabels = new int[index];
+		def.tranformXs = new int[index];
+		def.tranformYs = new int[index];
+		def.transformZs = new int[index];
 
 		for (int i = 0; i < index; ++i)
 		{
-			def.indexFrameIds[i] = indexFrameIds[i];
-			def.translator_x[i] = scratchTranslatorX[i];
-			def.translator_y[i] = scratchTranslatorY[i];
-			def.translator_z[i] = scratchTranslatorZ[i];
+			def.transformSkeletonLabels[i] = indexFrameIds[i];
+			def.tranformXs[i] = scratchTranslatorX[i];
+			def.tranformYs[i] = scratchTranslatorY[i];
+			def.transformZs[i] = scratchTranslatorZ[i];
 		}
 
 		return def;

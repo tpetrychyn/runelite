@@ -55,28 +55,28 @@ public class SequenceLoader
 		if (opcode == 1)
 		{
 			var3 = stream.readUnsignedShort();
-			def.frameLenghts = new int[var3];
+			def.frameLengths = new int[var3];
 
 			for (var4 = 0; var4 < var3; ++var4)
 			{
-				def.frameLenghts[var4] = stream.readUnsignedShort();
+				def.frameLengths[var4] = stream.readUnsignedShort();
 			}
 
-			def.frameIDs = new int[var3];
+			def.frameIds = new int[var3];
 
 			for (var4 = 0; var4 < var3; ++var4)
 			{
-				def.frameIDs[var4] = stream.readUnsignedShort();
+				def.frameIds[var4] = stream.readUnsignedShort();
 			}
 
 			for (var4 = 0; var4 < var3; ++var4)
 			{
-				def.frameIDs[var4] += stream.readUnsignedShort() << 16;
+				def.frameIds[var4] += stream.readUnsignedShort() << 16;
 			}
 		}
 		else if (opcode == 2)
 		{
-			def.frameStep = stream.readUnsignedShort();
+			def.frameCount = stream.readUnsignedShort();
 		}
 		else if (opcode == 3)
 		{
@@ -120,7 +120,7 @@ public class SequenceLoader
 		}
 		else if (opcode == 11)
 		{
-			def.replyMode = stream.readUnsignedByte();
+			def.replayMode = stream.readUnsignedByte();
 		}
 		else if (opcode == 12)
 		{

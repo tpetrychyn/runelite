@@ -657,39 +657,39 @@ public class ObjectDefinition extends DualNode {
 		garbageValue = "255"
 	)
 	@Export("getModelDynamic")
-	public final Model getModelDynamic(int var1, int var2, int[][] var3, int var4, int var5, int var6, SequenceDefinition var7, int var8) {
-		long var9;
+	public final Model getModelDynamic(int type, int orientation, int[][] var3, int var4, int var5, int var6, SequenceDefinition sequenceDefinition, int frame) {
+		long modelTag;
 		if (this.models == null) {
-			var9 = (long)(var2 + (this.id << 10));
+			modelTag = (long)(orientation + (this.id << 10));
 		} else {
-			var9 = (long)(var2 + (var1 << 3) + (this.id << 10));
+			modelTag = (long)(orientation + (type << 3) + (this.id << 10));
 		}
 
-		Model var11 = (Model)ObjectDefinition_cachedModels.get(var9);
-		if (var11 == null) {
-			ModelData var12 = this.getModelData(var1, var2);
+		Model litModel = (Model)ObjectDefinition_cachedModels.get(modelTag);
+		if (litModel == null) {
+			ModelData var12 = this.getModelData(type, orientation);
 			if (var12 == null) {
 				return null;
 			}
 
-			var11 = var12.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
-			ObjectDefinition_cachedModels.put(var9, var11);
+			litModel = var12.toModel(this.ambient + 64, this.contrast + 768, -50, -10, -50);
+			ObjectDefinition_cachedModels.put(modelTag, litModel);
 		}
 
-		if (var7 == null && this.clipType == -1) {
-			return var11;
+		if (sequenceDefinition == null && this.clipType == -1) {
+			return litModel;
 		} else {
-			if (var7 != null) {
-				var11 = var7.transformObjectModel(var11, var8, var2);
+			if (sequenceDefinition != null) {
+				litModel = sequenceDefinition.transformObjectModel(litModel, frame, orientation);
 			} else {
-				var11 = var11.toSharedSequenceModel(true);
+				litModel = litModel.toSharedSequenceModel(true);
 			}
 
 			if (this.clipType >= 0) {
-				var11 = var11.contourGround(var3, var4, var5, var6, false, this.clipType);
+				litModel = litModel.contourGround(var3, var4, var5, var6, false, this.clipType);
 			}
 
-			return var11;
+			return litModel;
 		}
 	}
 

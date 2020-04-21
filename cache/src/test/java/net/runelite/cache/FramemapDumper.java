@@ -30,7 +30,7 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import net.runelite.cache.definitions.FramemapDefinition;
+import net.runelite.cache.definitions.SkeletonDefinition;
 import net.runelite.cache.definitions.loaders.FramemapLoader;
 import net.runelite.cache.fs.Archive;
 import net.runelite.cache.fs.Index;
@@ -72,7 +72,7 @@ public class FramemapDumper
 				byte[] contents = archive.decompress(archiveData);
 
 				FramemapLoader loader = new FramemapLoader();
-				FramemapDefinition framemap = loader.load(0, contents);
+				SkeletonDefinition framemap = loader.load(0, contents);
 
 				Files.asCharSink(new File(outDir, archive.getArchiveId() + ".json"), Charset.defaultCharset()).write(gson.toJson(framemap));
 				++count;

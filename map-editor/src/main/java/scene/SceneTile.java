@@ -2,10 +2,10 @@ package scene;
 
 import lombok.Getter;
 import lombok.Setter;
+import models.FloorDecoration;
 import models.TileModelImpl;
 import models.TilePaintImpl;
 import models.WallDecoration;
-import net.runelite.api.*;
 import net.runelite.cache.definitions.MapDefinition;
 
 @Getter
@@ -18,9 +18,6 @@ public class SceneTile extends MapDefinition.Tile {
     private TileModelImpl tileModel;
     private FloorDecoration floorDecoration;
     private WallDecoration wallDecoration;
-    private boolean needsUpdate = true;
-
-    private int bufferIdx = 0;
 
     private SceneTile north;
     private SceneTile northEast;

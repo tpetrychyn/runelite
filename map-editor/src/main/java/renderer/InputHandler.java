@@ -82,12 +82,11 @@ public class InputHandler implements KeyListener, MouseListener {
         }
 
         if (keys[KeyEvent.VK_K]) {
-            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 12854, 5));
+            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 11569, 9));
         }
-//
-//        if (keys[KeyEvent.VK_R]) {
-//            uploadScene();
-//        }
+        if (keys[KeyEvent.VK_R]) {
+            mapEditor.hoverTile = null;
+        }
     }
 
     @Override

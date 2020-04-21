@@ -23,6 +23,7 @@ public class Shader
 	static final Shader PROGRAM = new Shader()
 			.add(GL4.GL_VERTEX_SHADER, "/gpu/vert.glsl")
 			.add(GL4.GL_GEOMETRY_SHADER, "/gpu/geom.glsl")
+//			.add(GL4.GL_FRAGMENT_SHADER, "/gpu/picker.frag");
 			.add(GL4.GL_FRAGMENT_SHADER, "/gpu/frag.glsl");
 
 	static final Shader COMPUTE_PROGRAM = new Shader()

@@ -17,31 +17,31 @@ public class Frames extends DualNode {
 		signature = "(Liy;Liy;IZ)V",
 		garbageValue = "0"
 	)
-	public Frames(AbstractArchive var1, AbstractArchive var2, int var3, boolean var4) {
+	public Frames(AbstractArchive animationsArchive, AbstractArchive skeletonsArchive, int id) {
 		NodeDeque var5 = new NodeDeque();
-		int var6 = var1.getGroupFileCount(var3);
-		this.frames = new Animation[var6];
-		int[] var7 = var1.getGroupFileIds(var3);
+		int fileCount = animationsArchive.getGroupFileCount(id);
+		this.frames = new Animation[fileCount];
+		int[] fileIds = animationsArchive.getGroupFileIds(id);
 
-		for (int var8 = 0; var8 < var7.length; ++var8) {
-			byte[] var9 = var1.takeFile(var3, var7[var8]);
-			Skeleton var10 = null;
-			int var11 = (var9[0] & 255) << 8 | var9[1] & 255;
+		for (int i = 0; i < fileIds.length; ++i) {
+			byte[] contents = animationsArchive.takeFile(id, fileIds[i]);
+			Skeleton skeleton = null;
+			int var11 = (contents[0] & 255) << 8 | contents[1] & 255;
 
 			for (Skeleton var12 = (Skeleton)var5.last(); var12 != null; var12 = (Skeleton)var5.previous()) {
 				if (var11 == var12.id) {
-					var10 = var12;
+					skeleton = var12;
 					break;
 				}
 			}
 
-			if (var10 == null) {
-				byte[] var13 = var2.getFile(var11, 0);
-				var10 = new Skeleton(var11, var13);
-				var5.addFirst(var10);
+			if (skeleton == null) {
+				byte[] var13 = skeletonsArchive.getFile(var11, 0);
+				skeleton = new Skeleton(var11, var13);
+				var5.addFirst(skeleton);
 			}
 
-			this.frames[var7[var8]] = new Animation(var9, var10);
+			this.frames[fileIds[i]] = new Animation(contents, skeleton);
 		}
 
 	}

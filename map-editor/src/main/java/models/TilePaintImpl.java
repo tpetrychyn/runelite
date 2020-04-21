@@ -9,6 +9,7 @@ import net.runelite.api.TilePaint;
 public class TilePaintImpl implements TilePaint {
     private int bufferOffset = -1;
     private int uvBufferOffset = -1;
+    private int targetBufferOffset = -1;
     private int bufferLen;
 
     private boolean isFlat;

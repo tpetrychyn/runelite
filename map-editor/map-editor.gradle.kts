@@ -4,6 +4,7 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven("https://jitpack.io")
 }
 
@@ -38,7 +39,9 @@ dependencies {
     api(files("lib/jogamp-fat.jar"))
     implementation("com.jfoenix:jfoenix:9.0.9")
 
-    api("com.github.elect86:glm:471c2fd5d2002696e2721dde19fded16c01fab78")
+    api(group = "org.joml", name = "joml", version = "1.9.12")
+
+    testImplementation(Libraries.junit)
 }
 
 javafx {

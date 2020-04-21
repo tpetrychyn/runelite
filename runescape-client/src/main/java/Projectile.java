@@ -249,19 +249,19 @@ public final class Projectile extends Renderable {
 		garbageValue = "29577048"
 	)
 	@Export("getVarbit")
-	public static int getVarbit(int var0) {
-		VarbitDefinition var2 = (VarbitDefinition)VarbitDefinition.VarbitDefinition_cached.get((long)var0);
+	public static int getVarbit(int id) {
+		VarbitDefinition var2 = (VarbitDefinition)VarbitDefinition.VarbitDefinition_cached.get((long)id);
 		VarbitDefinition var1;
 		if (var2 != null) {
 			var1 = var2;
 		} else {
-			byte[] var7 = VarbitDefinition.VarbitDefinition_archive.takeFile(14, var0);
+			byte[] var7 = VarbitDefinition.VarbitDefinition_archive.takeFile(14, id);
 			var2 = new VarbitDefinition();
 			if (var7 != null) {
 				var2.decode(new Buffer(var7));
 			}
 
-			VarbitDefinition.VarbitDefinition_cached.put((long)var0, var2);
+			VarbitDefinition.VarbitDefinition_cached.put((long)id, var2);
 			var1 = var2;
 		}
 

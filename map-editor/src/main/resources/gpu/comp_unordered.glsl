@@ -27,7 +27,7 @@
 
 #include comp_common.glsl
 
-layout(local_size_x = 6) in;
+layout(local_size_x = 7) in;
 
 #include common.glsl
 
@@ -67,6 +67,11 @@ void main() {
   ivec4 thisrvC = rotate(thisC, orientation);
 
   uint myOffset = localId;
+
+  // color picker
+  pickerOut[outOffset + myOffset * 3]     = minfo.pickerId;
+  pickerOut[outOffset + myOffset * 3 + 1] = minfo.pickerId;
+  pickerOut[outOffset + myOffset * 3 + 2] = minfo.pickerId;
 
   // position vertices in scene and write to out buffer
   vout[outOffset + myOffset * 3]     = pos + thisrvA;

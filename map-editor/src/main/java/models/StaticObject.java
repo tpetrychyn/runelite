@@ -18,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ModelImpl extends ModelDefinition implements Model {
+public class StaticObject extends ModelDefinition implements Model {
     private int bufferOffset;
     private int uvBufferOffset;
     private int bufferLen;
@@ -41,7 +41,7 @@ public class ModelImpl extends ModelDefinition implements Model {
     private int diameter;
     private int height;
 
-    public ModelImpl(ModelDefinition def, int ambient, int contrast, int x, int y, int z) {
+    public StaticObject(ModelDefinition def, int ambient, int contrast, int x, int y, int z) {
         def.computeNormals();
         int somethingMagnitude = (int) Math.sqrt((double) (z * z + x * x + y * y));
         int var7 = somethingMagnitude * contrast >> 8;
@@ -399,7 +399,7 @@ public class ModelImpl extends ModelDefinition implements Model {
         boundsType = 0;
     }
 
-    public ModelImpl contourGround(MapLoader mapLoader, int xOff, int height, int yOff, boolean deepCopy, int clipType, int worldX, int worldY) {
+    public StaticObject contourGround(MapLoader mapLoader, int xOff, int height, int yOff, boolean deepCopy, int clipType, int worldX, int worldY) {
         this.calculateBoundsCylinder();
         int left = xOff - this.xzRadius;
         int right = xOff + this.xzRadius;
@@ -413,9 +413,9 @@ public class ModelImpl extends ModelDefinition implements Model {
             if (height == mapLoader.getWorldTile(0, left, top).height && height == mapLoader.getWorldTile(0, right, top).height && height == mapLoader.getWorldTile(0, left, bottom).height && height == mapLoader.getWorldTile(0, right, bottom).height) {
                 return this;
             } else {
-                ModelImpl model;
+                StaticObject model;
                 if (deepCopy) {
-                    model = new ModelImpl();
+                    model = new StaticObject();
                     model.id = this.id;
                     model.vertexCount = this.vertexCount;
                     model.vertexPositionsX = this.vertexPositionsX;

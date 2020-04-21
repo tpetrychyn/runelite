@@ -119,9 +119,9 @@ public class ModelDefinition
 		faceNormals = original.faceNormals;
 		textureCoordinates = original.textureCoordinates;
 		vertexSkins = original.vertexSkins;
+		vertexGroups = original.vertexGroups;
 		faceSkins = original.faceSkins;
 		textureRenderTypes = original.textureRenderTypes;
-
 	}
 
 	public void computeNormals()
@@ -402,7 +402,22 @@ public class ModelDefinition
 		System.arraycopy(origVZ, 0, vertexPositionsZ, 0, origVZ.length);
 	}
 
-	public void animate(int type, int[] frameMap, int dx, int dy, int dz)
+	// FrameMapDefinition = Skeleton
+	// FrameDefition = Animation
+	public void animate(FramesDefinition frames, int frame) {
+		if (this.vertexGroups == null || frame == -1) {
+			return;
+		}
+		AnimationDefinition animation = frames.frames[frame];
+		SkeletonDefinition skeleton = animation.skeleton;
+
+		for (int i = 0; i<animation.transformCount; i++) {
+			int lbl = animation.transformSkeletonLabels[i];
+			transform(skeleton.transformTypes[lbl], skeleton.labels[lbl], animation.tranformXs[i], animation.tranformYs[i], animation.transformZs[i]);
+		}
+	}
+
+	public void transform(int type, int[] frameMap, int dx, int dy, int dz)
 	{
 		if (origVX == null)
 		{
@@ -589,7 +604,7 @@ public class ModelDefinition
 		reset();
 	}
 
-	public void rotate1()
+	public void rotateY90Ccw()
 	{
 		for (int var1 = 0; var1 < this.vertexCount; ++var1)
 		{
@@ -601,7 +616,7 @@ public class ModelDefinition
 		reset();
 	}
 
-	public void rotate2()
+	public void rotateY180()
 	{
 		for (int var1 = 0; var1 < this.vertexCount; ++var1)
 		{
@@ -612,7 +627,7 @@ public class ModelDefinition
 		reset();
 	}
 
-	public void rotate3()
+	public void rotateY270Ccw()
 	{
 		for (int var1 = 0; var1 < this.vertexCount; ++var1)
 		{

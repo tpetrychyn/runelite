@@ -245,33 +245,33 @@ public class SequenceDefinition extends DualNode {
 		garbageValue = "-1535419363"
 	)
 	@Export("transformObjectModel")
-	Model transformObjectModel(Model var1, int var2, int var3) {
-		var2 = this.frameIds[var2];
-		Frames var4 = GrandExchangeEvents.getFrames(var2 >> 16);
-		var2 &= 65535;
-		if (var4 == null) {
-			return var1.toSharedSequenceModel(true);
+	Model transformObjectModel(Model model, int frame, int orientation) {
+		frame = this.frameIds[frame];
+		Frames frames = GrandExchangeEvents.getFrames(frame >> 16);
+		frame &= 65535;
+		if (frames == null) {
+			return model.toSharedSequenceModel(true);
 		} else {
-			Model var5 = var1.toSharedSequenceModel(!var4.hasAlphaTransform(var2));
-			var3 &= 3;
-			if (var3 == 1) {
-				var5.rotateY270Ccw();
-			} else if (var3 == 2) {
-				var5.rotateY180();
-			} else if (var3 == 3) {
-				var5.rotateY90Ccw();
+			Model definition = model.toSharedSequenceModel(!frames.hasAlphaTransform(frame));
+			orientation &= 3;
+			if (orientation == 1) {
+				definition.rotateY270Ccw();
+			} else if (orientation == 2) {
+				definition.rotateY180();
+			} else if (orientation == 3) {
+				definition.rotateY90Ccw();
 			}
 
-			var5.animate(var4, var2);
-			if (var3 == 1) {
-				var5.rotateY90Ccw();
-			} else if (var3 == 2) {
-				var5.rotateY180();
-			} else if (var3 == 3) {
-				var5.rotateY270Ccw();
+			definition.animate(frames, frame);
+			if (orientation == 1) {
+				definition.rotateY90Ccw();
+			} else if (orientation == 2) {
+				definition.rotateY180();
+			} else if (orientation == 3) {
+				definition.rotateY270Ccw();
 			}
 
-			return var5;
+			return definition;
 		}
 	}
 

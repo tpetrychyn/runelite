@@ -28,8 +28,12 @@
 /*
  * Rotate a vertex by a given orientation in JAU
  */
+#define M_PI 3.1415926535897932384626433832795
 ivec4 rotate(ivec4 vertex, int orientation) {
-  ivec2 sinCos = sinCosTable[orientation];
+  float sin = 65536 * sin(orientation * M_PI / 1024);
+  float cos = 65536 * cos(orientation * M_PI / 1024);
+
+  ivec2 sinCos = ivec2(int(sin), int(cos));
   int s = sinCos.x;
   int c = sinCos.y;
   int x = vertex.z * s + vertex.x * c >> 16;
