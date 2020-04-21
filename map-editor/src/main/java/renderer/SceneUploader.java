@@ -90,12 +90,12 @@ public class SceneUploader {
 //			reset(bridge);
 //		}
 
-        TilePaint sceneTilePaint = tile.getTilePaint();
+        TilePaintImpl sceneTilePaint = tile.getTilePaint();
         if (sceneTilePaint != null) {
             sceneTilePaint.setBufferOffset(-1);
         }
 
-        TileModel sceneTileModel = tile.getTileModel();
+        TileModelImpl sceneTileModel = tile.getTileModel();
         if (sceneTileModel != null) {
             sceneTileModel.setBufferOffset(-1);
         }
@@ -163,7 +163,7 @@ public class SceneUploader {
             }
         }
 
-        TileModel sceneTileModel = tile.getTileModel();
+        TileModelImpl sceneTileModel = tile.getTileModel();
         if (sceneTileModel != null) {
             sceneTileModel.setBufferOffset(offset);
             if (sceneTileModel.getTriangleTextureId() != null) {
@@ -236,7 +236,7 @@ public class SceneUploader {
         }
     }
 
-    public int upload(TilePaint tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
+    public int upload(TilePaintImpl tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
         int swHeight = tile.getSwHeight();
         int seHeight = tile.getSeHeight();
         int neHeight = tile.getNeHeight();
@@ -300,7 +300,7 @@ public class SceneUploader {
         return 6;
     }
 
-    public int upload(TileModel sceneTileModel, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
+    public int upload(TileModelImpl sceneTileModel, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
         final int[] faceX = sceneTileModel.getFaceX();
         final int[] faceY = sceneTileModel.getFaceY();
         final int[] faceZ = sceneTileModel.getFaceZ();
@@ -396,7 +396,7 @@ public class SceneUploader {
         return len;
     }
 
-    int pushFace(Model model, int face, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
+    public int pushFace(Model model, int face, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
         final int[] vertexX = model.getVerticesX();
         final int[] vertexY = model.getVerticesY();
         final int[] vertexZ = model.getVerticesZ();

@@ -31,6 +31,6 @@ public class SceneTile extends MapDefinition.Tile {
 
     @Override
     public String toString() {
-        return String.format("x %d y %d rgb %d", x, y, tilePaint.getRBG());
+        return String.format("x %d y %d rgb %d", x, y, tilePaint.getRgb());
     }
 }

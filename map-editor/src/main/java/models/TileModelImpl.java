@@ -4,14 +4,18 @@ import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Perspective;
 import net.runelite.api.TileModel;
+import org.apache.commons.lang3.NotImplementedException;
+import renderer.SceneUploader;
+import renderer.helpers.GpuIntBuffer;
+import renderer.helpers.ModelBuffers;
+
+import java.nio.IntBuffer;
+
+import static renderer.helpers.ModelBuffers.FLAG_SCENE_BUFFER;
 
 @Getter
 @Setter
-public class TileModelImpl implements TileModel {
-    private int bufferOffset;
-    private int uvBufferOffset;
-    private int bufferLen;
-
+public class TileModelImpl extends Renderable {
     static int[] field1615;
     static int[] field1605;
     static int[] field1613;
@@ -34,6 +38,32 @@ public class TileModelImpl implements TileModel {
     int rotation;
     int underlayRgb;
     int overlayRgb;
+
+    public void draw(ModelBuffers modelBuffers, int sceneX, int sceneY) {
+        int x = sceneX * Perspective.LOCAL_TILE_SIZE;
+        int y = 0;
+        int z = sceneY * Perspective.LOCAL_TILE_SIZE;
+
+        GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
+        modelBuffers.incUnorderedModels();
+
+        b.ensureCapacity(9);
+        IntBuffer buffer = b.getBuffer();
+        buffer.put(getBufferOffset());
+        buffer.put(getUvBufferOffset());
+        buffer.put(getBufferLen() / 3);
+        buffer.put(modelBuffers.getTargetBufferOffset());
+        buffer.put(FLAG_SCENE_BUFFER);
+        buffer.put(x).put(y).put(z);
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 1));
+
+        modelBuffers.addTargetBufferOffset(getBufferLen());
+    }
+
+    @Override
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
+        throw new NotImplementedException("tile models do not draw dynamic");
+    }
 
     static {
         field1615 = new int[6];
@@ -274,125 +304,5 @@ public class TileModelImpl implements TileModel {
 
         var33 /= 14;
         var34 /= 14;
-    }
-
-    @Override
-    public int getModelUnderlay() {
-        return underlayRgb;
-    }
-
-    @Override
-    public int getModelOverlay() {
-        return overlayRgb;
-    }
-
-    @Override
-    public int getBufferOffset() {
-        return bufferOffset;
-    }
-
-    @Override
-    public void setBufferOffset(int bufferOffset) {
-        this.bufferOffset = bufferOffset;
-    }
-
-    @Override
-    public int getUvBufferOffset() {
-        return uvBufferOffset;
-    }
-
-    @Override
-    public void setUvBufferOffset(int bufferOffset) {
-        this.uvBufferOffset = bufferOffset;
-    }
-
-    @Override
-    public int getBufferLen() {
-        return bufferLen;
-    }
-
-    @Override
-    public void setBufferLen(int bufferLen) {
-        this.bufferLen = bufferLen;
-    }
-
-    @Override
-    public int getUnderlaySwColor() {
-        return 0;
-    }
-
-    @Override
-    public void setUnderlaySwColor(int color) {
-
-    }
-
-    @Override
-    public int getUnderlaySeColor() {
-        return 0;
-    }
-
-    @Override
-    public void setUnderlaySeColor(int color) {
-
-    }
-
-    @Override
-    public int getUnderlayNeColor() {
-        return 0;
-    }
-
-    @Override
-    public void setUnderlayNeColor(int color) {
-
-    }
-
-    @Override
-    public int getUnderlayNwColor() {
-        return 0;
-    }
-
-    @Override
-    public void setUnderlayNwColor(int color) {
-
-    }
-
-    @Override
-    public int getOverlaySwColor() {
-        return 0;
-    }
-
-    @Override
-    public void setOverlaySwColor(int color) {
-
-    }
-
-    @Override
-    public int getOverlaySeColor() {
-        return 0;
-    }
-
-    @Override
-    public void setOverlaySeColor(int color) {
-
-    }
-
-    @Override
-    public int getOverlayNeColor() {
-        return 0;
-    }
-
-    @Override
-    public void setOverlayNeColor(int color) {
-
-    }
-
-    @Override
-    public int getOverlayNwColor() {
-        return 0;
-    }
-
-    @Override
-    public void setOverlayNwColor(int color) {
-
     }
 }

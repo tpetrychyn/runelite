@@ -2,16 +2,18 @@ package models;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Perspective;
 import net.runelite.api.TilePaint;
+import org.apache.commons.lang3.NotImplementedException;
+import renderer.SceneUploader;
+import renderer.helpers.GpuIntBuffer;
+import renderer.helpers.ModelBuffers;
+
+import java.nio.IntBuffer;
 
 @Getter
 @Setter
-public class TilePaintImpl implements TilePaint {
-    private int bufferOffset = -1;
-    private int uvBufferOffset = -1;
-    private int targetBufferOffset = -1;
-    private int bufferLen;
-
+public class TilePaintImpl extends Renderable {
     private boolean isFlat;
     private int swHeight;
     private int seHeight;
@@ -36,38 +38,30 @@ public class TilePaintImpl implements TilePaint {
         this.isFlat = isFlat;
     }
 
-    @Override
-    public int getRBG() {
-        return rgb;
+    public void draw(ModelBuffers modelBuffers, int sceneX, int sceneY) {
+        int x = sceneX * Perspective.LOCAL_TILE_SIZE;
+        int y = 0;
+        int z = sceneY * Perspective.LOCAL_TILE_SIZE;
+
+        GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
+        modelBuffers.incUnorderedModels();
+
+        b.ensureCapacity(9);
+        IntBuffer buffer = b.getBuffer();
+        buffer.put(getBufferOffset());
+        buffer.put(getUvBufferOffset());
+        buffer.put(2);
+        buffer.put(modelBuffers.getTargetBufferOffset());
+        buffer.put(ModelBuffers.FLAG_SCENE_BUFFER);
+        buffer.put(x).put(y).put(z);
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 0));
+
+        setSceneBufferOffset(modelBuffers.getTargetBufferOffset());
+        modelBuffers.addTargetBufferOffset(2 * 3);
     }
 
     @Override
-    public int getBufferOffset() {
-        return bufferOffset;
-    }
-
-    @Override
-    public void setBufferOffset(int bufferOffset) {
-        this.bufferOffset = bufferOffset;
-    }
-
-    @Override
-    public int getUvBufferOffset() {
-        return uvBufferOffset;
-    }
-
-    @Override
-    public void setUvBufferOffset(int bufferOffset) {
-        this.uvBufferOffset = bufferOffset;
-    }
-
-    @Override
-    public int getBufferLen() {
-        return bufferLen;
-    }
-
-    @Override
-    public void setBufferLen(int bufferLen) {
-        this.bufferLen = bufferLen;
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
+        throw new NotImplementedException("tile paints do not have dynamic draws");
     }
 }

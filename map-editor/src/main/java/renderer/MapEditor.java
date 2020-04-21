@@ -13,16 +13,14 @@ import layoutControllers.MinimapController;
 import lombok.extern.slf4j.Slf4j;
 import models.*;
 import models.DynamicObject;
+import models.Renderable;
 import net.runelite.api.*;
 import net.runelite.cache.SpriteManager;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.fs.StoreProvider;
 import net.runelite.cache.item.RSTextureProvider;
 import org.joml.Matrix4f;
-import renderer.helpers.AntiAliasingMode;
-import renderer.helpers.GLUtil;
-import renderer.helpers.GpuFloatBuffer;
-import renderer.helpers.GpuIntBuffer;
+import renderer.helpers.*;
 import scene.Scene;
 import scene.SceneRegionBuilder;
 import scene.SceneTile;
@@ -40,9 +38,6 @@ public class MapEditor implements GLEventListener {
 
     // This is the maximum number of triangles the compute shaders support
     private static final int MAX_TEMP_VERTICES = 65535;
-    private static final int MAX_TRIANGLE = 4096;
-    private static final int SMALL_TRIANGLE_COUNT = 512;
-    private static final int FLAG_SCENE_BUFFER = Integer.MIN_VALUE;
     static final int MAX_DISTANCE = 1000;
 
     private InputHandler inputHandler;
@@ -92,39 +87,7 @@ public class MapEditor implements GLEventListener {
     private final IntBuffer uniformBuffer = GpuIntBuffer.allocateDirect(5 + 3);
     private final float[] textureOffsets = new float[128];
 
-    private GpuIntBuffer vertexBuffer;
-    private GpuFloatBuffer uvBuffer;
-
-    private GpuIntBuffer modelBufferUnordered;
-    private GpuIntBuffer modelBufferSmall;
-    private GpuIntBuffer modelBuffer;
-
-    private int unorderedModels;
-
-    /**
-     * number of models in small buffer
-     */
-    private int smallModels;
-
-    /**
-     * number of models in large buffer
-     */
-    private int largeModels;
-
-    /**
-     * offset in the target buffer for model
-     */
-    private int targetBufferOffset;
-
-    /**
-     * offset into the temporary scene vertex buffer
-     */
-    private int tempOffset;
-
-    /**
-     * offset into the temporary scene uv buffer
-     */
-    private int tempUvOffset;
+    private ModelBuffers modelBuffers;
 
     private int lastViewportWidth;
     private int lastViewportHeight;
@@ -133,7 +96,6 @@ public class MapEditor implements GLEventListener {
     private int lastStretchedCanvasWidth;
     private int lastStretchedCanvasHeight;
     private AntiAliasingMode lastAntiAliasingMode;
-
 
     private final Camera camera = new Camera();
 
@@ -183,15 +145,9 @@ public class MapEditor implements GLEventListener {
         }
 
         bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId = -1;
-        unorderedModels = smallModels = largeModels = 0;
         colorPickerBufferId = -1;
 
-        vertexBuffer = new GpuIntBuffer();
-        uvBuffer = new GpuFloatBuffer();
-
-        modelBufferUnordered = new GpuIntBuffer();
-        modelBufferSmall = new GpuIntBuffer();
-        modelBuffer = new GpuIntBuffer();
+        modelBuffers = new ModelBuffers();
 
         GLProfile.initSingleton();
 
@@ -305,11 +261,8 @@ public class MapEditor implements GLEventListener {
     }
 
     void drawTiles() {
-        modelBuffer.clear();
-        modelBufferSmall.clear();
-        modelBufferUnordered.clear();
-        smallModels = largeModels = unorderedModels = 0;
-        targetBufferOffset = 0;
+        modelBuffers.clear();
+        modelBuffers.setTargetBufferOffset(0);
         for (int x = 0; x < scene.getRadius() * Constants.REGION_SIZE; x++) {
             for (int y = 0; y < scene.getRadius() * Constants.REGION_SIZE; y++) {
                 SceneTile tile = scene.getTile(0, x, y);
@@ -321,13 +274,13 @@ public class MapEditor implements GLEventListener {
 
         // allocate enough size in the outputBuffer for the static verts + the dynamic verts -- each vertex is an ivec4, 4 ints
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutBufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, (targetBufferOffset + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT * 4, null, gl.GL_DYNAMIC_DRAW);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (modelBuffers.getTargetBufferOffset() + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT * 4, null, gl.GL_DYNAMIC_DRAW);
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutUvBufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, (targetBufferOffset + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_FLOAT * 4, null, gl.GL_DYNAMIC_DRAW);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (modelBuffers.getTargetBufferOffset() + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_FLOAT * 4, null, gl.GL_DYNAMIC_DRAW);
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER, (targetBufferOffset + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (modelBuffers.getTargetBufferOffset() + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
     }
 
     void checkHover() {
@@ -378,253 +331,149 @@ public class MapEditor implements GLEventListener {
         camera.setDebugText(debugText);
     }
 
-    private int calcPickerId(int x, int y, int type) {
-        // pack x tile in top 14 bits, y in next 14, objectId in bottom 4
-        // NOTE: signed int so x can really only use 13 bits!!
-        return ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | type & 0xF;
-    }
-
     void drawTile(SceneTile tile) {
         int x = tile.getX();
         int y = tile.getY();
 
         if (tile.getTilePaint() != null) {
-            drawScenePaint(tile.getTilePaint(), x, y);
+            tile.getTilePaint().draw(modelBuffers, x, y);
         }
 
         if (tile.getTileModel() != null) {
-            drawSceneModel(tile.getTileModel(), x, y);
+            tile.getTileModel().draw(modelBuffers, x, y);
         }
 
         FloorDecoration f = tile.getFloorDecoration();
         if (f != null) {
-            drawSceneRenderable(f.getModel(), 0, f.getHeight(), x, y, calcPickerId(x, y, 2));
+            f.draw(modelBuffers, x, y);
         }
 
         WallDecoration w = tile.getWallDecoration();
         if (w != null) {
             if (w.getEntityA() instanceof StaticObject) {
-                drawSceneRenderable(w.getEntityA().getModel(), w.getOrientationA(), w.getHeight(), x, y, calcPickerId(x, y, 3));
+                w.draw(modelBuffers, x, y);
             } else if (w.getEntityA() instanceof DynamicObject) {
-                w.setX(x);
-                w.setY(y);
+                w.setSceneX(x);
+                w.setSceneY(y);
                 dynamicDecorations.add(w);
             }
         }
     }
 
-    private final List<WallDecoration> dynamicDecorations = new ArrayList<>();
+    private final List<Renderable> dynamicDecorations = new ArrayList<>();
 
     private void drawDynamic() {
-        if (hoverTile != null && hoverType != -1) {
-            if (hoverType == 0 && hoverTile.getTilePaint() != null) {
-                TilePaintImpl paint = hoverTile.getTilePaint();
-                paint.setNeColor(1111);
-                paint.setNwColor(1111);
-                paint.setSeColor(1111);
-                paint.setSwColor(1111);
-                drawSceneTemporary(paint, hoverTile.getX(), hoverTile.getY());
-            }
-            if (hoverType == 2 && hoverTile.getFloorDecoration() != null) {
-                FloorDecoration floorDecoration = hoverTile.getFloorDecoration();
-                drawTemporaryFloorDecoration(floorDecoration, floorDecoration.getX(), floorDecoration.getY());
-            }
-        }
-        for (WallDecoration w : dynamicDecorations) {
-            drawSceneRenderable(w.getEntityA().getModel(), w.getOrientationA(), w.getHeight(), w.getX(), w.getY(), calcPickerId(w.getX(), w.getY(), 3));
+//        if (hoverTile != null && hoverType != -1) {
+//            if (hoverType == 0 && hoverTile.getTilePaint() != null) {
+//                TilePaintImpl paint = hoverTile.getTilePaint();
+//                paint.setNeColor(1111);
+//                paint.setNwColor(1111);
+//                paint.setSeColor(1111);
+//                paint.setSwColor(1111);
+//                drawSceneTemporary(paint, hoverTile.getX(), hoverTile.getY());
+//            }
+//            if (hoverType == 2 && hoverTile.getFloorDecoration() != null) {
+//                FloorDecoration floorDecoration = hoverTile.getFloorDecoration();
+//                drawTemporaryFloorDecoration(floorDecoration, floorDecoration.getX(), floorDecoration.getY());
+//            }
+//        }
+        for (Renderable r : dynamicDecorations) {
+            r.drawDynamic(modelBuffers, sceneUploader);
         }
     }
 
     SceneTile hoverTile;
     private int hoverType = -1;
 
-    private void drawSceneRenderable(Model model, int orientation, int height, int tileX, int tileY, int pickerId) {
-        // draw in the middle of the tile otherwise camera clipping
-        int x = tileX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
-        int z = tileY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
+//    void drawTemporaryFloorDecoration(FloorDecoration fd, int tileX, int tileY) {
+//        int x = tileX;// * Perspective.LOCAL_TILE_SIZE;
+//        int y = 0;
+//        int z = tileY;// * Perspective.LOCAL_TILE_SIZE;
+//
+//        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
+////        sceneUploader.upload(fd, vertexBuffer, uvBuffer);
+//
+//        Model model = fd.getModel();
+//        if (model != null) {
+//            int[] fc1 = new int[model.getFaceColors1().length];
+//            Arrays.fill(fc1, 1111);
+//            model.setFaceColors1(fc1);
+//            int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
+//            vertexBuffer.ensureCapacity(12 * faces);
+//            uvBuffer.ensureCapacity(12 * faces);
+//            int len = 0;
+//            for (int i = 0; i < faces; ++i) {
+//                len += sceneUploader.pushFace(model, i, vertexBuffer, uvBuffer);
+//            }
+//            GpuIntBuffer b = bufferForTriangles(faces);
+//
+//            b.ensureCapacity(9);
+//            IntBuffer buffer = b.getBuffer();
+//            buffer.put(tempOffset);
+//            buffer.put(-1);
+//            buffer.put(len / 3);
+//            buffer.put(targetBufferOffset + tempOffset);
+//            buffer.put((model.getRadius() << 12) | 0);
+//            buffer.put(x).put(fd.getHeight()).put(z);
+//            buffer.put(-1);
+//
+//            tempOffset += len;
+//        }
+//    }
 
-        if (model != null && model.getSceneId() == sceneUploader.sceneId) {
-//            model.calculateBoundsCylinder();
-//            model.calculateExtreme(orientation);
+//    void drawSceneTemporary(TilePaintImpl tile, int tileX, int tileY) {
+//        int x = tileX * Perspective.LOCAL_TILE_SIZE;
+//        int y = 0;
+//        int z = tileY * Perspective.LOCAL_TILE_SIZE;
+//
+//        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
+//        int len = sceneUploader.upload(tile, vertexBuffer, uvBuffer);
+//
+//        GpuIntBuffer b = modelBufferUnordered;
+//        ++unorderedModels;
+//
+//        b.ensureCapacity(9);
+//        IntBuffer buffer = b.getBuffer();
+//        buffer.put(tempOffset);
+//        buffer.put(-1);
+//        buffer.put(2);
+//        buffer.put(targetBufferOffset + tempOffset);
+//        buffer.put(0);
+//        buffer.put(x).put(y).put(z);
+//        buffer.put(-1);
+//
+//        tempOffset += len;
+//    }
 
-            int tc = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
-            int uvOffset = model.getUvBufferOffset();
-
-            GpuIntBuffer b = bufferForTriangles(tc);
-
-            b.ensureCapacity(9);
-            IntBuffer buffer = b.getBuffer();
-            buffer.put(model.getBufferOffset());
-            buffer.put(uvOffset);
-            buffer.put(tc);
-            buffer.put(targetBufferOffset);
-            buffer.put(FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientation);
-            buffer.put(x).put(height).put(z);
-            buffer.put(pickerId);
-
-            targetBufferOffset += tc * 3;
-        } else {
-            if (model != null) {
-                int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
-                vertexBuffer.ensureCapacity(12 * faces);
-                uvBuffer.ensureCapacity(12 * faces);
-                int len = 0;
-                for (int i = 0; i < faces; ++i) {
-                    len += sceneUploader.pushFace(model, i, vertexBuffer, uvBuffer);
-                }
-                GpuIntBuffer b = bufferForTriangles(faces);
-
-                b.ensureCapacity(9);
-                IntBuffer buffer = b.getBuffer();
-                buffer.put(tempOffset);
-                buffer.put(-1);
-                buffer.put(len / 3);
-                buffer.put(targetBufferOffset + tempOffset);
-                buffer.put((model.getRadius() << 12) | orientation);
-                buffer.put(x).put(height).put(z);
-                buffer.put(pickerId);
-
-                tempOffset += len;
-            }
-        }
-    }
-
-    void drawTemporaryFloorDecoration(FloorDecoration fd, int tileX, int tileY) {
-        int x = tileX;// * Perspective.LOCAL_TILE_SIZE;
-        int y = 0;
-        int z = tileY;// * Perspective.LOCAL_TILE_SIZE;
-
-        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
-//        sceneUploader.upload(fd, vertexBuffer, uvBuffer);
-
-        Model model = fd.getModel();
-        if (model != null) {
-            int[] fc1 = new int[model.getFaceColors1().length];
-            Arrays.fill(fc1, 1111);
-            model.setFaceColors1(fc1);
-            int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
-            vertexBuffer.ensureCapacity(12 * faces);
-            uvBuffer.ensureCapacity(12 * faces);
-            int len = 0;
-            for (int i = 0; i < faces; ++i) {
-                len += sceneUploader.pushFace(model, i, vertexBuffer, uvBuffer);
-            }
-            GpuIntBuffer b = bufferForTriangles(faces);
-
-            b.ensureCapacity(9);
-            IntBuffer buffer = b.getBuffer();
-            buffer.put(tempOffset);
-            buffer.put(-1);
-            buffer.put(len / 3);
-            buffer.put(targetBufferOffset + tempOffset);
-            buffer.put((model.getRadius() << 12) | 0);
-            buffer.put(x).put(fd.getHeight()).put(z);
-            buffer.put(-1);
-
-            tempOffset += len;
-        }
-    }
-
-    private void drawScenePaint(TilePaintImpl tilePaint, int tileX, int tileY) {
-        if (tilePaint.getBufferLen() > 0) {
-            int x = tileX * Perspective.LOCAL_TILE_SIZE;
-            int y = 0;
-            int z = tileY * Perspective.LOCAL_TILE_SIZE;
-
-            GpuIntBuffer b = modelBufferUnordered;
-            ++unorderedModels;
-
-            b.ensureCapacity(9);
-            IntBuffer buffer = b.getBuffer();
-            buffer.put(tilePaint.getBufferOffset());
-            buffer.put(tilePaint.getUvBufferOffset());
-            buffer.put(2);
-            buffer.put(targetBufferOffset);
-            buffer.put(FLAG_SCENE_BUFFER);
-            buffer.put(x).put(y).put(z);
-            buffer.put(calcPickerId(tileX, tileY, 0));
-
-            tilePaint.setTargetBufferOffset(targetBufferOffset);
-            targetBufferOffset += 2 * 3;
-        }
-    }
-
-    public void drawSceneModel(TileModel model, int tileX, int tileY) {
-        if (model.getBufferLen() > 0) {
-            int x = tileX * Perspective.LOCAL_TILE_SIZE;
-            int y = 0;
-            int z = tileY * Perspective.LOCAL_TILE_SIZE;
-
-            GpuIntBuffer b = modelBufferUnordered;
-            ++unorderedModels;
-
-            b.ensureCapacity(9);
-            IntBuffer buffer = b.getBuffer();
-            buffer.put(model.getBufferOffset());
-            buffer.put(model.getUvBufferOffset());
-            buffer.put(model.getBufferLen() / 3);
-            buffer.put(targetBufferOffset);
-            buffer.put(FLAG_SCENE_BUFFER);
-            buffer.put(x).put(y).put(z);
-            buffer.put(calcPickerId(tileX, tileY, 1));
-
-            targetBufferOffset += model.getBufferLen();
-        }
-    }
-
-    void drawSceneTemporary(TilePaint tile, int tileX, int tileY) {
-        int x = tileX * Perspective.LOCAL_TILE_SIZE;
-        int y = 0;
-        int z = tileY * Perspective.LOCAL_TILE_SIZE;
-
-        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
-        int len = sceneUploader.upload(tile, vertexBuffer, uvBuffer);
-
-        GpuIntBuffer b = modelBufferUnordered;
-        ++unorderedModels;
-
-        b.ensureCapacity(9);
-        IntBuffer buffer = b.getBuffer();
-        buffer.put(tempOffset);
-        buffer.put(-1);
-        buffer.put(2);
-        buffer.put(targetBufferOffset + tempOffset);
-        buffer.put(0);
-        buffer.put(x).put(y).put(z);
-        buffer.put(-1);
-
-        tempOffset += len;
-    }
-
-    void updateTile(SceneTile tile) {
-        GpuIntBuffer modifyBuffer = new GpuIntBuffer();
-        GpuFloatBuffer modifyUvBuffer = new GpuFloatBuffer();
-        sceneUploader.upload(tile.getTilePaint(), modifyBuffer, modifyUvBuffer);
-        modifyBuffer.flip();
-
-        // modify the persistent vertex buffer on the GPU
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
-//         tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4 ---- offset is 6 writes, 4 ints each
-        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4, modifyBuffer.getBuffer().limit(), modifyBuffer.getBuffer());
-        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
-
-        int x = tile.getX() * Perspective.LOCAL_TILE_SIZE;
-        int y = 0;
-        int z = tile.getY() * Perspective.LOCAL_TILE_SIZE;
-
-        GpuIntBuffer b = modelBufferUnordered;
-        ++unorderedModels;
-
-        b.ensureCapacity(9);
-        IntBuffer buffer = b.getBuffer();
-        buffer.put(tile.getTilePaint().getBufferOffset());
-        buffer.put(tile.getTilePaint().getUvBufferOffset());
-        buffer.put(2);
-        buffer.put(tile.getTilePaint().getTargetBufferOffset());
-        buffer.put(FLAG_SCENE_BUFFER);
-        buffer.put(x).put(y).put(z);
-        buffer.put(calcPickerId(tile.getX(), tile.getY(), 0));
-    }
+//    void updateTile(SceneTile tile) {
+//        GpuIntBuffer modifyBuffer = new GpuIntBuffer();
+//        GpuFloatBuffer modifyUvBuffer = new GpuFloatBuffer();
+//        sceneUploader.upload(tile.getTilePaint(), modifyBuffer, modifyUvBuffer);
+//        modifyBuffer.flip();
+//
+//        // modify the persistent vertex buffer on the GPU
+//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
+////         tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4 ---- offset is 6 writes, 4 ints each
+//        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4, modifyBuffer.getBuffer().limit(), modifyBuffer.getBuffer());
+//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
+//
+//        int x = tile.getX() * Perspective.LOCAL_TILE_SIZE;
+//        int y = 0;
+//        int z = tile.getY() * Perspective.LOCAL_TILE_SIZE;
+//
+//        GpuIntBuffer b = modelBufferUnordered;
+//        ++unorderedModels;
+//
+//        b.ensureCapacity(9);
+//        IntBuffer buffer = b.getBuffer();
+//        buffer.put(tile.getTilePaint().getBufferOffset());
+//        buffer.put(tile.getTilePaint().getUvBufferOffset());
+//        buffer.put(2);
+//        buffer.put(tile.getTilePaint().getTargetBufferOffset());
+//        buffer.put(FLAG_SCENE_BUFFER);
+//        buffer.put(x).put(y).put(z);
+//        buffer.put(calcPickerId(tile.getX(), tile.getY(), 0));
+//    }
 
     @Override
     public void display(GLAutoDrawable drawable) {
@@ -633,7 +482,7 @@ public class MapEditor implements GLEventListener {
         }
 
         checkHover();
-        handleClick();
+//        handleClick();
 
         drawDynamic();
 
@@ -681,17 +530,14 @@ public class MapEditor implements GLEventListener {
         gl.glClearColor((sky >> 16 & 0xFF) / 255f, (sky >> 8 & 0xFF) / 255f, (sky & 0xFF) / 255f, 1f);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT);
 
-        vertexBuffer.flip();
-        uvBuffer.flip();
-        modelBuffer.flip();
-        modelBufferSmall.flip();
-        modelBufferUnordered.flip();
+        modelBuffers.flip();
+        modelBuffers.flipVertUv();
 
-        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
-        FloatBuffer uvBuffer = this.uvBuffer.getBuffer();
-        IntBuffer modelBuffer = this.modelBuffer.getBuffer();
-        IntBuffer modelBufferSmall = this.modelBufferSmall.getBuffer();
-        IntBuffer modelBufferUnordered = this.modelBufferUnordered.getBuffer();
+        IntBuffer vertexBuffer = modelBuffers.getVertexBuffer().getBuffer();
+        FloatBuffer uvBuffer = modelBuffers.getUvBuffer().getBuffer();
+        IntBuffer modelBuffer = modelBuffers.getModelBuffer().getBuffer();
+        IntBuffer modelBufferSmall = modelBuffers.getModelBufferSmall().getBuffer();
+        IntBuffer modelBufferUnordered = modelBuffers.getModelBufferUnordered().getBuffer();
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpBufferId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * Integer.BYTES, vertexBuffer, gl.GL_DYNAMIC_DRAW);
@@ -750,7 +596,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
 
-            gl.glDispatchCompute(unorderedModels, 1, 1);
+            gl.glDispatchCompute(modelBuffers.getUnorderedModels(), 1, 1);
 
             // small
             gl.glUseProgram(glSmallComputeProgram);
@@ -764,7 +610,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
 
-            gl.glDispatchCompute(smallModels, 1, 1);
+            gl.glDispatchCompute(modelBuffers.getSmallModels(), 1, 1);
 
             // large
             gl.glUseProgram(glComputeProgram);
@@ -778,7 +624,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
 
-            gl.glDispatchCompute(largeModels, 1, 1);
+            gl.glDispatchCompute(modelBuffers.getLargeModels(), 1, 1);
 
             gl.glMemoryBarrier(gl.GL_SHADER_STORAGE_BARRIER_BIT);
 
@@ -841,7 +687,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
             gl.glVertexAttribIPointer(2, 1, gl.GL_INT, 0, 0);
 
-            gl.glDrawArrays(gl.GL_TRIANGLES, 0, targetBufferOffset + tempOffset);
+            gl.glDrawArrays(gl.GL_TRIANGLES, 0, modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
 
             gl.glDisable(gl.GL_BLEND);
             gl.glDisable(gl.GL_CULL_FACE);
@@ -875,15 +721,14 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
 
+//        modelBuffers.clearVertUv();
+//        modelBuffers.clear();
+
         vertexBuffer.clear();
         uvBuffer.clear();
         modelBuffer.clear();
         modelBufferSmall.clear();
         modelBufferUnordered.clear();
-
-        smallModels = largeModels = unorderedModels = 0;
-        tempOffset = 0;
-        tempUvOffset = 0;
 
 //        minimapController.drawCanvas(scene);
     }
@@ -903,16 +748,14 @@ public class MapEditor implements GLEventListener {
 
     private void uploadScene() {
         sceneChangeRequested = false;
-        vertexBuffer.clear();
-        uvBuffer.clear();
+        modelBuffers.clearVertUv();
 
-        sceneUploader.upload(scene, vertexBuffer, uvBuffer);
+        sceneUploader.upload(scene, modelBuffers.getVertexBuffer(), modelBuffers.getUvBuffer());
 
-        vertexBuffer.flip();
-        uvBuffer.flip();
+        modelBuffers.flipVertUv();
 
-        IntBuffer vertexBuffer = this.vertexBuffer.getBuffer();
-        FloatBuffer uvBuffer = this.uvBuffer.getBuffer();
+        IntBuffer vertexBuffer = modelBuffers.getVertexBuffer().getBuffer();
+        FloatBuffer uvBuffer = modelBuffers.getUvBuffer().getBuffer();
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, vertexBuffer.limit() * GLBuffers.SIZEOF_INT, vertexBuffer, gl.GL_STATIC_COPY);
@@ -1092,16 +935,6 @@ public class MapEditor implements GLEventListener {
         gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0);
     }
 
-    private GpuIntBuffer bufferForTriangles(int triangles) {
-        if (triangles < SMALL_TRIANGLE_COUNT) {
-            ++smallModels;
-            return modelBufferSmall;
-        } else {
-            ++largeModels;
-            return modelBuffer;
-        }
-    }
-
     private void shutdownBuffers() {
         if (bufferId != -1) {
             glDeleteBuffer(gl, bufferId);
@@ -1149,47 +982,47 @@ public class MapEditor implements GLEventListener {
         }
     }
 
-    void handleClick() {
-        if (hoverTile == null) {
-            return;
-        }
-        if (inputHandler.isMouseClicked()) {
-            int x = hoverTile.getX();
-            int y = hoverTile.getY();
-            SceneTile north = scene.getTile(0, x, y + 1);
-            SceneTile east = scene.getTile(0, x + 1, y);
-            SceneTile northEast = scene.getTile(0, x + 1, y + 1);
-
-            SceneTile tile = scene.getTile(0, x, y);
-            int newHeight = tile.getTilePaint().getNeHeight() + 10;
-
-            if (north != null && north.getTilePaint() != null) {
-                TilePaintImpl tp = north.getTilePaint();
-                tp.setSeHeight(newHeight);
-                north.setHeight(newHeight);
-                updateTile(north);
-            }
-            if (east != null && east.getTilePaint() != null) {
-                TilePaintImpl tp = east.getTilePaint();
-                tp.setNwHeight(newHeight);
-                east.setHeight(newHeight);
-                updateTile(east);
-            }
-
-            if (northEast != null && northEast.getTilePaint() != null) {
-                TilePaintImpl tp = northEast.getTilePaint();
-                tp.setSwHeight(newHeight);
-                northEast.setHeight(newHeight);
-                updateTile(northEast);
-            }
-
-            tile.setHeight(newHeight);
-            tile.getTilePaint().setNeHeight(newHeight);
-
-            updateTile(tile);
-
-            System.out.printf("clicked tile %d %d\n", x, y);
-            inputHandler.mouseClicked = false;
-        }
-    }
+//    void handleClick() {
+//        if (hoverTile == null) {
+//            return;
+//        }
+//        if (inputHandler.isMouseClicked()) {
+//            int x = hoverTile.getX();
+//            int y = hoverTile.getY();
+//            SceneTile north = scene.getTile(0, x, y + 1);
+//            SceneTile east = scene.getTile(0, x + 1, y);
+//            SceneTile northEast = scene.getTile(0, x + 1, y + 1);
+//
+//            SceneTile tile = scene.getTile(0, x, y);
+//            int newHeight = tile.getTilePaint().getNeHeight() + 10;
+//
+//            if (north != null && north.getTilePaint() != null) {
+//                TilePaintImpl tp = north.getTilePaint();
+//                tp.setSeHeight(newHeight);
+//                north.setHeight(newHeight);
+//                updateTile(north);
+//            }
+//            if (east != null && east.getTilePaint() != null) {
+//                TilePaintImpl tp = east.getTilePaint();
+//                tp.setNwHeight(newHeight);
+//                east.setHeight(newHeight);
+//                updateTile(east);
+//            }
+//
+//            if (northEast != null && northEast.getTilePaint() != null) {
+//                TilePaintImpl tp = northEast.getTilePaint();
+//                tp.setSwHeight(newHeight);
+//                northEast.setHeight(newHeight);
+//                updateTile(northEast);
+//            }
+//
+//            tile.setHeight(newHeight);
+//            tile.getTilePaint().setNeHeight(newHeight);
+//
+//            updateTile(tile);
+//
+//            System.out.printf("clicked tile %d %d\n", x, y);
+//            inputHandler.mouseClicked = false;
+//        }
+//    }
 }

@@ -1,6 +1,7 @@
 package models;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.Entity;
 import net.runelite.api.Model;
 import net.runelite.api.Node;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
+@Setter
 public class DynamicObject implements Entity {
     private int id;
     private int type;
