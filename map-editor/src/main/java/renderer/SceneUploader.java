@@ -229,13 +229,6 @@ public class SceneUploader {
 //		}
     }
 
-    public void upload(Renderable renderable, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
-        if (renderable instanceof FloorDecoration) {
-            FloorDecoration fd = (FloorDecoration) renderable;
-            int len = uploadModel(fd.getModel(), vertexBuffer, uvBuffer);
-        }
-    }
-
     public int upload(TilePaintImpl tile, GpuIntBuffer vertexBuffer, GpuFloatBuffer uvBuffer) {
         int swHeight = tile.getSwHeight();
         int seHeight = tile.getSeHeight();

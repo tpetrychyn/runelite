@@ -107,9 +107,9 @@ public class ModelBuffers {
      */
     private int tempUvOffset;
 
-    public int calcPickerId(int x, int y, int type) {
+    public int calcPickerId(int x, int y, int objType) {
         // pack x tile in top 14 bits, y in next 14, objectId in bottom 4
         // NOTE: signed int so x can really only use 13 bits!!
-        return ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | type & 0xF;
+        return ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | objType & 0xF;
     }
 }

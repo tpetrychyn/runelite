@@ -8,6 +8,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import renderer.SceneUploader;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
+import renderer.helpers.PickerType;
 
 import java.nio.IntBuffer;
 
@@ -61,7 +62,7 @@ public class TileModelImpl extends Renderable {
     }
 
     @Override
-    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType) {
         throw new NotImplementedException("tile models do not draw dynamic");
     }
 

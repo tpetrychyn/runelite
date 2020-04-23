@@ -9,6 +9,7 @@ import net.runelite.api.Perspective;
 import renderer.SceneUploader;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
+import renderer.helpers.PickerType;
 
 import java.nio.IntBuffer;
 
@@ -55,7 +56,7 @@ public class WallDecoration extends Renderable {
         modelBuffers.addTargetBufferOffset(tc * 3);
     }
 
-    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType) {
         Model model = entityA.getModel();
         if (model == null) {
             return;
@@ -80,7 +81,11 @@ public class WallDecoration extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
         buffer.put((model.getRadius() << 12) | getOrientationA());
         buffer.put(x).put(height).put(y);
-        buffer.put(modelBuffers.calcPickerId(getSceneX(), getSceneY(), 3));
+        if (pickerType == PickerType.PICKABLE) {
+            buffer.put(modelBuffers.calcPickerId(getSceneX(), getSceneY(), 3));
+        } else {
+            buffer.put(pickerType.getValue());
+        }
 
         modelBuffers.addTempOffset(len);
     }

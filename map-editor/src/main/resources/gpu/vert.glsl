@@ -52,6 +52,9 @@ uniform int useFog;
 uniform int fogDepth;
 uniform int drawDistance;
 
+uniform int hoverId;
+uniform int selectedIds[255];
+
 out ivec3 vPosition;
 out vec4 vColor;
 out float vHsl;
@@ -97,4 +100,17 @@ void main()
     vFogAmount = fogFactorLinear(fogDistance, 0, fogDepth * TILE_SIZE) * useFog;
 
     o_pickerId = pickerId;
+
+    if (hoverId == pickerId) {
+        vColor.a = 0.8;
+        vHsl = 11111;
+    }
+
+    for (int i=0;i<255;i++) {
+        if (selectedIds[i] == pickerId) {
+            vColor.a = 0.8;
+            vHsl = 22222;
+            break;
+        }
+    }
 }

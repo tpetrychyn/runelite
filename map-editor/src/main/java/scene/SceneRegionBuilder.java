@@ -52,7 +52,7 @@ public class SceneRegionBuilder {
 
     // worldCoords to regionId
     // int regionId = (x >>> 6 << 8) | y >>> 6;
-    public SceneRegion loadRegion(int regionId) {
+    public SceneRegion loadRegion(int regionId, boolean isAnimationEnabled) {
         Region region = regionLoader.getRegion(regionId);
         if (region == null) {
             return null;
@@ -97,7 +97,7 @@ public class SceneRegionBuilder {
                 }
             }
 
-            for (int xi = -blend*2; xi < Constants.REGION_SIZE + blend*2; ++xi) {
+            for (int xi = -blend * 2; xi < Constants.REGION_SIZE + blend * 2; ++xi) {
                 for (int yi = -blend; yi < Constants.REGION_SIZE + blend; ++yi) {
                     int xr = xi + 5;
                     if (xr >= -blend && xr < Constants.REGION_SIZE + blend) {
@@ -264,6 +264,9 @@ public class SceneRegionBuilder {
         sceneRegion.getLocations().forEach(loc -> {
             ObjectDefinition objectDefinition = objectManager.getObject(loc.getId());
             ModelDefinition modelDefinition = objectDefinition.getModel(loc.getType(), loc.getOrientation());
+            if (modelDefinition == null) {
+                return;
+            }
 
             int z = loc.getPosition().getZ();
             int x = loc.getPosition().getX();
@@ -279,20 +282,18 @@ public class SceneRegionBuilder {
             int height = swHeight + seHeight + neHeight + nwHeight >> 2;
 
             if (loc.getType() == LocationType.FLOOR_DECORATION.getValue()) {
-                if (modelDefinition != null) {
-                    StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
 
-                    if (objectDefinition.getContouredGround() >= 0) {
+                if (objectDefinition.getContouredGround() >= 0) {
 //                               model = model.contourGround(mapLoader, xSize, height, ySize, true, objectDefinition.getContouredGround(), worldX, worldY);
-                    }
-
-                    sceneRegion.newFloorDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, 0, 0);
                 }
+
+                sceneRegion.newFloorDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, 0, 0);
             }
 
             if (loc.getType() == LocationType.INTERACTABLE_WALL_DECORATION.getValue()) {
                 Entity entity;
-                if (objectDefinition.getAnimationID() == -1 && modelDefinition != null) {
+                if (objectDefinition.getAnimationID() == -1 || !isAnimationEnabled) {
                     entity = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
                 } else if (objectDefinition.getAnimationID() > 0) {
                     entity = new DynamicObject(objectManager, loc.getId(), loc.getType(), loc.getOrientation(), height, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, objectDefinition.getAnimationID(), true, null);
@@ -302,23 +303,22 @@ public class SceneRegionBuilder {
 
                 int[] orientationTransform = {1, 2, 4, 8};
                 sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, entity, null, orientationTransform[loc.getOrientation()], 0, 0, 0);
+            } else {
+                Entity entity;
+                if (objectDefinition.getAnimationID() == -1 || !isAnimationEnabled) {
+                    entity = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+                } else if (objectDefinition.getAnimationID() > 0) {
+                    entity = new DynamicObject(objectManager, loc.getId(), loc.getType(), loc.getOrientation(), height, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, objectDefinition.getAnimationID(), true, null);
+                } else {
+                    return;
+                }
+
+                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, entity, null, 0, 0, 0, 0);
             }
 
-
-// TODO: in progress
-
-//                    if (loc.getType() == LocationType.INTERACTABLE.getValue()) {
-//                        if (modelDefinition != null) {
-//                            ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-//                            scene.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, 0, 0);
-//                        }
-//                    }
-
-//            if (loc.getType() == LocationType.INTERACTABLE.getValue()) {
-//                if (modelDefinition != null) {
-//                    ModelImpl model = new ModelImpl(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-//                    sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, 0, 0);
-//                }
+//            if (loc.getType() == LocationType.INTERACTABLE.getValue() || loc.getType() == LocationType.DIAGONAL_INTERACTABLE.getValue()) {
+//                StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+//                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, 0, 0);
 //            }
         });
 

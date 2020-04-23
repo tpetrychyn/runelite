@@ -20,7 +20,7 @@ public class Scene {
         for (int x = 0; x < radius; x++) {
             for (int y = 0; y < radius; y++) {
                 System.out.printf("Loading region %d\n", regionId);
-                this.regions[x][y] = sceneRegionBuilder.loadRegion(regionId);
+                this.regions[x][y] = sceneRegionBuilder.loadRegion(regionId, true);
                 regionId++;
             }
             regionId += 256 - (radius); // move 1 region to the right, reset to lowest y

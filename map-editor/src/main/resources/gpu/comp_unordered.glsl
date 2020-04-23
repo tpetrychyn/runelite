@@ -27,7 +27,7 @@
 
 #include comp_common.glsl
 
-layout(local_size_x = 7) in;
+layout(local_size_x = 6) in;
 
 #include common.glsl
 
@@ -68,11 +68,6 @@ void main() {
 
   uint myOffset = localId;
 
-  // color picker
-  pickerOut[outOffset + myOffset * 3]     = minfo.pickerId;
-  pickerOut[outOffset + myOffset * 3 + 1] = minfo.pickerId;
-  pickerOut[outOffset + myOffset * 3 + 2] = minfo.pickerId;
-
   // position vertices in scene and write to out buffer
   vout[outOffset + myOffset * 3]     = pos + thisrvA;
   vout[outOffset + myOffset * 3 + 1] = pos + thisrvB;
@@ -91,4 +86,9 @@ void main() {
     uvout[outOffset + myOffset * 3 + 1] = uv[uvOffset + localId * 3 + 1];
     uvout[outOffset + myOffset * 3 + 2] = uv[uvOffset + localId * 3 + 2];
   }
+
+  // color picker
+  pickerOut[outOffset + myOffset * 3]     = minfo.pickerId;
+  pickerOut[outOffset + myOffset * 3 + 1] = minfo.pickerId;
+  pickerOut[outOffset + myOffset * 3 + 2] = minfo.pickerId;
 }

@@ -112,6 +112,8 @@ public class MapEditor implements GLEventListener {
     private int uniBlockLarge;
     private int uniBlockMain;
     private int uniSmoothBanding;
+    private int uniHoverId;
+    private int uniSelectedIds;
 
     Animator animator;
     SceneRegionBuilder sceneRegionBuilder;
@@ -202,8 +204,6 @@ public class MapEditor implements GLEventListener {
             initBuffers();
             initPickerBuffer();
 
-            uploadScene();
-
             // disable vsync
 //            gl.setSwapInterval(0);
         } catch (ShaderException e) {
@@ -283,7 +283,7 @@ public class MapEditor implements GLEventListener {
         gl.glBufferData(gl.GL_ARRAY_BUFFER, (modelBuffers.getTargetBufferOffset() + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
     }
 
-    void checkHover() {
+    void handleHover() {
         String debugText = "";
         int mouseX = inputHandler.getMouseX();
         int mouseY = inputHandler.getMouseY();
@@ -319,16 +319,13 @@ public class MapEditor implements GLEventListener {
 
         debugText += String.format("id %d\n x %d y %d objId %d \n", pickerId, x, y, type);
 
-        SceneTile t = scene.getTile(0, x, y);
-        if (t != null) {
-            hoverTile = t;
-            hoverType = type;
-            if (type == 2) {
-                FloorDecoration d = t.getFloorDecoration();
-                if (d != null)
-                debugText += d.toString();
-            }
-        }
+//        SceneTile t = scene.getTile(0, x, y);
+//        if (t != null) {
+//            if (t.getTilePaint() == null) {
+//                return;
+//            }
+        hoverId = pickerId;
+//        }
         camera.setDebugText(debugText);
     }
 
@@ -337,6 +334,8 @@ public class MapEditor implements GLEventListener {
         int y = tile.getY();
 
         if (tile.getTilePaint() != null) {
+            tile.getTilePaint().setSceneX(x);
+            tile.getTilePaint().setSceneY(y);
             tile.getTilePaint().draw(modelBuffers, x, y);
         }
 
@@ -364,118 +363,14 @@ public class MapEditor implements GLEventListener {
     private final List<Renderable> dynamicDecorations = new ArrayList<>();
 
     private void drawDynamic() {
-        if (hoverTile != null && hoverType != -1) {
-            if (hoverType == 0 && hoverTile.getTilePaint() != null) {
-                TilePaintImpl paint = hoverTile.getTilePaint();
-                paint.setNeColor(1111);
-                paint.setNwColor(1111);
-                paint.setSeColor(1111);
-                paint.setSwColor(1111);
-                drawSceneTemporary(paint, hoverTile.getX(), hoverTile.getY());
-            }
-        }
-//            if (hoverType == 2 && hoverTile.getFloorDecoration() != null) {
-//                FloorDecoration floorDecoration = hoverTile.getFloorDecoration();
-//                drawTemporaryFloorDecoration(floorDecoration, floorDecoration.getX(), floorDecoration.getY());
-//            }
-//        }
         for (Renderable r : dynamicDecorations) {
-            r.drawDynamic(modelBuffers, sceneUploader);
+            r.drawDynamic(modelBuffers, sceneUploader, PickerType.PICKABLE);
         }
     }
 
-    SceneTile hoverTile;
-    private int hoverType = -1;
-
-//    void drawTemporaryFloorDecoration(FloorDecoration fd, int tileX, int tileY) {
-//        int x = tileX;// * Perspective.LOCAL_TILE_SIZE;
-//        int y = 0;
-//        int z = tileY;// * Perspective.LOCAL_TILE_SIZE;
-//
-//        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
-////        sceneUploader.upload(fd, vertexBuffer, uvBuffer);
-//
-//        Model model = fd.getModel();
-//        if (model != null) {
-//            int[] fc1 = new int[model.getFaceColors1().length];
-//            Arrays.fill(fc1, 1111);
-//            model.setFaceColors1(fc1);
-//            int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
-//            vertexBuffer.ensureCapacity(12 * faces);
-//            uvBuffer.ensureCapacity(12 * faces);
-//            int len = 0;
-//            for (int i = 0; i < faces; ++i) {
-//                len += sceneUploader.pushFace(model, i, vertexBuffer, uvBuffer);
-//            }
-//            GpuIntBuffer b = bufferForTriangles(faces);
-//
-//            b.ensureCapacity(9);
-//            IntBuffer buffer = b.getBuffer();
-//            buffer.put(tempOffset);
-//            buffer.put(-1);
-//            buffer.put(len / 3);
-//            buffer.put(targetBufferOffset + tempOffset);
-//            buffer.put((model.getRadius() << 12) | 0);
-//            buffer.put(x).put(fd.getHeight()).put(z);
-//            buffer.put(-1);
-//
-//            tempOffset += len;
-//        }
-//    }
-
-    void drawSceneTemporary(TilePaintImpl tile, int tileX, int tileY) {
-        int x = tileX * Perspective.LOCAL_TILE_SIZE;
-        int y = 0;
-        int z = tileY * Perspective.LOCAL_TILE_SIZE;
-
-        // cpu vertexBuffer is cleared every frame, temp tiles can write to it from 0
-        int len = sceneUploader.upload(tile, modelBuffers.getVertexBuffer(), modelBuffers.getUvBuffer());
-
-        GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
-        modelBuffers.incUnorderedModels();
-
-        b.ensureCapacity(9);
-        IntBuffer buffer = b.getBuffer();
-        buffer.put(modelBuffers.getTempOffset());
-        buffer.put(-1);
-        buffer.put(2);
-        buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
-        buffer.put(0);
-        buffer.put(x).put(y).put(z);
-        buffer.put(-1);
-
-        modelBuffers.addTempOffset(len);
-    }
-
-//    void updateTile(SceneTile tile) {
-//        GpuIntBuffer modifyBuffer = new GpuIntBuffer();
-//        GpuFloatBuffer modifyUvBuffer = new GpuFloatBuffer();
-//        sceneUploader.upload(tile.getTilePaint(), modifyBuffer, modifyUvBuffer);
-//        modifyBuffer.flip();
-//
-//        // modify the persistent vertex buffer on the GPU
-//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, bufferId);
-////         tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4 ---- offset is 6 writes, 4 ints each
-//        gl.glBufferSubData(gl.GL_ARRAY_BUFFER, tile.getTilePaint().getBufferOffset() * GLBuffers.SIZEOF_INT * 4, modifyBuffer.getBuffer().limit(), modifyBuffer.getBuffer());
-//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
-//
-//        int x = tile.getX() * Perspective.LOCAL_TILE_SIZE;
-//        int y = 0;
-//        int z = tile.getY() * Perspective.LOCAL_TILE_SIZE;
-//
-//        GpuIntBuffer b = modelBufferUnordered;
-//        ++unorderedModels;
-//
-//        b.ensureCapacity(9);
-//        IntBuffer buffer = b.getBuffer();
-//        buffer.put(tile.getTilePaint().getBufferOffset());
-//        buffer.put(tile.getTilePaint().getUvBufferOffset());
-//        buffer.put(2);
-//        buffer.put(tile.getTilePaint().getTargetBufferOffset());
-//        buffer.put(FLAG_SCENE_BUFFER);
-//        buffer.put(x).put(y).put(z);
-//        buffer.put(calcPickerId(tile.getX(), tile.getY(), 0));
-//    }
+    // FIXME: I probably need an SSBO because I want to select more than 1024 (max uniforms for my gpu?)
+    private SizedIntegerList selectedIds = new SizedIntegerList(255);
+    private int hoverId;
 
     @Override
     public void display(GLAutoDrawable drawable) {
@@ -483,8 +378,8 @@ public class MapEditor implements GLEventListener {
             uploadScene();
         }
 
-        checkHover();
-//        handleClick();
+        handleHover();
+        handleClick();
 
         drawDynamic();
 
@@ -660,6 +555,9 @@ public class MapEditor implements GLEventListener {
 //                textureOffsets[id * 2 + 1] = texture.getV();
 //            }
 
+            gl.glUniform1i(uniHoverId, hoverId);
+            gl.glUniform1iv(uniSelectedIds, 255, selectedIds.toIntArray(), 0);
+
             // Bind uniforms
             gl.glUniformBlockBinding(glProgram, uniBlockMain, 0);
             gl.glUniform1i(uniTextures, 1); // texture sampler array is bound to texture1
@@ -709,6 +607,7 @@ public class MapEditor implements GLEventListener {
             gl.glBlitFramebuffer(0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
                     0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
                     gl.GL_COLOR_BUFFER_BIT, gl.GL_NEAREST);
+            gl.glDisable(gl.GL_BLEND);
 
             // Reset
             gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT0);
@@ -762,7 +661,9 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
-        modelBuffers.clearVertUv();
+        vertexBuffer.clear();
+        uvBuffer.clear();
+//        modelBuffers.clearVertUv();
 
         drawTiles();
     }
@@ -808,6 +709,9 @@ public class MapEditor implements GLEventListener {
         uniBlockSmall = gl.glGetUniformBlockIndex(glSmallComputeProgram, "uniforms");
         uniBlockLarge = gl.glGetUniformBlockIndex(glComputeProgram, "uniforms");
         uniBlockMain = gl.glGetUniformBlockIndex(glProgram, "uniforms");
+
+        uniHoverId = gl.glGetUniformLocation(glProgram, "hoverId");
+        uniSelectedIds = gl.glGetUniformLocation(glProgram, "selectedIds");
     }
 
     private void initUniformBuffer() {
@@ -978,47 +882,46 @@ public class MapEditor implements GLEventListener {
         }
     }
 
-//    void handleClick() {
-//        if (hoverTile == null) {
-//            return;
-//        }
-//        if (inputHandler.isMouseClicked()) {
-//            int x = hoverTile.getX();
-//            int y = hoverTile.getY();
-//            SceneTile north = scene.getTile(0, x, y + 1);
-//            SceneTile east = scene.getTile(0, x + 1, y);
-//            SceneTile northEast = scene.getTile(0, x + 1, y + 1);
-//
-//            SceneTile tile = scene.getTile(0, x, y);
-//            int newHeight = tile.getTilePaint().getNeHeight() + 10;
-//
-//            if (north != null && north.getTilePaint() != null) {
-//                TilePaintImpl tp = north.getTilePaint();
-//                tp.setSeHeight(newHeight);
-//                north.setHeight(newHeight);
-//                updateTile(north);
-//            }
-//            if (east != null && east.getTilePaint() != null) {
-//                TilePaintImpl tp = east.getTilePaint();
-//                tp.setNwHeight(newHeight);
-//                east.setHeight(newHeight);
-//                updateTile(east);
-//            }
-//
-//            if (northEast != null && northEast.getTilePaint() != null) {
-//                TilePaintImpl tp = northEast.getTilePaint();
-//                tp.setSwHeight(newHeight);
-//                northEast.setHeight(newHeight);
-//                updateTile(northEast);
-//            }
-//
-//            tile.setHeight(newHeight);
-//            tile.getTilePaint().setNeHeight(newHeight);
-//
-//            updateTile(tile);
-//
-//            System.out.printf("clicked tile %d %d\n", x, y);
-//            inputHandler.mouseClicked = false;
-//        }
-//    }
+    int hoverStartX = -1;
+    int hoverStartY = -1;
+
+    void handleClick() {
+        if (hoverId == -1) {
+            return;
+        }
+        if (inputHandler.isMouseClicked()) {
+            selectedIds.clear();
+            selectedIds.add(hoverId);
+
+            inputHandler.mouseClicked = false;
+        }
+
+
+        if (inputHandler.leftMousePressed) {
+            int x = (hoverId >> 20) & 0xFFF;
+            int y = (hoverId >> 4) & 0xFFF;
+            hoverStartX = x;
+            hoverStartY = y;
+            inputHandler.leftMousePressed = false;
+        }
+
+        if (inputHandler.isLeftMouseDown()) {
+            int hoverX = (hoverId >> 20) & 0xFFF;
+            int hoverY = (hoverId >> 4) & 0xFFF;
+            selectedIds.clear();
+            for (int x = hoverStartX; x <= hoverX; x++) {
+                for (int y = hoverStartY; y >= hoverY; y--) {
+                    SceneTile t = scene.getTile(0, x, y);
+                    if (t != null && t.getTilePaint() != null) {
+                        for (int i = 0; i < 4; i++) {
+                            int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | i & 0xF;
+                            selectedIds.add(colorPickerId);
+                        }
+//                        int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | 0 & 0xF;
+//                        selectedIds.add(colorPickerId);
+                    }
+                }
+            }
+        }
+    }
 }

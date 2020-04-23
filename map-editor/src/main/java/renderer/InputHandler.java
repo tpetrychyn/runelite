@@ -14,6 +14,7 @@ public class InputHandler implements KeyListener, MouseListener {
     private MapEditor mapEditor;
 
     private boolean isLeftMouseDown = false;
+    public boolean leftMousePressed = false;
     private boolean isRightMouseDown = false;
     private boolean[] keys = new boolean[250];
     public boolean mouseClicked;
@@ -28,6 +29,7 @@ public class InputHandler implements KeyListener, MouseListener {
 
         new AnimationTimer() {
             long lastNanoTime = System.nanoTime();
+
             @Override
             public void handle(long now) {
                 double dt = (now - lastNanoTime) / 1000000;
@@ -82,10 +84,7 @@ public class InputHandler implements KeyListener, MouseListener {
         }
 
         if (keys[KeyEvent.VK_K]) {
-            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 11569, 5));
-        }
-        if (keys[KeyEvent.VK_R]) {
-            mapEditor.hoverTile = null;
+            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 13360, 5));
         }
     }
 
@@ -141,12 +140,21 @@ public class InputHandler implements KeyListener, MouseListener {
         if (e.getButton() == MouseEvent.BUTTON3) {
             isRightMouseDown = true;
         }
+
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            leftMousePressed = true;
+            isLeftMouseDown = true;
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON3) {
             isRightMouseDown = false;
+        }
+
+        if (e.getButton() == MouseEvent.BUTTON1) {
+            isLeftMouseDown = false;
         }
     }
 
