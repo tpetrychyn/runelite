@@ -24,6 +24,7 @@ package renderer;/*
  */
 
 import models.*;
+import models.DynamicObject;
 import models.Renderable;
 import renderer.helpers.GpuFloatBuffer;
 import renderer.helpers.GpuIntBuffer;
@@ -181,14 +182,18 @@ public class SceneUploader {
 
         WallDecoration wallDecoration = tile.getWallDecoration();
         if (wallDecoration != null) {
-            Entity modelA = wallDecoration.getEntityA();
-            if (modelA instanceof StaticObject) {
-                uploadModel(modelA.getModel(), vertexBuffer, uvBuffer);
+            Entity entityA = wallDecoration.getEntityA();
+            if (entityA instanceof StaticObject) {
+                uploadModel(entityA.getModel(), vertexBuffer, uvBuffer);
+            } else if (entityA instanceof DynamicObject) {
+                for (int i=((DynamicObject) entityA).getSequenceDefinition().frameIds.length - ((DynamicObject) entityA).getSequenceDefinition().frameCount;i<((DynamicObject) entityA).getSequenceDefinition().frameIds.length;i++) {
+                    uploadModel(((DynamicObject) entityA).getModel(i), vertexBuffer, uvBuffer);
+                }
             }
 
-            Entity modelB = wallDecoration.getEntityA();
-            if (modelB instanceof StaticObject) {
-                uploadModel(modelB.getModel(), vertexBuffer, uvBuffer);
+            Entity entityB = wallDecoration.getEntityA();
+            if (entityB instanceof StaticObject) {
+                uploadModel(entityB.getModel(), vertexBuffer, uvBuffer);
             }
         }
 
@@ -370,7 +375,6 @@ public class SceneUploader {
         } else {
             model.setUvBufferOffset(-1);
         }
-        model.setSceneId(sceneId);
 
         vertexBuffer.ensureCapacity(model.getTrianglesCount() * 12);
         uvBuffer.ensureCapacity(model.getTrianglesCount() * 12);

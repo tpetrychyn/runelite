@@ -1,6 +1,5 @@
 package models;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Entity;
@@ -14,13 +13,11 @@ import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.definitions.SequenceDefinition;
 import net.runelite.cache.definitions.VarbitDefinition;
 import net.runelite.cache.definitions.loaders.SequenceLoader;
-import net.runelite.cache.definitions.loaders.VarbitLoader;
 import net.runelite.cache.fs.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -88,6 +85,27 @@ public class DynamicObject implements Entity {
     private static final long clientStart = System.currentTimeMillis();
 
     private static Map<DynamicObject, Model> modelFrameCache = new HashMap<>();
+
+    public Model getModel(int frame) {
+        this.frame = frame;
+        if (modelFrameCache.containsKey(this)) {
+            return modelFrameCache.get(this);
+        }
+
+        ObjectDefinition objectDefinition = objectManager.getObject(id);
+        if (objectDefinition == null) {
+            return null;
+        }
+
+        ModelDefinition modelDefinition = objectDefinition.getModelDynamic(type, orientation, sequenceDefinition, frame);
+        if (modelDefinition == null) {
+            return null;
+        }
+        Model m = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+        modelFrameCache.put(this, m);
+        return m;
+    }
+
     @Override
     public Model getModel() {
         if (this.sequenceDefinition == null) {
@@ -108,6 +126,7 @@ public class DynamicObject implements Entity {
 
                     var1 -= this.sequenceDefinition.frameLengths[this.frame];
                     ++this.frame;
+
                 } while(this.frame < this.sequenceDefinition.frameIds.length);
 
                 this.frame -= this.sequenceDefinition.frameCount;
@@ -118,22 +137,7 @@ public class DynamicObject implements Entity {
 
         this.cycleStart = clientCycle - var1;
 
-        if (modelFrameCache.containsKey(this)) {
-            return modelFrameCache.get(this);
-        }
-
-        ObjectDefinition objectDefinition = objectManager.getObject(id);
-        if (objectDefinition == null) {
-            return null;
-        }
-
-        ModelDefinition modelDefinition = objectDefinition.getModelDynamic(type, orientation, sequenceDefinition, frame);
-        if (modelDefinition == null) {
-            return null;
-        }
-        Model m = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-        modelFrameCache.put(this, m);
-        return m;
+        return getModel(frame);
     }
 
     @Override

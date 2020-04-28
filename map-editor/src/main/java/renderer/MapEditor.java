@@ -6,10 +6,13 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.*;
+import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
+import layoutControllers.DebugController;
 import layoutControllers.MainController;
 import layoutControllers.MinimapController;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import models.*;
 import models.DynamicObject;
@@ -57,7 +60,7 @@ public class MapEditor implements GLEventListener {
     private int rboDepthMain;
     private int texColorMain;
     private int texPickerMain;
-    private int[] pboIds = new int[2];
+    private int[] pboIds = new int[3];
     private int pboIndex;
 
     private int vaoHandle;
@@ -79,12 +82,16 @@ public class MapEditor implements GLEventListener {
     private int tmpModelBufferUnorderedId;
     private int tmpOutBufferId; // target vertex buffer for compute shaders
     private int tmpOutUvBufferId; // target uv buffer for compute shaders
-    private int colorPickerBufferId; // target uv buffer for compute shaders
+    private int colorPickerBufferId; // buffer for unique picker id
+    private int animFrameBufferId; // which frame the model should display on
+    private int selectedIdsBufferId;
+
+    private int hoverId;
 
     private int textureArrayId;
 
     private int uniformBufferId;
-    private final IntBuffer uniformBuffer = GpuIntBuffer.allocateDirect(5 + 3);
+    private final IntBuffer uniformBuffer = GpuIntBuffer.allocateDirect(5 + 3 + 1);
     private final float[] textureOffsets = new float[128];
 
     private ModelBuffers modelBuffers;
@@ -100,9 +107,6 @@ public class MapEditor implements GLEventListener {
     private final Camera camera = new Camera();
 
     // Uniforms
-    private int uniUseFog;
-    private int uniFogColor;
-    private int uniFogDepth;
     private int uniDrawDistance;
     private int uniProjectionMatrix;
     private int uniBrightness;
@@ -113,7 +117,6 @@ public class MapEditor implements GLEventListener {
     private int uniBlockMain;
     private int uniSmoothBanding;
     private int uniHoverId;
-    private int uniSelectedIds;
 
     Animator animator;
     SceneRegionBuilder sceneRegionBuilder;
@@ -147,7 +150,7 @@ public class MapEditor implements GLEventListener {
         }
 
         bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId = -1;
-        colorPickerBufferId = -1;
+        colorPickerBufferId = selectedIdsBufferId = -1;
 
         modelBuffers = new ModelBuffers();
 
@@ -198,14 +201,14 @@ public class MapEditor implements GLEventListener {
 //            gl.glGetIntegerv(gl.GL_DEPTH_BITS, intBuf1);
 //            System.out.printf("depth bits %s \n", intBuf1.get(0));
 
-            initVao();
             initProgram();
             initUniformBuffer();
             initBuffers();
             initPickerBuffer();
+            initVao();
 
             // disable vsync
-//            gl.setSwapInterval(0);
+            gl.setSwapInterval(0);
         } catch (ShaderException e) {
             e.printStackTrace();
         }
@@ -281,21 +284,29 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, (modelBuffers.getTargetBufferOffset() + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
+
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, animFrameBufferId);
+        gl.glBufferData(gl.GL_ARRAY_BUFFER, (modelBuffers.getTargetBufferOffset() + MAX_TEMP_VERTICES) * GLBuffers.SIZEOF_INT * 4, null, gl.GL_DYNAMIC_DRAW);
     }
 
     void handleHover() {
-        String debugText = "";
         int mouseX = inputHandler.getMouseX();
         int mouseY = inputHandler.getMouseY();
 
-        pboIndex = (pboIndex + 1) % 2;
-        int nextIndex = (pboIndex + 1) % 2;
+        // Using 3 PBOs brings this function time to 0.05ms, with only 2 PBOs is it 10ms
+        // This will write to pboIndex and read from nextIndex which should have finished drawing to
+        // since it will 2 frames behind.
+        pboIndex = (pboIndex + 1) % 3;
+        int nextIndex = (pboIndex + 1) % 3;
 
         // Read from pixel buffer object async to get pixels without blocking render
         gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, fboMainRenderer);
         gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[pboIndex]);
         gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT1);
         gl.glReadPixels(mouseX, canvasHeight - mouseY, 1, 1, gl.GL_RED_INTEGER, gl.GL_INT, 0);
+        gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT0);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0);
+        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
 
         gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[nextIndex]);
         ByteBuffer srcBuf = gl.glMapBuffer(gl.GL_PIXEL_PACK_BUFFER, gl.GL_READ_ONLY);
@@ -303,12 +314,17 @@ public class MapEditor implements GLEventListener {
         byte[] pboBytes = new byte[4];
         srcBuf.get(pboBytes);
         int pickerId = (pboBytes[3] & 0xFF) << 24 | (pboBytes[2] & 0xFF) << 16 | (pboBytes[1] & 0xFF) << 8 | (pboBytes[0] & 0xFF);
-        gl.glReadBuffer(gl.GL_COLOR_ATTACHMENT0);
+//        IntBuffer srcBuf = GLBuffers.newDirectIntBuffer(1);
+//        gl.glGetBufferSubData(gl.GL_PIXEL_PACK_BUFFER, 0, GLBuffers.SIZEOF_INT, srcBuf);
+
+//        int pickerId = -1;
+//        if (srcBuf.limit() > 0) {
+//            pickerId = srcBuf.get();
+//        }
         gl.glUnmapBuffer(gl.GL_PIXEL_PACK_BUFFER);
-        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0);
-        gl.glBindFramebuffer(gl.GL_READ_FRAMEBUFFER, 0);
 
         if (pickerId == -1) {
+            hoverId = -1;
             return;
         }
 
@@ -318,15 +334,18 @@ public class MapEditor implements GLEventListener {
         int type = pickerId & 0xF;
 
         debugText += String.format("id %d\n x %d y %d objId %d \n", pickerId, x, y, type);
+        SceneTile tile = scene.getTile(0, x, y);
+        if (tile != null) {
+            if (tile.getWallDecoration() != null) {
+                WallDecoration d = tile.getWallDecoration();
+                debugText += String.format("wall dec: tag %d \n", d.getTag());
+                if (d.getEntityA() instanceof DynamicObject) {
+                    debugText += String.format("id %d \n", ((DynamicObject) d.getEntityA()).getId());
+                }
+            }
+        }
 
-//        SceneTile t = scene.getTile(0, x, y);
-//        if (t != null) {
-//            if (t.getTilePaint() == null) {
-//                return;
-//            }
         hoverId = pickerId;
-//        }
-        camera.setDebugText(debugText);
     }
 
     void drawTile(SceneTile tile) {
@@ -355,25 +374,31 @@ public class MapEditor implements GLEventListener {
             } else if (w.getEntityA() instanceof DynamicObject) {
                 w.setSceneX(x);
                 w.setSceneY(y);
-                dynamicDecorations.add(w);
+                w.draw(modelBuffers, x, y);
+//                w.drawDynamic(modelBuffers, sceneUploader, PickerType.PICKABLE);
             }
         }
+//
+//        for (WallDecoration obj : tile.getBoundaryObjects()) {
+//            if (obj != null && obj.getEntityA() != null) {
+//                obj.draw(modelBuffers, x, y);
+//            }
+//        }
     }
 
     private final List<Renderable> dynamicDecorations = new ArrayList<>();
 
     private void drawDynamic() {
-        for (Renderable r : dynamicDecorations) {
-            r.drawDynamic(modelBuffers, sceneUploader, PickerType.PICKABLE);
-        }
+//        for (Renderable r : dynamicDecorations) {
+//            ((WallDecoration)r).drawDynamic2(modelBuffers, sceneUploader, PickerType.PICKABLE);
+//        }
     }
 
-    // FIXME: I probably need an SSBO because I want to select more than 1024 (max uniforms for my gpu?)
-    private SizedIntegerList selectedIds = new SizedIntegerList(255);
-    private int hoverId;
+    private static long clientStart = System.currentTimeMillis();
 
     @Override
     public void display(GLAutoDrawable drawable) {
+        long start = System.nanoTime();
         if (sceneChangeRequested) {
             uploadScene();
         }
@@ -382,7 +407,6 @@ public class MapEditor implements GLEventListener {
         handleClick();
 
         drawDynamic();
-
         if (canvasWidth > 0 && canvasHeight > 0 && (canvasWidth != lastViewportWidth || canvasHeight != lastViewportHeight)) {
             createProjectionMatrix(0, canvasWidth, canvasHeight, 0, 1, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             lastViewportWidth = canvasWidth;
@@ -451,6 +475,8 @@ public class MapEditor implements GLEventListener {
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpModelBufferUnorderedId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, modelBufferUnordered.limit() * Integer.BYTES, modelBufferUnordered, gl.GL_DYNAMIC_DRAW);
 
+        int clientCycle = (int)((System.currentTimeMillis() - clientStart) / 20); // 50 fps
+
         // UBO
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
         uniformBuffer.clear();
@@ -462,7 +488,8 @@ public class MapEditor implements GLEventListener {
                 .put(camera.getScale())
                 .put(camera.getCameraX()) //x
                 .put(camera.getCameraZ()) // z
-                .put(camera.getCameraY()); // y
+                .put(camera.getCameraY()) // y
+                .put(clientCycle); // currFrame
         uniformBuffer.flip();
 
         gl.glBufferSubData(gl.GL_UNIFORM_BUFFER, 0, uniformBuffer.limit() * Integer.BYTES, uniformBuffer);
@@ -492,6 +519,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
+//            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 8, animFrameBufferId);
 
             gl.glDispatchCompute(modelBuffers.getUnorderedModels(), 1, 1);
 
@@ -506,6 +534,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
+//            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 8, animFrameBufferId);
 
             gl.glDispatchCompute(modelBuffers.getSmallModels(), 1, 1);
 
@@ -520,6 +549,7 @@ public class MapEditor implements GLEventListener {
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 5, this.uvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 6, tmpUvBufferId);
             gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 7, colorPickerBufferId);
+//            gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 8, animFrameBufferId);
 
             gl.glDispatchCompute(modelBuffers.getLargeModels(), 1, 1);
 
@@ -532,15 +562,9 @@ public class MapEditor implements GLEventListener {
             }
 
             gl.glUseProgram(glProgram);
-
-            final int fogDepth = 0;
-            gl.glUniform1i(uniUseFog, fogDepth > 0 ? 1 : 0);
-            gl.glUniform4f(uniFogColor, (sky >> 16 & 0xFF) / 255f, (sky >> 8 & 0xFF) / 255f, (sky & 0xFF) / 255f, 1f);
-            gl.glUniform1i(uniFogDepth, fogDepth);
-            gl.glUniform1i(uniDrawDistance, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
-
             // Brightness happens to also be stored in the texture provider, so we use that
             gl.glUniform1f(uniBrightness, 0.7f);//(float) textureProvider.getBrightness());
+            gl.glUniform1i(uniDrawDistance, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             gl.glUniform1f(uniSmoothBanding, 1f);
 
 //            for (int id = 0; id < textures.length; ++id) {
@@ -556,7 +580,6 @@ public class MapEditor implements GLEventListener {
 //            }
 
             gl.glUniform1i(uniHoverId, hoverId);
-            gl.glUniform1iv(uniSelectedIds, 255, selectedIds.toIntArray(), 0);
 
             // Bind uniforms
             gl.glUniformBlockBinding(glProgram, uniBlockMain, 0);
@@ -574,18 +597,6 @@ public class MapEditor implements GLEventListener {
 
             // Draw output of compute shaders
             gl.glBindVertexArray(vaoHandle);
-
-            gl.glEnableVertexAttribArray(0);
-            gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutBufferId);
-            gl.glVertexAttribIPointer(0, 4, gl.GL_INT, 0, 0);
-
-            gl.glEnableVertexAttribArray(1);
-            gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutUvBufferId);
-            gl.glVertexAttribPointer(1, 4, gl.GL_FLOAT, false, 0, 0);
-
-            gl.glEnableVertexAttribArray(2);
-            gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
-            gl.glVertexAttribIPointer(2, 1, gl.GL_INT, 0, 0);
 
             gl.glDrawArrays(gl.GL_TRIANGLES, 0, modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
 
@@ -625,8 +636,23 @@ public class MapEditor implements GLEventListener {
         modelBuffers.clearVertUv();
         modelBuffers.clear();
 
+        long end = System.nanoTime();
+        if (frames == 0) {
+//            String debugText = camera.getDebugText();
+            debugText += String.format("display time %f ms\n" +
+                    "fps: %f \n", ((double) end - (double) start) / (double) 1000000, animator.getLastFPS());
+            camera.setDebugText(debugText);
+        }
+        frames++;
+        if (frames > 10) {
+            frames = 0;
+        }
+
+        debugText = "";
 //        minimapController.drawCanvas(scene);
     }
+    String debugText = "";
+    int frames = 0;
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
@@ -644,6 +670,7 @@ public class MapEditor implements GLEventListener {
     private void uploadScene() {
         dynamicDecorations.clear();
         sceneChangeRequested = false;
+        initDynamicSSBO();
         modelBuffers.clearVertUv();
 
         sceneUploader.upload(scene, modelBuffers.getVertexBuffer(), modelBuffers.getUvBuffer());
@@ -661,9 +688,7 @@ public class MapEditor implements GLEventListener {
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
 
-        vertexBuffer.clear();
-        uvBuffer.clear();
-//        modelBuffers.clearVertUv();
+        modelBuffers.clearVertUv();
 
         drawTiles();
     }
@@ -671,8 +696,28 @@ public class MapEditor implements GLEventListener {
     private void initVao() {
         // Create VAO
         vaoHandle = glGenVertexArrays(gl);
+
+        gl.glBindVertexArray(vaoHandle);
+
+        gl.glEnableVertexAttribArray(0);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutBufferId);
+        gl.glVertexAttribIPointer(0, 4, gl.GL_INT, 0, 0);
+
+        gl.glEnableVertexAttribArray(1);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpOutUvBufferId);
+        gl.glVertexAttribPointer(1, 4, gl.GL_FLOAT, false, 0, 0);
+
+        gl.glEnableVertexAttribArray(2);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, colorPickerBufferId);
+        gl.glVertexAttribIPointer(2, 1, gl.GL_INT, 0, 0);
+
+//        gl.glEnableVertexAttribArray(3);
+//        gl.glBindBuffer(gl.GL_ARRAY_BUFFER, animFrameBufferId);
+//        gl.glVertexAttribIPointer(3, 4, gl.GL_INT, 0, 0);
+
         // unbind VBO
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0);
+        gl.glBindVertexArray(0);
     }
 
     private void initProgram() throws ShaderException {
@@ -698,9 +743,6 @@ public class MapEditor implements GLEventListener {
         uniProjectionMatrix = gl.glGetUniformLocation(glProgram, "projectionMatrix");
         uniBrightness = gl.glGetUniformLocation(glProgram, "brightness");
         uniSmoothBanding = gl.glGetUniformLocation(glProgram, "smoothBanding");
-        uniUseFog = gl.glGetUniformLocation(glProgram, "useFog");
-        uniFogColor = gl.glGetUniformLocation(glProgram, "fogColor");
-        uniFogDepth = gl.glGetUniformLocation(glProgram, "fogDepth");
         uniDrawDistance = gl.glGetUniformLocation(glProgram, "drawDistance");
 
         uniTextures = gl.glGetUniformLocation(glProgram, "textures");
@@ -711,14 +753,13 @@ public class MapEditor implements GLEventListener {
         uniBlockMain = gl.glGetUniformBlockIndex(glProgram, "uniforms");
 
         uniHoverId = gl.glGetUniformLocation(glProgram, "hoverId");
-        uniSelectedIds = gl.glGetUniformLocation(glProgram, "selectedIds");
     }
 
     private void initUniformBuffer() {
         uniformBufferId = glGenBuffers(gl);
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
         uniformBuffer.clear();
-        uniformBuffer.put(new int[8]);
+        uniformBuffer.put(new int[9]);
         uniformBuffer.flip();
 
         gl.glBufferData(gl.GL_UNIFORM_BUFFER, uniformBuffer.limit() * Integer.BYTES, uniformBuffer, gl.GL_DYNAMIC_DRAW);
@@ -745,17 +786,19 @@ public class MapEditor implements GLEventListener {
 
         texPickerMain = GLUtil.glGenTexture(gl);
         gl.glBindTexture(gl.GL_TEXTURE_2D, texPickerMain);
-        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_R32I, canvasWidth, canvasHeight, 0, gl.GL_RED_INTEGER, gl.GL_INT, null);
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_R32I, canvasWidth, canvasHeight, 0, gl.GL_BGRA_INTEGER, gl.GL_INT, null);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
         gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
         gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT1, gl.GL_TEXTURE_2D, texPickerMain, 0);
 
         // init pbo
-        gl.glGenBuffers(2, pboIds, 0);
+        gl.glGenBuffers(3, pboIds, 0);
         gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[0]);
-        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, canvasWidth * canvasHeight * GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
+        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
         gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[1]);
-        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, canvasWidth * canvasHeight * GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
+        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
+        gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, pboIds[2]);
+        gl.glBufferData(gl.GL_PIXEL_PACK_BUFFER, GLBuffers.SIZEOF_INT, null, gl.GL_STREAM_READ);
         gl.glBindBuffer(gl.GL_PIXEL_PACK_BUFFER, 0);
 
         int status = gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER);
@@ -778,6 +821,18 @@ public class MapEditor implements GLEventListener {
         tmpOutBufferId = GLUtil.glGenBuffers(gl);
         tmpOutUvBufferId = GLUtil.glGenBuffers(gl);
         colorPickerBufferId = GLUtil.glGenBuffers(gl);
+        animFrameBufferId = GLUtil.glGenBuffers(gl);
+        selectedIdsBufferId = GLUtil.glGenBuffers(gl);
+    }
+
+    private void initDynamicSSBO() {
+        // TODO: more than 4 obj per tile, dunno about this yet
+        int maxTileObj = 4;
+        int tileRad = scene.getRadius() * Constants.REGION_SIZE;
+        gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, selectedIdsBufferId);
+        gl.glBufferData(gl.GL_SHADER_STORAGE_BUFFER, tileRad * tileRad * maxTileObj * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
+        gl.glBindBufferBase(gl.GL_SHADER_STORAGE_BUFFER, 12, selectedIdsBufferId);
+        gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, 0);
     }
 
     private void createProjectionMatrix(float left, float right, float bottom, float top, float near, float far) {
@@ -826,7 +881,7 @@ public class MapEditor implements GLEventListener {
 
         int status = gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER);
         if (status != gl.GL_FRAMEBUFFER_COMPLETE) {
-            System.out.println("bad picker fbo");
+            System.out.println("bad aaPicker fbo");
         }
 
         // Reset
@@ -890,8 +945,17 @@ public class MapEditor implements GLEventListener {
             return;
         }
         if (inputHandler.isMouseClicked()) {
-            selectedIds.clear();
-            selectedIds.add(hoverId);
+            int x = (hoverId >> 20) & 0xFFF;
+            int y = (hoverId >> 4) & 0xFFF;
+            
+            int obj = 0;
+            int idx = x + 64 * (y + 64 * obj);
+            IntBuffer tt = GLBuffers.newDirectIntBuffer(1);
+            tt.put(1);
+            tt.flip();
+            gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, selectedIdsBufferId);
+            gl.glBufferSubData(gl.GL_SHADER_STORAGE_BUFFER, idx * GLBuffers.SIZEOF_INT , GLBuffers.SIZEOF_INT, tt);
+            gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, 0);
 
             inputHandler.mouseClicked = false;
         }
@@ -908,14 +972,14 @@ public class MapEditor implements GLEventListener {
         if (inputHandler.isLeftMouseDown()) {
             int hoverX = (hoverId >> 20) & 0xFFF;
             int hoverY = (hoverId >> 4) & 0xFFF;
-            selectedIds.clear();
+//            selectedIds.clear();
             for (int x = hoverStartX; x <= hoverX; x++) {
                 for (int y = hoverStartY; y >= hoverY; y--) {
                     SceneTile t = scene.getTile(0, x, y);
                     if (t != null && t.getTilePaint() != null) {
                         for (int i = 0; i < 4; i++) {
                             int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | i & 0xF;
-                            selectedIds.add(colorPickerId);
+//                            selectedIds.add(colorPickerId);
                         }
 //                        int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | 0 & 0xF;
 //                        selectedIds.add(colorPickerId);

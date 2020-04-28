@@ -35,6 +35,14 @@ layout(std140) uniform uniforms {
     int cameraX;
     int cameraY;
     int cameraZ;
+    int currFrame;
+};
+
+struct AnimInfo {
+    int frame;
+    int frameDuration;
+    int frameOffset;
+    int totalFrames;
 };
 
 struct modelinfo {
@@ -47,6 +55,12 @@ struct modelinfo {
     int y;// scene position y
     int z;// scene position z
     int pickerId;
+
+    // anim vars
+    int frame;
+    int frameDuration;
+    int frameOffset;
+    int totalFrames;
 };
 
 layout(std430, binding = 0) readonly buffer modelbuffer_in {
@@ -79,4 +93,8 @@ layout(std430, binding = 6) readonly buffer tempuvbuffer_in {
 
 layout(std430, binding = 7) writeonly buffer color_picker_id_out {
     int pickerOut[];
+};
+
+layout(std430, binding = 8) writeonly buffer anim_out {
+    AnimInfo animInfo[];
 };

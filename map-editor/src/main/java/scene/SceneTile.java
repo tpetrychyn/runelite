@@ -8,6 +8,9 @@ import models.TilePaintImpl;
 import models.WallDecoration;
 import net.runelite.cache.definitions.MapDefinition;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 public class SceneTile extends MapDefinition.Tile {
@@ -18,6 +21,7 @@ public class SceneTile extends MapDefinition.Tile {
     private TileModelImpl tileModel;
     private FloorDecoration floorDecoration;
     private WallDecoration wallDecoration;
+    private List<WallDecoration> boundaryObjects = new ArrayList<>();
 
     private SceneTile north;
     private SceneTile northEast;

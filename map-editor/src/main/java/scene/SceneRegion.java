@@ -143,4 +143,24 @@ public class SceneRegion {
 
         this.tiles[z][x][y].setWallDecoration(wallDecoration);
     }
+
+    public void newBoundaryObject(int z, int x, int y, int height, Entity entityA, Entity entityB, int orientationA, int orientationB, long tag, int flags) {
+        for (int iz = z; iz >= 0; --iz) {
+            if (this.tiles[iz][x][y] == null) {
+                this.tiles[iz][x][y] = new SceneTile(iz, x, y);
+            }
+        }
+
+        WallDecoration wallDecoration = new WallDecoration(tag,
+                flags,
+                x * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE,
+                y * Perspective.LOCAL_TILE_SIZE + Constants.REGION_SIZE,
+                height,
+                entityA,
+                entityB,
+                orientationA,
+                orientationB);
+
+        this.tiles[z][x][y].getBoundaryObjects().add(wallDecoration);
+    }
 }

@@ -36,7 +36,7 @@ public class FloorDecoration extends Renderable {
 
         GpuIntBuffer b = modelBuffers.bufferForTriangles(tc);
 
-        b.ensureCapacity(9);
+        b.ensureCapacity(13);
         IntBuffer buffer = b.getBuffer();
         buffer.put(model.getBufferOffset());
         buffer.put(uvOffset);
@@ -45,6 +45,7 @@ public class FloorDecoration extends Renderable {
         buffer.put(ModelBuffers.FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientation);
         buffer.put(x).put(height).put(z);
         buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 2));
+        buffer.put(-1).put(-1).put(-1).put(-1); //animation
 
         modelBuffers.addTargetBufferOffset(tc * 3);
     }

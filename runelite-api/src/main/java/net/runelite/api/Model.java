@@ -73,9 +73,6 @@ public interface Model extends Entity
 
 	byte[] getTriangleTransparencies();
 
-	int getSceneId();
-	void setSceneId(int sceneId);
-
 	int getBufferOffset();
 	void setBufferOffset(int bufferOffset);
 

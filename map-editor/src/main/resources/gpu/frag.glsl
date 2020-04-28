@@ -28,13 +28,11 @@ uniform sampler2DArray textures;
 uniform vec2 textureOffsets[64];
 uniform float brightness;
 uniform float smoothBanding;
-uniform vec4 fogColor;
 uniform bool colorPickerRender;
 
 in vec4 Color;
 centroid in float fHsl;
 in vec4 fUv;
-in float fogAmount;
 
 in vec3 vPosition;
 
@@ -46,6 +44,9 @@ layout(location = 1) out int pickerId;
 #include hsl_to_rgb.glsl
 
 void main() {
+  if (Color.a == 0) {
+    discard;
+  }
   float n = fUv.x;
 
   int hsl = int(fHsl);
@@ -65,9 +66,6 @@ void main() {
     smoothColor = textureColorBrightness * smoothColor;
   }
 
-  vec3 mixedColor = mix(smoothColor.rgb, fogColor.rgb, fogAmount);
-
-  fragColor = vec4(mixedColor, smoothColor.a);
-
+  fragColor = smoothColor;
   pickerId = frag_pickerId;
 }

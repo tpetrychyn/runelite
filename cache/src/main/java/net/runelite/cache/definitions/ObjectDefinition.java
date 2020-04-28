@@ -101,7 +101,7 @@ public class ObjectDefinition {
             }
 
             // TODO: flat shading
-
+            litModel.tag = modelTag;
             litModelCache.put(modelTag, litModel);
         }
 
@@ -124,7 +124,7 @@ public class ObjectDefinition {
             }
 
             // TODO: flat shading
-
+            litModel.tag = modelTag;
             litModelCache.put(modelTag, litModel);
         }
 
@@ -258,11 +258,4 @@ public class ObjectDefinition {
 
         return copy;
     }
-
-//    public ObjectDefinition transform() {
-//        int var1 = -1;
-//        if (this.transformVarbit != -1) {
-//            var1 = getVa
-//        }
-//    }
 }

@@ -105,7 +105,7 @@ public class TilePaintImpl extends Renderable {
         GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
         modelBuffers.incUnorderedModels();
 
-        b.ensureCapacity(9);
+        b.ensureCapacity(13);
         IntBuffer buffer = b.getBuffer();
         buffer.put(getBufferOffset());
         buffer.put(getUvBufferOffset());
@@ -114,6 +114,7 @@ public class TilePaintImpl extends Renderable {
         buffer.put(FLAG_SCENE_BUFFER);
         buffer.put(x).put(y).put(z);
         buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 0));
+        buffer.put(-1).put(-1).put(-1).put(-1);
 
         setSceneBufferOffset(modelBuffers.getTargetBufferOffset());
         modelBuffers.addTargetBufferOffset(2 * 3);
@@ -130,7 +131,7 @@ public class TilePaintImpl extends Renderable {
         GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
         modelBuffers.incUnorderedModels();
 
-        b.ensureCapacity(9);
+        b.ensureCapacity(13);
         IntBuffer buffer = b.getBuffer();
         buffer.put(modelBuffers.getTempOffset());
         buffer.put(-1);
@@ -139,6 +140,7 @@ public class TilePaintImpl extends Renderable {
         buffer.put(0);
         buffer.put(x).put(y).put(z);
         buffer.put(pickerType.getValue());
+        buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTempOffset(len);
     }

@@ -23,18 +23,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#version 330
-
-#define TILE_SIZE 128
-
-#define FOG_SCENE_EDGE_MIN TILE_SIZE
-#define FOG_SCENE_EDGE_MAX (104 * TILE_SIZE)
-#define FOG_CORNER_ROUNDING 1.5
-#define FOG_CORNER_ROUNDING_SQUARED FOG_CORNER_ROUNDING * FOG_CORNER_ROUNDING
+#version 450
 
 layout (location = 0) in ivec4 VertexPosition;
 layout (location = 1) in vec4 uv;
 layout (location = 2) in int pickerId;
+
+//layout (location = 3) in ivec4 animInfo;
 
 layout(std140) uniform uniforms {
     int cameraYaw;
@@ -45,29 +40,27 @@ layout(std140) uniform uniforms {
     int cameraX;
     int cameraY;
     int cameraZ;
+    int currFrame;
+};
+
+layout(std430, binding = 12) buffer blocksData
+{
+    int selectedIds[];
 };
 
 uniform float brightness;
-uniform int useFog;
-uniform int fogDepth;
 uniform int drawDistance;
 
 uniform int hoverId;
-uniform int selectedIds[255];
 
 out ivec3 vPosition;
 out vec4 vColor;
 out float vHsl;
 out vec4 vUv;
-out float vFogAmount;
 
 flat out int o_pickerId;
 
 #include hsl_to_rgb.glsl
-
-float fogFactorLinear(const float dist, const float start, const float end) {
-    return 1.0 - clamp((dist - start) / (end - start), 0.0, 1.0);
-}
 
 void main()
 {
@@ -83,22 +76,24 @@ void main()
     vHsl = float(hsl);
     vUv = uv;
 
-    int fogWest = max(FOG_SCENE_EDGE_MIN, cameraX - drawDistance);
-    int fogEast = min(FOG_SCENE_EDGE_MAX, cameraX + drawDistance - TILE_SIZE);
-    int fogSouth = max(FOG_SCENE_EDGE_MIN, cameraZ - drawDistance);
-    int fogNorth = min(FOG_SCENE_EDGE_MAX, cameraZ + drawDistance - TILE_SIZE);
+    // animation logic
+//    int frame = animInfo.x;
+//    if (frame > -1) {
+//        int frameDuration = animInfo.y;
+//        int frameOffset = animInfo.z;
+//        int totalFrames = animInfo.w;
+//
+//        // apparently this multiply and shift is faster than modulo
+//        int c = currFrame % totalFrames;
+//        if (c < frameOffset || c > frameOffset + frameDuration) {
+//            vColor.a = 0;
+//            vHsl = 0;
+//            return;
+//        }
+//    }
+    // end animation logic
 
-    // Calculate distance from the scene edge
-    int xDist = min(vertex.x - fogWest, fogEast - vertex.x);
-    int zDist = min(vertex.z - fogSouth, fogNorth - vertex.z);
-    float nearestEdgeDistance = min(xDist, zDist);
-    float secondNearestEdgeDistance = max(xDist, zDist);
-    float fogDistance = nearestEdgeDistance - FOG_CORNER_ROUNDING * TILE_SIZE *
-    max(0, (nearestEdgeDistance + FOG_CORNER_ROUNDING_SQUARED) /
-    (secondNearestEdgeDistance + FOG_CORNER_ROUNDING_SQUARED));
-
-    vFogAmount = fogFactorLinear(fogDistance, 0, fogDepth * TILE_SIZE) * useFog;
-
+    // picking logic
     o_pickerId = pickerId;
 
     if (hoverId == pickerId) {
@@ -106,11 +101,13 @@ void main()
         vHsl = 11111;
     }
 
-    for (int i=0;i<255;i++) {
-        if (selectedIds[i] == pickerId) {
-            vColor.a = 0.8;
-            vHsl = 22222;
-            break;
-        }
+    int x = (pickerId >> 20) & 0xFFF;
+    int y = (pickerId >> 4) & 0xFFF;
+    int type = pickerId & 0xF;
+    int idx = x + 64 * (y + 64 * type);
+    if (selectedIds[idx] == 1) {
+        vColor.a = 0.8;
+        vHsl = 55555;
     }
+    // end picking logic
 }

@@ -12,6 +12,7 @@ import net.runelite.cache.models.VertexNormal;
 public class ModelDefinition
 {
 	public int id;
+	public long tag;
 
 	public int vertexCount = 0;
 	public int[] vertexPositionsX;

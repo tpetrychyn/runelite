@@ -25,9 +25,6 @@
 
 #version 330
 
-#define PI 3.1415926535897932384626433832795f
-#define UNIT PI / 1024.0f
-
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
@@ -40,20 +37,20 @@ layout(std140) uniform uniforms {
   int cameraX;
   int cameraY;
   int cameraZ;
+  int currFrame;
 };
 
 uniform mat4 projectionMatrix;
+uniform int drawDistance;
 
 in ivec3 vPosition[];
 in vec4 vColor[];
 in float vHsl[];
 in vec4 vUv[];
-in float vFogAmount[];
 
 out vec4 Color;
 centroid out float fHsl;
 out vec4 fUv;
-out float fogAmount;
 
 flat in int o_pickerId[];
 flat out int frag_pickerId;
@@ -66,8 +63,8 @@ void main() {
   vec3 screenB = toScreen(vPosition[1] - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
   vec3 screenC = toScreen(vPosition[2] - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
 
-  if (-screenA.z < 50 || -screenB.z < 50 || -screenC.z < 50) {
-    // the client does not draw a triangle if any vertex distance is <50
+  if (-screenA.z < 0 || -screenB.z < 0 || -screenC.z < 0
+    || -screenA.z > drawDistance || -screenB.z > drawDistance || -screenC.z > drawDistance) {
     return;
   }
 
@@ -75,7 +72,6 @@ void main() {
   Color = vColor[0];
   fHsl = vHsl[0];
   fUv = vUv[0];
-  fogAmount = vFogAmount[0];
   gl_Position  = projectionMatrix * tmp;
   frag_pickerId = o_pickerId[0];
   EmitVertex();
@@ -84,7 +80,6 @@ void main() {
   Color = vColor[1];
   fHsl = vHsl[1];
   fUv = vUv[1];
-  fogAmount = vFogAmount[1];
   gl_Position  = projectionMatrix * tmp;
   frag_pickerId = o_pickerId[1];
   EmitVertex();
@@ -93,7 +88,6 @@ void main() {
   Color = vColor[2];
   fHsl = vHsl[2];
   fUv = vUv[2];
-  fogAmount = vFogAmount[2];
   gl_Position  = projectionMatrix * tmp;
   frag_pickerId = o_pickerId[2];
   EmitVertex();

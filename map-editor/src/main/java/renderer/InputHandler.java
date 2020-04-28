@@ -86,6 +86,9 @@ public class InputHandler implements KeyListener, MouseListener {
         if (keys[KeyEvent.VK_K]) {
             mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 13360, 5));
         }
+        if (keys[KeyEvent.VK_L]) {
+            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 13408, 5));
+        }
     }
 
     @Override

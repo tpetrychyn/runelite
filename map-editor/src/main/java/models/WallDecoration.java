@@ -43,7 +43,7 @@ public class WallDecoration extends Renderable {
 
         GpuIntBuffer b = modelBuffers.bufferForTriangles(tc);
 
-        b.ensureCapacity(9);
+        b.ensureCapacity(13);
         IntBuffer buffer = b.getBuffer();
         buffer.put(model.getBufferOffset());
         buffer.put(uvOffset);
@@ -52,41 +52,46 @@ public class WallDecoration extends Renderable {
         buffer.put(ModelBuffers.FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientationA);
         buffer.put(x).put(height).put(z);
         buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 3));
+        buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTargetBufferOffset(tc * 3);
     }
 
     public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType) {
-        Model model = entityA.getModel();
-        if (model == null) {
-            return;
+        DynamicObject dyn = (DynamicObject) entityA;
+        int idx = 0;
+        int animOffset = 0;
+        int totalFramesCountUsed = 0;
+        for (int i=dyn.getSequenceDefinition().frameIds.length - dyn.getSequenceDefinition().frameCount;i<dyn.getSequenceDefinition().frameIds.length;i++) {
+            totalFramesCountUsed += dyn.getSequenceDefinition().frameLengths[i];
         }
+        for (int i=dyn.getSequenceDefinition().frameIds.length - dyn.getSequenceDefinition().frameCount;i<dyn.getSequenceDefinition().frameIds.length;i++) {
+            Model model = dyn.getModel(i);
+            if (model == null) {
+                continue;
+            }
+            int x = sceneX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
+            int z = sceneY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
 
-        int x = getSceneX() * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
-        int y = getSceneY() * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
-        int faces = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
-        modelBuffers.getVertexBuffer().ensureCapacity(12 * faces);
-        modelBuffers.getUvBuffer().ensureCapacity(12 * faces);
-        int len = 0;
-        for (int i = 0; i < faces; ++i) {
-            len += sceneUploader.pushFace(model, i, modelBuffers.getVertexBuffer(), modelBuffers.getUvBuffer());
+            int tc = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
+            int uvOffset = model.getUvBufferOffset();
+
+            GpuIntBuffer b = modelBuffers.bufferForTriangles(tc);
+
+            b.ensureCapacity(13);
+            IntBuffer buffer = b.getBuffer();
+            buffer.put(model.getBufferOffset());
+            buffer.put(uvOffset);
+            buffer.put(tc);
+            buffer.put(modelBuffers.getTargetBufferOffset());
+            buffer.put(ModelBuffers.FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientationA);
+            buffer.put(x).put(height).put(z);
+            buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 3));
+            buffer.put(idx).put(dyn.getSequenceDefinition().frameLengths[i]).put(animOffset).put(totalFramesCountUsed);
+
+            idx++;
+            animOffset += dyn.getSequenceDefinition().frameLengths[i];
+            modelBuffers.addTargetBufferOffset(tc * 3);
         }
-        GpuIntBuffer b = modelBuffers.bufferForTriangles(faces);
-
-        b.ensureCapacity(9);
-        IntBuffer buffer = b.getBuffer();
-        buffer.put(modelBuffers.getTempOffset());
-        buffer.put(-1);
-        buffer.put(len / 3);
-        buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
-        buffer.put((model.getRadius() << 12) | getOrientationA());
-        buffer.put(x).put(height).put(y);
-        if (pickerType == PickerType.PICKABLE) {
-            buffer.put(modelBuffers.calcPickerId(getSceneX(), getSceneY(), 3));
-        } else {
-            buffer.put(pickerType.getValue());
-        }
-
-        modelBuffers.addTempOffset(len);
     }
 }

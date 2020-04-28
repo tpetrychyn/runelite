@@ -26,6 +26,8 @@
 /*
  * Convert a vertex to screen space
  */
+#define PI 3.1415926535897932384626433832795f
+#define UNIT PI / 1024.0f
 vec3 toScreen(ivec3 vertex, int cameraYaw, int cameraPitch, int centerX, int centerY, int zoom) {
   float yawSin = sin(cameraYaw * UNIT);
   float yawCos = cos(cameraYaw * UNIT);

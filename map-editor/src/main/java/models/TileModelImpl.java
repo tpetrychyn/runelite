@@ -48,7 +48,7 @@ public class TileModelImpl extends Renderable {
         GpuIntBuffer b = modelBuffers.getModelBufferUnordered();
         modelBuffers.incUnorderedModels();
 
-        b.ensureCapacity(9);
+        b.ensureCapacity(13);
         IntBuffer buffer = b.getBuffer();
         buffer.put(getBufferOffset());
         buffer.put(getUvBufferOffset());
@@ -57,6 +57,7 @@ public class TileModelImpl extends Renderable {
         buffer.put(FLAG_SCENE_BUFFER);
         buffer.put(x).put(y).put(z);
         buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 1));
+        buffer.put(-1).put(-1).put(-1).put(-1); // animation
 
         modelBuffers.addTargetBufferOffset(getBufferLen());
     }
