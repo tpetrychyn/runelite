@@ -6,8 +6,8 @@ import net.runelite.api.Constants;
 @Getter
 public class Scene {
     // NxM grid of regions to display
-    private SceneRegion[][] regions;
-    private int radius;
+    private final SceneRegion[][] regions;
+    private final int radius;
 
     public Scene(SceneRegionBuilder sceneRegionBuilder, int centerRegionId, int radius) {
         this.radius = radius;

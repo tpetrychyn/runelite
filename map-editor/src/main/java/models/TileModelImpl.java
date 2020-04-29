@@ -3,12 +3,10 @@ package models;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Perspective;
-import net.runelite.api.TileModel;
 import org.apache.commons.lang3.NotImplementedException;
 import renderer.SceneUploader;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
-import renderer.helpers.PickerType;
 
 import java.nio.IntBuffer;
 
@@ -63,7 +61,7 @@ public class TileModelImpl extends Renderable {
     }
 
     @Override
-    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType) {
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
         throw new NotImplementedException("tile models do not draw dynamic");
     }
 

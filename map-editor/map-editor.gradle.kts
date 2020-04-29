@@ -37,14 +37,16 @@ dependencies {
     runtimeOnly(Libraries.jogampJoglWindowsI586)
 
     api(files("lib/jogamp-fat.jar"))
+    api(files("lib/jimObjModelImporterJFX.jar"))
     implementation("com.jfoenix:jfoenix:9.0.9")
 
     api(group = "org.joml", name = "joml", version = "1.9.12")
+    api(group = "de.javagl", name = "obj", version = "0.3.0")
 
     testImplementation(Libraries.junit)
 }
 
 javafx {
     version = "14"
-    modules = listOf("javafx.controls", "javafx.fxml")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
 }

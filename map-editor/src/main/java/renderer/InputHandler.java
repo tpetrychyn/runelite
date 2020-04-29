@@ -89,6 +89,11 @@ public class InputHandler implements KeyListener, MouseListener {
         if (keys[KeyEvent.VK_L]) {
             mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 13408, 5));
         }
+
+        if (keys[KeyEvent.VK_R]) {
+            mapEditor.rotateObject();
+            keys[KeyEvent.VK_R] = false;
+        }
     }
 
     @Override

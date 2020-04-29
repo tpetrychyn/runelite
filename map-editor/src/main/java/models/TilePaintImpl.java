@@ -5,13 +5,10 @@ import com.jogamp.opengl.util.GLBuffers;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Perspective;
-import net.runelite.api.TilePaint;
-import org.apache.commons.lang3.NotImplementedException;
 import renderer.SceneUploader;
 import renderer.helpers.GpuFloatBuffer;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
-import renderer.helpers.PickerType;
 
 import java.nio.IntBuffer;
 
@@ -120,7 +117,7 @@ public class TilePaintImpl extends Renderable {
         modelBuffers.addTargetBufferOffset(2 * 3);
     }
 
-    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType) {
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
         int x = getSceneX() * Perspective.LOCAL_TILE_SIZE;
         int y = 0;
         int z = getSceneY() * Perspective.LOCAL_TILE_SIZE;
@@ -139,7 +136,7 @@ public class TilePaintImpl extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
         buffer.put(0);
         buffer.put(x).put(y).put(z);
-        buffer.put(pickerType.getValue());
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 0));
         buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTempOffset(len);

@@ -6,24 +6,26 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
-import layoutControllers.DebugController;
 import layoutControllers.MainController;
 import layoutControllers.MinimapController;
-import lombok.SneakyThrows;
+import layoutControllers.ObjectPickerController;
 import lombok.extern.slf4j.Slf4j;
 import models.*;
-import models.DynamicObject;
-import models.Renderable;
-import net.runelite.api.*;
+import net.runelite.api.Constants;
+import net.runelite.api.Perspective;
 import net.runelite.cache.SpriteManager;
+import net.runelite.cache.definitions.ModelDefinition;
+import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.fs.StoreProvider;
 import net.runelite.cache.item.RSTextureProvider;
 import org.joml.Matrix4f;
-import renderer.helpers.*;
+import renderer.helpers.AntiAliasingMode;
+import renderer.helpers.GLUtil;
+import renderer.helpers.GpuIntBuffer;
+import renderer.helpers.ModelBuffers;
 import scene.Scene;
 import scene.SceneRegionBuilder;
 import scene.SceneTile;
@@ -32,7 +34,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static renderer.helpers.GLUtil.*;
 
@@ -86,6 +89,7 @@ public class MapEditor implements GLEventListener {
     private int animFrameBufferId; // which frame the model should display on
     private int selectedIdsBufferId;
 
+    private boolean showHover = true;
     private int hoverId;
 
     private int textureArrayId;
@@ -125,7 +129,7 @@ public class MapEditor implements GLEventListener {
     int canvasWidth = 1200;
     int canvasHeight = (int) (canvasWidth / 1.3);
 
-    public NewtCanvasJFX LoadMap(MainController mainController, MinimapController minimapController) {
+    public NewtCanvasJFX LoadMap(MainController mainController, MinimapController minimapController, ObjectPickerController objectPickerController) {
         try {
             Store store = StoreProvider.getStore();
             SpriteManager sprites = new SpriteManager(store);
@@ -186,6 +190,8 @@ public class MapEditor implements GLEventListener {
         lastAntiAliasingMode = null;
 
         textureArrayId = -1;
+
+        objectPickerController.setMapEditor(this);
 
         return glCanvas;
     }
@@ -314,13 +320,6 @@ public class MapEditor implements GLEventListener {
         byte[] pboBytes = new byte[4];
         srcBuf.get(pboBytes);
         int pickerId = (pboBytes[3] & 0xFF) << 24 | (pboBytes[2] & 0xFF) << 16 | (pboBytes[1] & 0xFF) << 8 | (pboBytes[0] & 0xFF);
-//        IntBuffer srcBuf = GLBuffers.newDirectIntBuffer(1);
-//        gl.glGetBufferSubData(gl.GL_PIXEL_PACK_BUFFER, 0, GLBuffers.SIZEOF_INT, srcBuf);
-
-//        int pickerId = -1;
-//        if (srcBuf.limit() > 0) {
-//            pickerId = srcBuf.get();
-//        }
         gl.glUnmapBuffer(gl.GL_PIXEL_PACK_BUFFER);
 
         if (pickerId == -1) {
@@ -336,6 +335,12 @@ public class MapEditor implements GLEventListener {
         debugText += String.format("id %d\n x %d y %d objId %d \n", pickerId, x, y, type);
         SceneTile tile = scene.getTile(0, x, y);
         if (tile != null) {
+            if (injectedDec != null && tile.getTilePaint() != null) {
+                injectedDec.setSceneX(x);
+                injectedDec.setSceneY(y);
+                injectedDec.setHeight(tile.getTilePaint().getNwHeight());
+                return;
+            }
             if (tile.getWallDecoration() != null) {
                 WallDecoration d = tile.getWallDecoration();
                 debugText += String.format("wall dec: tag %d \n", d.getTag());
@@ -375,23 +380,16 @@ public class MapEditor implements GLEventListener {
                 w.setSceneX(x);
                 w.setSceneY(y);
                 w.draw(modelBuffers, x, y);
-//                w.drawDynamic(modelBuffers, sceneUploader, PickerType.PICKABLE);
             }
         }
-//
-//        for (WallDecoration obj : tile.getBoundaryObjects()) {
-//            if (obj != null && obj.getEntityA() != null) {
-//                obj.draw(modelBuffers, x, y);
-//            }
-//        }
     }
 
     private final List<Renderable> dynamicDecorations = new ArrayList<>();
 
     private void drawDynamic() {
-//        for (Renderable r : dynamicDecorations) {
-//            ((WallDecoration)r).drawDynamic2(modelBuffers, sceneUploader, PickerType.PICKABLE);
-//        }
+        for (Renderable r : dynamicDecorations) {
+            r.drawDynamic(modelBuffers, sceneUploader);
+        }
     }
 
     private static long clientStart = System.currentTimeMillis();
@@ -475,7 +473,7 @@ public class MapEditor implements GLEventListener {
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tmpModelBufferUnorderedId);
         gl.glBufferData(gl.GL_ARRAY_BUFFER, modelBufferUnordered.limit() * Integer.BYTES, modelBufferUnordered, gl.GL_DYNAMIC_DRAW);
 
-        int clientCycle = (int)((System.currentTimeMillis() - clientStart) / 20); // 50 fps
+        int clientCycle = (int) ((System.currentTimeMillis() - clientStart) / 20); // 50 fps
 
         // UBO
         gl.glBindBuffer(gl.GL_UNIFORM_BUFFER, uniformBufferId);
@@ -579,7 +577,7 @@ public class MapEditor implements GLEventListener {
 //                textureOffsets[id * 2 + 1] = texture.getV();
 //            }
 
-            gl.glUniform1i(uniHoverId, hoverId);
+            gl.glUniform1i(uniHoverId, showHover ? hoverId : -1);
 
             // Bind uniforms
             gl.glUniformBlockBinding(glProgram, uniBlockMain, 0);
@@ -651,6 +649,7 @@ public class MapEditor implements GLEventListener {
         debugText = "";
 //        minimapController.drawCanvas(scene);
     }
+
     String debugText = "";
     int frames = 0;
 
@@ -826,8 +825,7 @@ public class MapEditor implements GLEventListener {
     }
 
     private void initDynamicSSBO() {
-        // TODO: more than 4 obj per tile, dunno about this yet
-        int maxTileObj = 4;
+        int maxTileObj = 15;
         int tileRad = scene.getRadius() * Constants.REGION_SIZE;
         gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, selectedIdsBufferId);
         gl.glBufferData(gl.GL_SHADER_STORAGE_BUFFER, tileRad * tileRad * maxTileObj * GLBuffers.SIZEOF_INT, null, gl.GL_DYNAMIC_DRAW);
@@ -940,21 +938,57 @@ public class MapEditor implements GLEventListener {
     int hoverStartX = -1;
     int hoverStartY = -1;
 
+    WallDecoration injectedDec = null;
+
+    public void injectWallDecoration(ModelDefinition m, ObjectDefinition o) {
+        StaticObject model = new StaticObject(m, o.getAmbient() + 64, o.getContrast() + 768, -50, -10, -50);
+        injectedDec = new WallDecoration(m.tag,
+                0,
+                0,
+                0,
+                0,
+                model,
+                null,
+                0,
+                0);
+        dynamicDecorations.add(injectedDec);
+        showHover = false;
+    }
+
+    public void rotateObject() {
+        ((StaticObject) injectedDec.getEntityA()).rotateY90Ccw();
+    }
+
     void handleClick() {
         if (hoverId == -1) {
             return;
         }
         if (inputHandler.isMouseClicked()) {
+            int maxTileObj = 15;
+            int tileRad = scene.getRadius() * Constants.REGION_SIZE;
             int x = (hoverId >> 20) & 0xFFF;
             int y = (hoverId >> 4) & 0xFFF;
-            
-            int obj = 0;
+            int obj = hoverId & 0xF;
+
+            SceneTile tile = scene.getTile(0, x, y);
+            if (tile != null) {
+                if (injectedDec != null && tile.getTilePaint() != null) {
+                    injectedDec.setSceneX(x);
+                    injectedDec.setSceneY(y);
+                    injectedDec.setHeight(tile.getTilePaint().getNwHeight());
+                    dynamicDecorations.add(injectedDec);
+                    inputHandler.mouseClicked = false;
+                    return;
+                }
+            }
+
             int idx = x + 64 * (y + 64 * obj);
-            IntBuffer tt = GLBuffers.newDirectIntBuffer(1);
-            tt.put(1);
+            IntBuffer tt = GLBuffers.newDirectIntBuffer(tileRad * tileRad * maxTileObj * GLBuffers.SIZEOF_INT);
+            tt.put(idx, 1);
             tt.flip();
+
             gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, selectedIdsBufferId);
-            gl.glBufferSubData(gl.GL_SHADER_STORAGE_BUFFER, idx * GLBuffers.SIZEOF_INT , GLBuffers.SIZEOF_INT, tt);
+            gl.glBufferSubData(gl.GL_SHADER_STORAGE_BUFFER, 0, tileRad * tileRad * maxTileObj * GLBuffers.SIZEOF_INT, tt);
             gl.glBindBuffer(gl.GL_SHADER_STORAGE_BUFFER, 0);
 
             inputHandler.mouseClicked = false;

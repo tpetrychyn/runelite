@@ -2,10 +2,8 @@ package models;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.api.Model;
 import renderer.SceneUploader;
 import renderer.helpers.ModelBuffers;
-import renderer.helpers.PickerType;
 
 @Getter
 @Setter
@@ -29,5 +27,5 @@ public abstract class Renderable {
     protected int pickerType = -1;
 
     public abstract void draw(ModelBuffers modelBuffers, int sceneX, int sceneY);
-    public abstract void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType);
+    public abstract void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader);
 }

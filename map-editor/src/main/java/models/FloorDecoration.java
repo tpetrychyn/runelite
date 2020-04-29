@@ -2,17 +2,12 @@ package models;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.api.*;
-import net.runelite.api.Point;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.Model;
+import net.runelite.api.Perspective;
 import renderer.SceneUploader;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
-import renderer.helpers.PickerType;
 
-import javax.annotation.Nullable;
-import java.awt.*;
 import java.nio.IntBuffer;
 
 @Getter
@@ -51,7 +46,7 @@ public class FloorDecoration extends Renderable {
     }
 
     @Override
-    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader, PickerType pickerType) {
+    public void drawDynamic(ModelBuffers modelBuffers, SceneUploader sceneUploader) {
         //TODO
         //    void drawTemporaryFloorDecoration(FloorDecoration fd, int tileX, int tileY) {
 //        int x = tileX;// * Perspective.LOCAL_TILE_SIZE;

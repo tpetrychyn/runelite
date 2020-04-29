@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import layoutControllers.MainController;
 import layoutControllers.MinimapController;
+import layoutControllers.ObjectPickerController;
 import renderer.MapEditor;
 
 import java.io.IOException;
@@ -31,28 +32,39 @@ public class JfxApplication extends Application {
         stage.setScene(jfxScene);
         stage.show();
 
+        // LOAD MINIMAP
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout/minimap.fxml"));
         Parent root1 = fxmlLoader.load();
-//        Stage stage2 = new Stage();
-//        stage2.initModality(Modality.NONE);
-//        stage2.setTitle("Minimap");
-//        stage2.setScene(new Scene(root1));
-//        stage2.show();
+        Stage stage2 = new Stage();
+        stage2.initModality(Modality.NONE);
+        stage2.setTitle("Minimap");
+        stage2.setScene(new Scene(root1));
+        stage2.show();
 
+        // LOAD OBJECT PICKER
+        FXMLLoader objLoader = new FXMLLoader(getClass().getResource("/layout/object-picker.fxml"));
+        Parent objRoot = objLoader.load();
+        Stage objStage = new Stage();
+        objStage.initModality(Modality.NONE);
+        objStage.setTitle("Object Picker");
+        objStage.setScene(new Scene(objRoot));
+        objStage.show();
+
+        ObjectPickerController objectPickerController = objLoader.getController();
 
 
         MinimapController minimapController = fxmlLoader.getController();
-        root1.setOnScroll(minimapController::onMouseWheelScroll);
+//        root1.setOnScroll(minimapController::onMouseWheelScroll);
 
         LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(controller) {
             @Override
             public NewtCanvasJFX call() {
-                return new MapEditor().LoadMap(controller, minimapController);
+                return new MapEditor().LoadMap(controller, minimapController, objectPickerController);
             }
         };
         loadTask.setOnSucceeded(e -> controller.getGroup().getChildren().add(loadTask.getValue()));
         new Thread(loadTask).start();
-//
+
 //        controller.getGroup().getChildren().add(new MapEditor().LoadMap(controller, minimapController));
     }
 
