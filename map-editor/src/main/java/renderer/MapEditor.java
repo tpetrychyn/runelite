@@ -121,6 +121,7 @@ public class MapEditor implements GLEventListener {
     private int uniBlockMain;
     private int uniSmoothBanding;
     private int uniHoverId;
+    private int uniMouseCoordsId;
 
     Animator animator;
     SceneRegionBuilder sceneRegionBuilder;
@@ -322,9 +323,16 @@ public class MapEditor implements GLEventListener {
         int pickerId = (pboBytes[3] & 0xFF) << 24 | (pboBytes[2] & 0xFF) << 16 | (pboBytes[1] & 0xFF) << 8 | (pboBytes[0] & 0xFF);
         gl.glUnmapBuffer(gl.GL_PIXEL_PACK_BUFFER);
 
+        // TODO: bring PickerType enum back
+        // -1 = null hover, ignore
+        // -2 = we want to pass through this object
         if (pickerId == -1) {
             hoverId = -1;
             return;
+        }
+
+        if (pickerId != -2) {
+            hoverId = pickerId;
         }
 
         //int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | objectId & 0xF;
@@ -349,8 +357,6 @@ public class MapEditor implements GLEventListener {
                 }
             }
         }
-
-        hoverId = pickerId;
     }
 
     void drawTile(SceneTile tile) {
@@ -577,7 +583,8 @@ public class MapEditor implements GLEventListener {
 //                textureOffsets[id * 2 + 1] = texture.getV();
 //            }
 
-            gl.glUniform1i(uniHoverId, showHover ? hoverId : -1);
+            gl.glUniform1i(uniHoverId, hoverId);
+            gl.glUniform2i(uniMouseCoordsId, inputHandler.getMouseX(), canvasHeight - inputHandler.getMouseY());
 
             // Bind uniforms
             gl.glUniformBlockBinding(glProgram, uniBlockMain, 0);
@@ -752,6 +759,7 @@ public class MapEditor implements GLEventListener {
         uniBlockMain = gl.glGetUniformBlockIndex(glProgram, "uniforms");
 
         uniHoverId = gl.glGetUniformLocation(glProgram, "hoverId");
+        uniMouseCoordsId = gl.glGetUniformLocation(glProgram, "mouseCoords");
     }
 
     private void initUniformBuffer() {

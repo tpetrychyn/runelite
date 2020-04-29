@@ -32,7 +32,7 @@ public class JfxApplication extends Application {
         stage.setScene(jfxScene);
         stage.show();
 
-        // LOAD MINIMAP
+//        // LOAD MINIMAP
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout/minimap.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage2 = new Stage();

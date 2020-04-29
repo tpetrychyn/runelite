@@ -81,7 +81,7 @@ public class WallDecoration extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
         buffer.put((model.getRadius() << 12) | getOrientationA());
         buffer.put(x).put(height).put(y);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 3));
+        buffer.put(-2);
         buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTempOffset(len);

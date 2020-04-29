@@ -41,9 +41,16 @@ flat in int frag_pickerId;
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) out int pickerId;
 
+uniform ivec2 mouseCoords;
+
 #include hsl_to_rgb.glsl
 
 void main() {
+  if (frag_pickerId == -2) {
+    if (mouseCoords.x == int(gl_FragCoord.x) && mouseCoords.y == int(gl_FragCoord.y)) {
+      discard;
+    }
+  }
   if (Color.a == 0) {
     discard;
   }

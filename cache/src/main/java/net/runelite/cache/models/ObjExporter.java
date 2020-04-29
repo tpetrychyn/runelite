@@ -141,7 +141,7 @@ public class ObjExporter
 		}
 	}
 
-	private static Color rs2hsbToColor(int hsb)
+	public static Color rs2hsbToColor(int hsb)
 	{
 		int decode_hue = (hsb >> 10) & 0x3f;
 		int decode_saturation = (hsb >> 7) & 0x07;

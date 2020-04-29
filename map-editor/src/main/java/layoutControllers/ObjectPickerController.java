@@ -1,10 +1,8 @@
 package layoutControllers;
 
-import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -12,22 +10,19 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.cache.ObjectManager;
+import net.runelite.cache.TextureManager;
 import net.runelite.cache.definitions.ModelDefinition;
 import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.fs.StoreProvider;
-import net.runelite.cache.models.ObjExporter;
 import renderer.MapEditor;
-import net.runelite.cache.TextureManager;
 
-import java.io.*;
-import java.util.Stack;
+import java.io.IOException;
 
 @Getter
 @Setter
@@ -45,16 +40,13 @@ public class ObjectPickerController {
         Store store = StoreProvider.getStore();
         ObjectManager objectManager = new ObjectManager(store);
         TextureManager textureManager = new TextureManager(store);
-
         try {
             objectManager.load();
             textureManager.load();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ObjModelImporter importer = new ObjModelImporter();
-//        importer.read(new File("model/15402.obj"));
-//        MeshView[] meshViews = importer.getImport();
+
         Group g = new Group();
         StackPane p = new StackPane(g);
         Camera camera = new PerspectiveCamera(true);
@@ -83,26 +75,9 @@ public class ObjectPickerController {
             if (m == null) continue;
             Label l = new Label(o.getName());
             l.setOnMouseClicked((e) -> {
-                try {
-                    PrintWriter objWriter = new PrintWriter(new FileWriter(new File(m.id + ".obj")));
-                    PrintWriter mtlWriter = new PrintWriter(new FileWriter(new File(m.id + ".mtl")));
-                    ObjExporter oe = new ObjExporter(textureManager, m);
-                    oe.export(objWriter, mtlWriter);
-
-                    objWriter.flush();
-                    objWriter.close();
-                    mtlWriter.flush();
-                    mtlWriter.close();
-
-                    System.out.printf("wrote model %d\n", m.id);
-
-                    importer.read(new File(m.id + ".obj"));
-                    MeshView[] mv = importer.getImport();
-                    g.getChildren().clear();
-                    g.getChildren().addAll(mv);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                MeshView[] mv = JavaFxHelpers.modelToMeshViews(m);
+                g.getChildren().clear();
+                g.getChildren().addAll(mv);
                 mapEditor.injectWallDecoration(m, o);
             });
             vBox.getChildren().addAll(l);
