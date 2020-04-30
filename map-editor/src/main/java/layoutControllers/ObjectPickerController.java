@@ -2,16 +2,26 @@ package layoutControllers;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+import javafx.util.Callback;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.cache.ObjectManager;
@@ -27,6 +37,7 @@ import java.io.IOException;
 @Getter
 @Setter
 public class ObjectPickerController {
+    private MainController mainController;
     private MapEditor mapEditor;
 
     @FXML
@@ -34,6 +45,13 @@ public class ObjectPickerController {
 
     @FXML
     private StackPane stackPane;
+
+    @FXML
+    private ListView<ObjectDefinition> listView;
+    ObservableList<ObjectDefinition> entries = FXCollections.observableArrayList();
+
+    @FXML
+    private TextField searchBox;
 
     @FXML
     private void initialize() {
@@ -46,6 +64,8 @@ public class ObjectPickerController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        searchBox.textProperty().addListener((observable, oldVal, newVal) -> search(oldVal, newVal));
 
         Group g = new Group();
         StackPane p = new StackPane(g);
@@ -67,24 +87,46 @@ public class ObjectPickerController {
 
         initMouseControl(g, stackPane, camera);
 
-        VBox vBox = new VBox();
-        for (int i = 0; i < 1500; i++) {
-            ObjectDefinition o = objectManager.getObject(i);
-            if (o == null) continue;
-            ModelDefinition m = o.getModel(10, 0);
-            if (m == null) continue;
-            Label l = new Label(o.getName());
-            l.setOnMouseClicked((e) -> {
-                MeshView[] mv = JavaFxHelpers.modelToMeshViews(m);
-                g.getChildren().clear();
-                g.getChildren().addAll(mv);
-                mapEditor.injectWallDecoration(m, o);
-            });
-            vBox.getChildren().addAll(l);
-        }
+        entries.addAll(objectManager.getObjects());
+        listView.setItems(entries);
+        listView.setCellFactory(list -> new ListCell<>() {
+            @Override
+            public void updateItem(ObjectDefinition item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(String.format("%s (%d)", item.getName(), item.getId()));
+                }
+            }
+        });
 
-        vBox.setSpacing(10);
-        scrollPane.setContent(vBox);
+        listView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                    if (newVal == null || newVal == oldVal) {
+                        return;
+                    }
+                    g.getChildren().clear();
+                    ModelDefinition m = newVal.getModel(10, 0);
+                    if (m == null) {
+                        return;
+                    }
+                    MeshView[] mv = JavaFxHelpers.modelToMeshViews(m);
+                    g.getChildren().addAll(mv);
+
+                    SnapshotParameters ss = new SnapshotParameters();
+                    ss.setFill(Color.TRANSPARENT);
+                    WritableImage snapshot = subScene.snapshot(ss, null);
+
+                    ImageView i = new ImageView(snapshot);
+                    i.setFitWidth(125);
+                    i.setFitHeight(75);
+                    i.setPreserveRatio(true);
+                    i.setPickOnBounds(true);
+                    VBox ele = new VBox(i, new Label(String.format("%s (%d)", newVal.getName(), newVal.getId())));
+                    ele.setAlignment(Pos.CENTER);
+                    mainController.addModelToSwatch(ele);
+                }
+        );
     }
 
     //Tracks drag starting point for x and y
@@ -125,5 +167,19 @@ public class ObjectPickerController {
             //Add it to the Z-axis location.
             camera.setTranslateZ(camera.getTranslateZ() + delta);
         });
+    }
+
+    public void search(String oldVal, String newVal) {
+        if (oldVal != null && (newVal.length() < oldVal.length())) {
+            listView.setItems(entries);
+        }
+        String value = newVal.toUpperCase();
+        ObservableList<ObjectDefinition> subentries = FXCollections.observableArrayList();
+        for (ObjectDefinition entry : listView.getItems()) {
+            if (entry.getName().toUpperCase().contains(value)) {
+                subentries.add(entry);
+            }
+        }
+        listView.setItems(subentries);
     }
 }

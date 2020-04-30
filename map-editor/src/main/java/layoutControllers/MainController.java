@@ -1,5 +1,6 @@
 package layoutControllers;
 
+import com.jfoenix.controls.JFXMasonryPane;
 import com.jogamp.opengl.util.Animator;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.Getter;
@@ -60,6 +62,9 @@ public class MainController {
     private MenuItem optMinimap;
 
     @FXML
+    private JFXMasonryPane swatchPane;
+
+    @FXML
     private void initialize() {
         optMinimap.setOnAction(event -> {
             try {
@@ -97,5 +102,10 @@ public class MainController {
                 debugText.setText(camera.getDebugText());
             }
         }.start();
+    }
+
+
+    public void addModelToSwatch(Region p) {
+        swatchPane.getChildren().addAll(p);
     }
 }

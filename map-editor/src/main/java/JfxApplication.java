@@ -1,6 +1,7 @@
 import com.jogamp.newt.javafx.NewtCanvasJFX;
 import javafx.application.Application;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -26,13 +27,13 @@ public class JfxApplication extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/layout/main.fxml"));
         Parent root = loader.load();
 
-        MainController controller = loader.getController();
+        MainController mainController = loader.getController();
 
         javafx.scene.Scene jfxScene = new javafx.scene.Scene(root);
         stage.setScene(jfxScene);
         stage.show();
 
-//        // LOAD MINIMAP
+        // LOAD MINIMAP
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout/minimap.fxml"));
         Parent root1 = fxmlLoader.load();
         Stage stage2 = new Stage();
@@ -51,21 +52,22 @@ public class JfxApplication extends Application {
         objStage.show();
 
         ObjectPickerController objectPickerController = objLoader.getController();
+        objectPickerController.setMainController(mainController);
 
 
         MinimapController minimapController = fxmlLoader.getController();
 //        root1.setOnScroll(minimapController::onMouseWheelScroll);
 
-        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(controller) {
+        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(mainController) {
             @Override
             public NewtCanvasJFX call() {
                 return new MapEditor().LoadMap(controller, minimapController, objectPickerController);
             }
         };
-        loadTask.setOnSucceeded(e -> controller.getGroup().getChildren().add(loadTask.getValue()));
+        loadTask.setOnSucceeded(e -> {
+            mainController.getGroup().getChildren().add(loadTask.getValue());
+        });
         new Thread(loadTask).start();
-
-//        controller.getGroup().getChildren().add(new MapEditor().LoadMap(controller, minimapController));
     }
 
 

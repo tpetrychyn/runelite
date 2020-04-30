@@ -30,6 +30,8 @@ import scene.Scene;
 import scene.SceneRegionBuilder;
 import scene.SceneTile;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -127,7 +129,7 @@ public class MapEditor implements GLEventListener {
     SceneRegionBuilder sceneRegionBuilder;
     private MinimapController minimapController;
 
-    int canvasWidth = 1200;
+    int canvasWidth = 800;
     int canvasHeight = (int) (canvasWidth / 1.3);
 
     public NewtCanvasJFX LoadMap(MainController mainController, MinimapController minimapController, ObjectPickerController objectPickerController) {
@@ -297,8 +299,8 @@ public class MapEditor implements GLEventListener {
     }
 
     void handleHover() {
-        int mouseX = inputHandler.getMouseX();
-        int mouseY = inputHandler.getMouseY();
+        int mouseX = 0;//inputHandler.getMouseX();
+        int mouseY = 0;//inputHandler.getMouseY();
 
         // Using 3 PBOs brings this function time to 0.05ms, with only 2 PBOs is it 10ms
         // This will write to pboIndex and read from nextIndex which should have finished drawing to
@@ -407,10 +409,10 @@ public class MapEditor implements GLEventListener {
             uploadScene();
         }
 
-        handleHover();
-        handleClick();
-
-        drawDynamic();
+//        handleHover();
+//        handleClick();
+//
+//        drawDynamic();
         if (canvasWidth > 0 && canvasHeight > 0 && (canvasWidth != lastViewportWidth || canvasHeight != lastViewportHeight)) {
             createProjectionMatrix(0, canvasWidth, canvasHeight, 0, 1, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             lastViewportWidth = canvasWidth;
