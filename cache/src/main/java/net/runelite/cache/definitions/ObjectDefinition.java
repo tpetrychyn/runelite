@@ -84,8 +84,15 @@ public class ObjectDefinition {
 
     public static Map<Long, ModelDefinition> litModelCache = new HashMap<>();
     public static Map<Integer, ModelDefinition> modelDefCache = new HashMap<>();
+    private Store store;
 
-    public ModelDefinition getModel(int type, int orientation) {
+    @Override
+    public String toString() {
+        return String.format("%s (%d)", name, id);
+    }
+
+    public ModelDefinition getModel(Store store, int type, int orientation) {
+        this.store = store;
         long modelTag;
         if (this.models == null) {
             modelTag = orientation + (this.id << 10);
@@ -105,6 +112,9 @@ public class ObjectDefinition {
             litModelCache.put(modelTag, litModel);
         }
 
+        if (litModel.faceAlphas != null) {
+            System.out.printf("");
+        }
         return litModel;
     }
 
@@ -144,7 +154,9 @@ public class ObjectDefinition {
                 return null;
             }
 
-            for (int i=0;i<modelIds.length;i++) {
+            int modelLen = modelIds.length;
+
+            for (int i=0;i<modelLen;i++) {
                 int modelId = modelIds[i];
                 if (isRotated) {
                     modelId += 65536;
@@ -152,7 +164,6 @@ public class ObjectDefinition {
 
                 modelDefinition = modelDefCache.get(modelId);
                 if (modelDefinition == null) {
-                    Store store = StoreProvider.getStore();
                     Storage storage = store.getStorage();
                     Index index = store.getIndex(IndexType.MODELS);
 
@@ -180,6 +191,14 @@ public class ObjectDefinition {
 
                     modelDefCache.put(modelId, modelDefinition);
                 }
+
+                if (modelLen > 1) {
+
+                }
+            }
+
+            if (modelLen > 1) {
+                modelDefinition = new ModelDefinition();
             }
         } else {
             int modelIdx = -1;
@@ -202,7 +221,6 @@ public class ObjectDefinition {
 
             modelDefinition = modelDefCache.get(modelId);
             if (modelDefinition == null) {
-                Store store = StoreProvider.getStore();
                 Storage storage = store.getStorage();
                 Index index = store.getIndex(IndexType.MODELS);
 
@@ -230,6 +248,10 @@ public class ObjectDefinition {
 
                 modelDefCache.put(modelId, modelDefinition);
             }
+        }
+
+        if (modelDefinition.faceAlphas != null) {
+            System.out.printf("");
         }
 
         assert modelDefinition != null;

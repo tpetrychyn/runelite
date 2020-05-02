@@ -1,82 +1,48 @@
-import com.jogamp.newt.javafx.NewtCanvasJFX;
+import com.google.inject.Guice;
+import di.BasicModule;
 import javafx.application.Application;
-import javafx.concurrent.Task;
-import javafx.embed.swing.SwingNode;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import layoutControllers.MainController;
-import layoutControllers.MinimapController;
-import layoutControllers.ObjectPickerController;
-import renderer.MapEditor;
-
-import java.io.IOException;
 
 public class JfxApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        stage.setTitle("FOSS Map Editor");
-        // JFX
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/layout/main.fxml"));
-        Parent root = loader.load();
+        BasicModule.injector = Guice.createInjector(new BasicModule());
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setControllerFactory(BasicModule.injector::getInstance);
 
-        MainController mainController = loader.getController();
-
+        fxmlLoader.setLocation(getClass().getResource("/views/main.fxml"));
+        Parent root = fxmlLoader.load();
         javafx.scene.Scene jfxScene = new javafx.scene.Scene(root);
         stage.setScene(jfxScene);
+        stage.setTitle("FOSS Map Editor");
+        stage.setX(0);
+        stage.setY(0);
         stage.show();
 
         // LOAD MINIMAP
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/layout/minimap.fxml"));
-        Parent root1 = fxmlLoader.load();
-        Stage stage2 = new Stage();
-        stage2.initModality(Modality.NONE);
-        stage2.setTitle("Minimap");
-        stage2.setScene(new Scene(root1));
-        stage2.show();
+        FXMLLoader miniLoader = new FXMLLoader(getClass().getResource("/views/minimap.fxml"));
+        miniLoader.setControllerFactory(BasicModule.injector::getInstance);
+        Parent miniRoot = miniLoader.load();
+        Stage miniStage = new Stage();
+        miniStage.initModality(Modality.NONE);
+        miniStage.setTitle("Minimap");
+        miniStage.setScene(new Scene(miniRoot));
+        miniStage.setX(-1000);
+        miniStage.setY(0);
+        miniStage.show();
 
         // LOAD OBJECT PICKER
-        FXMLLoader objLoader = new FXMLLoader(getClass().getResource("/layout/object-picker.fxml"));
-        Parent objRoot = objLoader.load();
-        Stage objStage = new Stage();
-        objStage.initModality(Modality.NONE);
-        objStage.setTitle("Object Picker");
-        objStage.setScene(new Scene(objRoot));
-        objStage.show();
-
-        ObjectPickerController objectPickerController = objLoader.getController();
-        objectPickerController.setMainController(mainController);
-
-
-        MinimapController minimapController = fxmlLoader.getController();
-//        root1.setOnScroll(minimapController::onMouseWheelScroll);
-
-        LoadMapRendererTask<NewtCanvasJFX> loadTask = new LoadMapRendererTask<>(mainController) {
-            @Override
-            public NewtCanvasJFX call() {
-                return new MapEditor().LoadMap(controller, minimapController, objectPickerController);
-            }
-        };
-        loadTask.setOnSucceeded(e -> {
-            mainController.getGroup().getChildren().add(loadTask.getValue());
-        });
-        new Thread(loadTask).start();
-    }
-
-
-}
-
-abstract class LoadMapRendererTask<V> extends Task<V> {
-    protected MainController controller;
-
-    public LoadMapRendererTask(MainController controller) {
-        this.controller = controller;
+//        FXMLLoader objLoader = new FXMLLoader(getClass().getResource("/views/object-picker.fxml"));
+//        objLoader.setControllerFactory(injector::getInstance);
+//        Parent objRoot = objLoader.load();
+//        Stage objStage = new Stage();
+//        objStage.initModality(Modality.NONE);
+//        objStage.setTitle("Object Picker");
+//        objStage.setScene(new Scene(objRoot));
+//        objStage.show();
     }
 }

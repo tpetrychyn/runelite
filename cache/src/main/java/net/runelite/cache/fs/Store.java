@@ -117,6 +117,7 @@ public final class Store implements Closeable
 
 	public void load() throws IOException
 	{
+		System.out.printf("load called");
 		storage.load(this);
 	}
 

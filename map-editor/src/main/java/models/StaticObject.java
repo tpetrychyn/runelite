@@ -43,7 +43,8 @@ public class StaticObject extends ModelDefinition implements Model {
 
     public StaticObject(ModelDefinition def, int ambient, int contrast, int x, int y, int z) {
         def.computeNormals();
-        int somethingMagnitude = (int) Math.sqrt((double) (z * z + x * x + y * y));
+        def.computeTextureUVCoordinates();
+        int somethingMagnitude = (int) Math.sqrt(z * z + x * x + y * y);
         int var7 = somethingMagnitude * contrast >> 8;
         faceColors1 = new int[def.faceCount];
         faceColors2 = new int[def.faceCount];
@@ -230,6 +231,8 @@ public class StaticObject extends ModelDefinition implements Model {
         faceVertexIndices2 = def.faceVertexIndices2;
         faceVertexIndices3 = def.faceVertexIndices3;
         faceRenderPriorities = def.faceRenderPriorities;
+        faceTextureUCoordinates = def.faceTextureUCoordinates;
+        faceTextureVCoordinates = def.faceTextureVCoordinates;
         faceAlphas = def.faceAlphas;
         priority = def.priority;
         faceTextures = def.faceTextures;
@@ -285,7 +288,7 @@ public class StaticObject extends ModelDefinition implements Model {
 
     @Override
     public byte[] getTriangleTransparencies() {
-        return faceRenderTypes;
+        return faceAlphas;
     }
 
     @Override

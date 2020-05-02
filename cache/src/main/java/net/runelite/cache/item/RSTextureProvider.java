@@ -66,6 +66,7 @@ public class RSTextureProvider
 
 	public int[] load(int var1)
 	{
+//		System.out.printf("rsTextureProvider load called");
 		TextureDefinition var2 = this.textures[var1];
 		if (var2 != null)
 		{

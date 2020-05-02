@@ -53,6 +53,7 @@ public class ObjectManager
 
 	public void load() throws IOException
 	{
+		System.out.printf("obj load called");
 		ObjectLoader loader = new ObjectLoader();
 
 		Storage storage = store.getStorage();

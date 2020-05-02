@@ -34,18 +34,20 @@ public class WallDecoration extends Renderable {
             return;
         }
 
+        model.calculateBoundsCylinder();
+        model.calculateExtreme(orientationA);
+
         int x = sceneX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
         int z = sceneY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
 
         int tc = Math.min(MAX_TRIANGLE, model.getTrianglesCount());
-        int uvOffset = model.getUvBufferOffset();
 
         GpuIntBuffer b = modelBuffers.bufferForTriangles(tc);
 
         b.ensureCapacity(13);
         IntBuffer buffer = b.getBuffer();
         buffer.put(model.getBufferOffset());
-        buffer.put(uvOffset);
+        buffer.put(model.getUvBufferOffset());
         buffer.put(tc);
         buffer.put(modelBuffers.getTargetBufferOffset());
         buffer.put(ModelBuffers.FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientationA);

@@ -1,50 +1,57 @@
-package layoutControllers;
+package controllers;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.*;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import javafx.util.Callback;
 import lombok.Getter;
 import lombok.Setter;
+import models.ObjectSwatchItem;
+import models.ObjectSwatchModel;
 import net.runelite.cache.ObjectManager;
-import net.runelite.cache.TextureManager;
 import net.runelite.cache.definitions.ModelDefinition;
 import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.fs.Store;
-import net.runelite.cache.fs.StoreProvider;
 import renderer.MapEditor;
 
-import java.io.IOException;
+import javax.inject.Inject;
 
 @Getter
 @Setter
 public class ObjectPickerController {
-    private MainController mainController;
+    @Inject
+    private ObjectManager objectManager;
+    @Inject
+    private Store store;
+    @Inject
+    private ObjectSwatchModel objectSwatchModel;
+    @Inject
     private MapEditor mapEditor;
 
     @FXML
     private ScrollPane scrollPane;
-
     @FXML
     private StackPane stackPane;
+    @FXML
+    private HBox paneAddToSwatch;
+    @FXML
+    private TextField txtAddToSwatchName;
+    @FXML
+    private Button btnAddToSwatch;
 
     @FXML
     private ListView<ObjectDefinition> listView;
@@ -53,18 +60,10 @@ public class ObjectPickerController {
     @FXML
     private TextField searchBox;
 
+    private ObjectDefinition selectedObject;
+
     @FXML
     private void initialize() {
-        Store store = StoreProvider.getStore();
-        ObjectManager objectManager = new ObjectManager(store);
-        TextureManager textureManager = new TextureManager(store);
-        try {
-            objectManager.load();
-            textureManager.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         searchBox.textProperty().addListener((observable, oldVal, newVal) -> search(oldVal, newVal));
 
         Group g = new Group();
@@ -82,6 +81,7 @@ public class ObjectPickerController {
         subScene.setCamera(camera);
 
         stackPane.getChildren().add(subScene);
+        subScene.toBack();
         subScene.heightProperty().bind(stackPane.heightProperty());
         subScene.widthProperty().bind(stackPane.widthProperty());
 
@@ -89,44 +89,41 @@ public class ObjectPickerController {
 
         entries.addAll(objectManager.getObjects());
         listView.setItems(entries);
-        listView.setCellFactory(list -> new ListCell<>() {
-            @Override
-            public void updateItem(ObjectDefinition item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                } else {
-                    setText(String.format("%s (%d)", item.getName(), item.getId()));
-                }
-            }
-        });
 
         listView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                     if (newVal == null || newVal == oldVal) {
                         return;
                     }
                     g.getChildren().clear();
-                    ModelDefinition m = newVal.getModel(10, 0);
+                    ModelDefinition m = newVal.getModel(store, 10, 0);
                     if (m == null) {
                         return;
                     }
                     MeshView[] mv = JavaFxHelpers.modelToMeshViews(m);
                     g.getChildren().addAll(mv);
 
-                    SnapshotParameters ss = new SnapshotParameters();
-                    ss.setFill(Color.TRANSPARENT);
-                    WritableImage snapshot = subScene.snapshot(ss, null);
-
-                    ImageView i = new ImageView(snapshot);
-                    i.setFitWidth(125);
-                    i.setFitHeight(75);
-                    i.setPreserveRatio(true);
-                    i.setPickOnBounds(true);
-                    VBox ele = new VBox(i, new Label(String.format("%s (%d)", newVal.getName(), newVal.getId())));
-                    ele.setAlignment(Pos.CENTER);
-                    mainController.addModelToSwatch(ele);
+                    paneAddToSwatch.setVisible(true);
+                    txtAddToSwatchName.setText(newVal.toString());
+                    selectedObject = newVal;
                 }
         );
+
+        btnAddToSwatch.setOnAction((e) -> {
+            if (selectedObject == null) {
+                return;
+            }
+            SnapshotParameters ss = new SnapshotParameters();
+            ss.setFill(Color.TRANSPARENT);
+            WritableImage snapshot = subScene.snapshot(ss, null);
+
+            ObjectSwatchItem item = new ObjectSwatchItem(selectedObject, snapshot, txtAddToSwatchName.getText());
+            int idx = objectSwatchModel.getObjectList().indexOf(item);
+            if (idx > -1) {
+                objectSwatchModel.getObjectList().set(idx, item);
+            } else {
+                objectSwatchModel.getObjectList().add(item);
+            }
+        });
     }
 
     //Tracks drag starting point for x and y
@@ -176,7 +173,7 @@ public class ObjectPickerController {
         String value = newVal.toUpperCase();
         ObservableList<ObjectDefinition> subentries = FXCollections.observableArrayList();
         for (ObjectDefinition entry : listView.getItems()) {
-            if (entry.getName().toUpperCase().contains(value)) {
+            if (entry.toString().toUpperCase().contains(value)) {
                 subentries.add(entry);
             }
         }

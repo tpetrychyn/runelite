@@ -52,6 +52,7 @@ public class SpriteManager implements SpriteProvider
 
 	public void load() throws IOException
 	{
+		System.out.printf("syprite load called");
 		Storage storage = store.getStorage();
 		Index index = store.getIndex(IndexType.SPRITES);
 

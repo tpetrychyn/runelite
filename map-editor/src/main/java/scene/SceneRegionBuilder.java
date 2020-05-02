@@ -1,9 +1,7 @@
 package scene;
 
-import models.DynamicObject;
 import models.StaticObject;
 import net.runelite.api.Constants;
-import net.runelite.api.Entity;
 import net.runelite.cache.ConfigType;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.ObjectManager;
@@ -20,32 +18,31 @@ import net.runelite.cache.region.LocationType;
 import net.runelite.cache.region.Region;
 import net.runelite.cache.region.RegionLoader;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SceneRegionBuilder {
 
+    @Inject
     private RegionLoader regionLoader;
+    @Inject
     private ObjectManager objectManager;
+    @Inject
     private RSTextureProvider rsTextureProvider;
+    private final Store store;
 
     private static int[] colorPalette = new ColorPalette(0.7d, 0, 512).getColorPalette();
 
     private static final Map<Integer, UnderlayDefinition> underlays = new HashMap<>();
     private static final Map<Integer, OverlayDefinition> overlays = new HashMap<>();
 
-    public SceneRegionBuilder(RSTextureProvider textureProvider) throws IOException {
-
-        rsTextureProvider = textureProvider;
-        regionLoader = new RegionLoader(StoreProvider.getStore());
-        regionLoader.loadRegions();
-
-        objectManager = new ObjectManager(StoreProvider.getStore());
-
-        loadUnderlays(StoreProvider.getStore());
-        loadOverlays(StoreProvider.getStore());
-        objectManager.load();
+    @Inject
+    public SceneRegionBuilder(Store store) throws IOException {
+        this.store = store;
+        loadUnderlays();
+        loadOverlays();
     }
 
     // Loads a single region(rs size 64), not a scene(rs size 104)!
@@ -263,7 +260,7 @@ public class SceneRegionBuilder {
 
         sceneRegion.getLocations().forEach(loc -> {
             ObjectDefinition objectDefinition = objectManager.getObject(loc.getId());
-            ModelDefinition modelDefinition = objectDefinition.getModel(loc.getType(), loc.getOrientation());
+            ModelDefinition modelDefinition = objectDefinition.getModel(store, loc.getType(), loc.getOrientation());
             if (modelDefinition == null) {
                 return;
             }
@@ -332,7 +329,7 @@ public class SceneRegionBuilder {
         return r.getTileSetting(z, x % 64, y % 64);
     }
 
-    private void loadUnderlays(Store store) throws IOException {
+    private void loadUnderlays() throws IOException {
         Storage storage = store.getStorage();
         Index index = store.getIndex(IndexType.CONFIGS);
         Archive archive = index.getArchive(ConfigType.UNDERLAY.getId());
@@ -352,7 +349,7 @@ public class SceneRegionBuilder {
         return underlays.get(id);
     }
 
-    private void loadOverlays(Store store) throws IOException {
+    private void loadOverlays() throws IOException {
         Storage storage = store.getStorage();
         Index index = store.getIndex(IndexType.CONFIGS);
         Archive archive = index.getArchive(ConfigType.OVERLAY.getId());

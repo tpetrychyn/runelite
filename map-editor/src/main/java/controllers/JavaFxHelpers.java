@@ -1,4 +1,4 @@
-package layoutControllers;
+package controllers;
 
 import de.javagl.obj.Mtl;
 import de.javagl.obj.Obj;

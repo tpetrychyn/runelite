@@ -116,6 +116,8 @@ public class ModelDefinition
 		textureTriangleVertexIndices1 = original.textureTriangleVertexIndices1;
 		textureTriangleVertexIndices2 = original.textureTriangleVertexIndices2;
 		textureTriangleVertexIndices3 = original.textureTriangleVertexIndices3;
+		faceTextureUCoordinates = original.faceTextureUCoordinates;
+		faceTextureVCoordinates = original.faceTextureVCoordinates;
 		vertexNormals = original.vertexNormals;
 		faceNormals = original.faceNormals;
 		textureCoordinates = original.textureCoordinates;

@@ -8,18 +8,15 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
-import layoutControllers.MainController;
-import layoutControllers.MinimapController;
-import layoutControllers.ObjectPickerController;
+import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
 import models.*;
 import net.runelite.api.Constants;
 import net.runelite.api.Perspective;
-import net.runelite.cache.SpriteManager;
 import net.runelite.cache.definitions.ModelDefinition;
 import net.runelite.cache.definitions.ObjectDefinition;
+import net.runelite.cache.definitions.TextureDefinition;
 import net.runelite.cache.fs.Store;
-import net.runelite.cache.fs.StoreProvider;
 import net.runelite.cache.item.RSTextureProvider;
 import org.joml.Matrix4f;
 import renderer.helpers.AntiAliasingMode;
@@ -30,28 +27,43 @@ import scene.Scene;
 import scene.SceneRegionBuilder;
 import scene.SceneTile;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
+import javax.inject.Inject;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static renderer.helpers.GLUtil.*;
 
 @Slf4j
 public class MapEditor implements GLEventListener {
-
     // This is the maximum number of triangles the compute shaders support
     private static final int MAX_TEMP_VERTICES = 65535;
     static final int MAX_DISTANCE = 1000;
 
-    private InputHandler inputHandler;
+    private final InputHandler inputHandler;
+    private final Camera camera;
+    private final ObjectSwatchModel objectSwatchModel;
+
+    @Inject
+    public MapEditor(Camera camera, InputHandler inputHandler, ObjectSwatchModel objectSwatchModel) {
+        this.camera = camera;
+        this.inputHandler = inputHandler;
+        this.objectSwatchModel = objectSwatchModel;
+    }
+
     private final SceneUploader sceneUploader = new SceneUploader();
     private final TextureManager textureManager = new TextureManager();
+
+    @Inject
     private RSTextureProvider textureProvider;
+    @Inject
+    private SceneRegionBuilder sceneRegionBuilder;
+    @Inject
+    private Store store;
+    @Inject
     private Scene scene;
 
     private GL4 gl;
@@ -110,8 +122,6 @@ public class MapEditor implements GLEventListener {
     private int lastStretchedCanvasHeight;
     private AntiAliasingMode lastAntiAliasingMode;
 
-    private final Camera camera = new Camera();
-
     // Uniforms
     private int uniDrawDistance;
     private int uniProjectionMatrix;
@@ -126,35 +136,17 @@ public class MapEditor implements GLEventListener {
     private int uniMouseCoordsId;
 
     Animator animator;
-    SceneRegionBuilder sceneRegionBuilder;
-    private MinimapController minimapController;
 
-    int canvasWidth = 800;
+    int canvasWidth = 1200;
     int canvasHeight = (int) (canvasWidth / 1.3);
 
-    public NewtCanvasJFX LoadMap(MainController mainController, MinimapController minimapController, ObjectPickerController objectPickerController) {
-        try {
-            Store store = StoreProvider.getStore();
-            SpriteManager sprites = new SpriteManager(store);
-            net.runelite.cache.TextureManager textureManager = new net.runelite.cache.TextureManager(store);
+    public NewtCanvasJFX LoadMap() {
+        scene.getSceneChangeListeners().add(e -> isSceneUploadRequired = true);
+        scene.Load(sceneRegionBuilder, 12085, 1);
 
-            textureManager.load();
-
-            textureProvider = new RSTextureProvider(textureManager, sprites);
-            sprites.load();
-
-            sceneRegionBuilder = new SceneRegionBuilder(textureProvider);
-            scene = new Scene(sceneRegionBuilder, 12085, 1);
-
-            // center camera in viewport
-            camera.setCenterX(canvasWidth / 2);
-            camera.setCenterY(canvasHeight / 2);
-
-            this.minimapController = minimapController;
-            minimapController.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // center camera in viewport
+        camera.setCenterX(canvasWidth / 2);
+        camera.setCenterY(canvasHeight / 2);
 
         bufferId = uvBufferId = uniformBufferId = tmpBufferId = tmpUvBufferId = tmpModelBufferId = tmpModelBufferSmallId = tmpModelBufferUnorderedId = tmpOutBufferId = tmpOutUvBufferId = -1;
         colorPickerBufferId = selectedIdsBufferId = -1;
@@ -171,8 +163,6 @@ public class MapEditor implements GLEventListener {
 
         GLWindow window = GLWindow.create(screen, glCaps);
         window.addGLEventListener(this);
-
-        inputHandler = new InputHandler(camera, this);
         window.addKeyListener(inputHandler);
         window.addMouseListener(inputHandler);
 
@@ -184,20 +174,28 @@ public class MapEditor implements GLEventListener {
         animator.setUpdateFPSFrames(3, null);
         animator.start();
 
-        mainController.setCamera(camera);
-        mainController.setInputHandler(inputHandler);
-        mainController.setAnimator(animator);
-
         lastViewportWidth = lastViewportHeight = lastCanvasWidth = lastCanvasHeight = -1;
         lastStretchedCanvasWidth = lastStretchedCanvasHeight = -1;
         lastAntiAliasingMode = null;
 
         textureArrayId = -1;
 
-        objectPickerController.setMapEditor(this);
+        objectSwatchModel.selectedObjectProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != oldVal) {
+                injectWallDecoration(newVal.getObjectDefinition());
+            }
+        });
+
+        scene.getSelectedTile().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) { return; }
+            //int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | objectId & 0xF;
+            hoverId = ((newVal.getX() & 0xFFF) << 20) | ((newVal.getY() & 0xFFF) << 4);
+        });
 
         return glCanvas;
     }
+
+    private boolean isSceneUploadRequired;
 
     @Override
     public void init(GLAutoDrawable drawable) {
@@ -299,8 +297,8 @@ public class MapEditor implements GLEventListener {
     }
 
     void handleHover() {
-        int mouseX = 0;//inputHandler.getMouseX();
-        int mouseY = 0;//inputHandler.getMouseY();
+        int mouseX = inputHandler.getMouseX();
+        int mouseY = inputHandler.getMouseY();
 
         // Using 3 PBOs brings this function time to 0.05ms, with only 2 PBOs is it 10ms
         // This will write to pboIndex and read from nextIndex which should have finished drawing to
@@ -325,6 +323,10 @@ public class MapEditor implements GLEventListener {
         int pickerId = (pboBytes[3] & 0xFF) << 24 | (pboBytes[2] & 0xFF) << 16 | (pboBytes[1] & 0xFF) << 8 | (pboBytes[0] & 0xFF);
         gl.glUnmapBuffer(gl.GL_PIXEL_PACK_BUFFER);
 
+        if (pickerId == 1058050193) { // clear sky coor
+            return;
+        }
+
         // TODO: bring PickerType enum back
         // -1 = null hover, ignore
         // -2 = we want to pass through this object
@@ -345,6 +347,7 @@ public class MapEditor implements GLEventListener {
         debugText += String.format("id %d\n x %d y %d objId %d \n", pickerId, x, y, type);
         SceneTile tile = scene.getTile(0, x, y);
         if (tile != null) {
+            scene.getSelectedTile().set(tile);
             if (injectedDec != null && tile.getTilePaint() != null) {
                 injectedDec.setSceneX(x);
                 injectedDec.setSceneY(y);
@@ -354,6 +357,11 @@ public class MapEditor implements GLEventListener {
             if (tile.getWallDecoration() != null) {
                 WallDecoration d = tile.getWallDecoration();
                 debugText += String.format("wall dec: tag %d \n", d.getTag());
+                long orientation = d.getTag() & 0xF;
+                //orientation + (type << 3) + (this.id << 10);
+                long typ = (d.getTag() >> 3) & 0xFF;
+                long id = (d.getTag() >> 10) & 0xFFFF;
+                debugText += String.format("ori: %d type: %d id: %d \n", orientation, typ, id);
                 if (d.getEntityA() instanceof DynamicObject) {
                     debugText += String.format("id %d \n", ((DynamicObject) d.getEntityA()).getId());
                 }
@@ -392,12 +400,13 @@ public class MapEditor implements GLEventListener {
         }
     }
 
-    private final List<Renderable> dynamicDecorations = new ArrayList<>();
+    private final List<Renderable> dynamicDecorations = Collections.synchronizedList(new ArrayList<>());
 
     private void drawDynamic() {
-        for (Renderable r : dynamicDecorations) {
-            r.drawDynamic(modelBuffers, sceneUploader);
+        if (injectedDec != null) {
+            injectedDec.drawDynamic(modelBuffers, sceneUploader);
         }
+        dynamicDecorations.forEach(r -> r.drawDynamic(modelBuffers, sceneUploader));
     }
 
     private static long clientStart = System.currentTimeMillis();
@@ -405,14 +414,14 @@ public class MapEditor implements GLEventListener {
     @Override
     public void display(GLAutoDrawable drawable) {
         long start = System.nanoTime();
-        if (sceneChangeRequested) {
+        if (isSceneUploadRequired) {
             uploadScene();
         }
 
-//        handleHover();
-//        handleClick();
-//
-//        drawDynamic();
+        handleHover();
+        handleClick();
+
+        drawDynamic();
         if (canvasWidth > 0 && canvasHeight > 0 && (canvasWidth != lastViewportWidth || canvasHeight != lastViewportHeight)) {
             createProjectionMatrix(0, canvasWidth, canvasHeight, 0, 1, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             lastViewportWidth = canvasWidth;
@@ -567,12 +576,15 @@ public class MapEditor implements GLEventListener {
                 textureArrayId = textureManager.initTextureArray(textureProvider, gl);
             }
 
+            final TextureDefinition[] textures = textureProvider.getTextureDefinitions();
+
             gl.glUseProgram(glProgram);
             // Brightness happens to also be stored in the texture provider, so we use that
             gl.glUniform1f(uniBrightness, 0.7f);//(float) textureProvider.getBrightness());
             gl.glUniform1i(uniDrawDistance, MAX_DISTANCE * Perspective.LOCAL_TILE_SIZE);
             gl.glUniform1f(uniSmoothBanding, 1f);
 
+            // This is just for animating!
 //            for (int id = 0; id < textures.length; ++id) {
 //                TextureDefinition texture = textures[id];
 //                if (texture == null) {
@@ -581,8 +593,8 @@ public class MapEditor implements GLEventListener {
 //
 //                textureProvider.load(id); // trips the texture load flag which lets textures animate
 //
-//                textureOffsets[id * 2] = texture.getU();
-//                textureOffsets[id * 2 + 1] = texture.getV();
+//                textureOffsets[id * 2] = texture.field1782;
+//                textureOffsets[id * 2 + 1] = texture.field1783;
 //            }
 
             gl.glUniform1i(uniHoverId, hoverId);
@@ -596,7 +608,6 @@ public class MapEditor implements GLEventListener {
             // We just allow the GL to do face culling. Note this requires the priority renderer
             // to have logic to disregard culled faces in the priority depth testing.
             gl.glEnable(gl.GL_CULL_FACE);
-            gl.glCullFace(GL.GL_BACK);
 
             // Enable blending for alpha
             gl.glEnable(gl.GL_BLEND);
@@ -624,7 +635,7 @@ public class MapEditor implements GLEventListener {
             gl.glDrawBuffer(gl.GL_COLOR_ATTACHMENT1);
             gl.glBlitFramebuffer(0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
                     0, 0, lastStretchedCanvasWidth, lastStretchedCanvasHeight,
-                    gl.GL_COLOR_BUFFER_BIT, gl.GL_NEAREST);
+                    gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT, gl.GL_NEAREST);
             gl.glDisable(gl.GL_BLEND);
 
             // Reset
@@ -665,19 +676,17 @@ public class MapEditor implements GLEventListener {
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
         gl = drawable.getGL().getGL4();
+        canvasWidth = width;
+        canvasHeight = height;
+        initPickerBuffer();
+        camera.setCenterX(canvasWidth / 2);
+        camera.setCenterY(canvasHeight / 2);
         gl.glViewport(x, y, width, height);
     }
 
-    private boolean sceneChangeRequested = true;
-
-    public void changeScene(Scene scene) {
-        this.scene = scene;
-        sceneChangeRequested = true;
-    }
-
     private void uploadScene() {
+        isSceneUploadRequired = false;
         dynamicDecorations.clear();
-        sceneChangeRequested = false;
         initDynamicSSBO();
         modelBuffers.clearVertUv();
 
@@ -950,7 +959,8 @@ public class MapEditor implements GLEventListener {
 
     WallDecoration injectedDec = null;
 
-    public void injectWallDecoration(ModelDefinition m, ObjectDefinition o) {
+    public void injectWallDecoration(ObjectDefinition o) {
+        ModelDefinition m = o.getModel(store, 10, 0);
         StaticObject model = new StaticObject(m, o.getAmbient() + 64, o.getContrast() + 768, -50, -10, -50);
         injectedDec = new WallDecoration(m.tag,
                 0,
@@ -961,7 +971,6 @@ public class MapEditor implements GLEventListener {
                 null,
                 0,
                 0);
-        dynamicDecorations.add(injectedDec);
         showHover = false;
     }
 
@@ -987,6 +996,7 @@ public class MapEditor implements GLEventListener {
                     injectedDec.setSceneY(y);
                     injectedDec.setHeight(tile.getTilePaint().getNwHeight());
                     dynamicDecorations.add(injectedDec);
+                    injectedDec = null;
                     inputHandler.mouseClicked = false;
                     return;
                 }

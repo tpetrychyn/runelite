@@ -2,10 +2,7 @@ package scene;
 
 import lombok.Getter;
 import lombok.Setter;
-import models.FloorDecoration;
-import models.TileModelImpl;
-import models.TilePaintImpl;
-import models.WallDecoration;
+import models.*;
 import net.runelite.cache.definitions.MapDefinition;
 
 import java.util.ArrayList;
@@ -27,7 +24,7 @@ public class SceneTile extends MapDefinition.Tile {
     private SceneTile northEast;
     private SceneTile east;
 
-    SceneTile(int z, int x, int y) {
+    public SceneTile(int z, int x, int y) {
         this.plane = z;
         this.x = x;
         this.y = y;
@@ -36,5 +33,15 @@ public class SceneTile extends MapDefinition.Tile {
     @Override
     public String toString() {
         return String.format("x %d y %d rgb %d", x, y, tilePaint.getRgb());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof SceneTile)) return false;
+
+        SceneTile other = (SceneTile) o;
+
+        return x == other.x && y == other.y && plane == other.plane;
     }
 }

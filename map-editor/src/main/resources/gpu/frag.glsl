@@ -51,9 +51,9 @@ void main() {
       discard;
     }
   }
-  if (Color.a == 0) {
-    discard;
-  }
+//  if (Color.a == 0) {
+//    discard;
+//  }
   float n = fUv.x;
 
   int hsl = int(fHsl);

@@ -49,6 +49,7 @@ public class TextureManager implements TextureProvider
 
 	public void load() throws IOException
 	{
+		System.out.printf("tex load called");
 		Storage storage = store.getStorage();
 		Index index = store.getIndex(IndexType.TEXTURES);
 		Archive archive = index.getArchive(0);

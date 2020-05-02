@@ -1,15 +1,31 @@
 package scene;
 
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import lombok.Getter;
+import models.ObjectSwatchItem;
 import net.runelite.api.Constants;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class Scene {
     // NxM grid of regions to display
-    private final SceneRegion[][] regions;
-    private final int radius;
+    private SceneRegion[][] regions;
+    private int radius;
 
-    public Scene(SceneRegionBuilder sceneRegionBuilder, int centerRegionId, int radius) {
+    private final List<ActionListener> sceneChangeListeners = new ArrayList<>();
+    private final ObjectProperty<SceneTile> selectedTile = new SimpleObjectProperty<>(null);
+
+    public void Load(SceneRegionBuilder sceneRegionBuilder, int centerRegionId, int radius) {
         this.radius = radius;
         this.regions = new SceneRegion[radius][radius];
 
@@ -25,6 +41,8 @@ public class Scene {
             }
             regionId += 256 - (radius); // move 1 region to the right, reset to lowest y
         }
+
+        this.sceneChangeListeners.forEach(it -> it.actionPerformed(null));
     }
 
     public SceneTile getTile(int z, int x, int y) {

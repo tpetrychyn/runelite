@@ -1,6 +1,5 @@
 package renderer;
 
-import layoutControllers.MainController;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.Constants;
@@ -11,7 +10,6 @@ import net.runelite.api.Perspective;
 public class Camera {
 
     private String debugText = "";
-
 
     private int yaw = 0; // yaw 0 true north, same with 2047 and 1
     private int pitch = 220;

@@ -7,11 +7,17 @@ import com.jogamp.newt.event.MouseListener;
 import javafx.animation.AnimationTimer;
 import lombok.Getter;
 import scene.Scene;
+import scene.SceneRegionBuilder;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 @Getter
 public class InputHandler implements KeyListener, MouseListener {
-    private Camera camera;
-    private MapEditor mapEditor;
+    @Inject
+    private Scene scene;
+    @Inject
+    private SceneRegionBuilder sceneRegionBuilder;
 
     private boolean isLeftMouseDown = false;
     public boolean leftMousePressed = false;
@@ -23,9 +29,10 @@ public class InputHandler implements KeyListener, MouseListener {
     private int mouseX;
     private int mouseY;
 
-    InputHandler(Camera camera, MapEditor mapEditor) {
+    private final Camera camera;
+    @Inject
+    InputHandler(Camera camera) {
         this.camera = camera;
-        this.mapEditor = mapEditor;
 
         new AnimationTimer() {
             long lastNanoTime = System.nanoTime();
@@ -84,14 +91,14 @@ public class InputHandler implements KeyListener, MouseListener {
         }
 
         if (keys[KeyEvent.VK_K]) {
-            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 13360, 5));
+            scene.Load(sceneRegionBuilder, 13360, 5);
         }
         if (keys[KeyEvent.VK_L]) {
-            mapEditor.changeScene(new Scene(mapEditor.sceneRegionBuilder, 13408, 5));
+            scene.Load(sceneRegionBuilder, 13408, 5);
         }
 
         if (keys[KeyEvent.VK_R]) {
-            mapEditor.rotateObject();
+//            mapEditor.rotateObject();
             keys[KeyEvent.VK_R] = false;
         }
     }

@@ -18,6 +18,7 @@ dependencies {
     annotationProcessor(Libraries.lombok)
 
     compileOnly(Libraries.lombok)
+    api("com.google.inject:guice:4.2.3")
 
     implementation(Libraries.findbugs)
     implementation(Libraries.guava)
@@ -48,5 +49,6 @@ dependencies {
 
 javafx {
     version = "14"
-    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics")
+//    configuration = "compileOnly"
 }
