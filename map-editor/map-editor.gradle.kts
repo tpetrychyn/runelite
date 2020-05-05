@@ -13,7 +13,6 @@ description = "RSPS Map Editor"
 dependencies {
     api(project(":runelite-api"))
     api(project(":cache"))
-    implementation(project(":http-api"))
 
     annotationProcessor(Libraries.lombok)
 
@@ -50,5 +49,4 @@ dependencies {
 javafx {
     version = "14"
     modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics")
-//    configuration = "compileOnly"
 }

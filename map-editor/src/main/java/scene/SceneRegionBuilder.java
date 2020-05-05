@@ -24,13 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SceneRegionBuilder {
-
-    @Inject
-    private RegionLoader regionLoader;
-    @Inject
-    private ObjectManager objectManager;
-    @Inject
-    private RSTextureProvider rsTextureProvider;
+    private final RegionLoader regionLoader;
+    private final ObjectManager objectManager;
+    private final RSTextureProvider rsTextureProvider;
     private final Store store;
 
     private static int[] colorPalette = new ColorPalette(0.7d, 0, 512).getColorPalette();
@@ -39,8 +35,11 @@ public class SceneRegionBuilder {
     private static final Map<Integer, OverlayDefinition> overlays = new HashMap<>();
 
     @Inject
-    public SceneRegionBuilder(Store store) throws IOException {
+    public SceneRegionBuilder(Store store, RegionLoader regionLoader, ObjectManager objectManager, RSTextureProvider rsTextureProvider) throws IOException {
         this.store = store;
+        this.regionLoader = regionLoader;
+        this.objectManager = objectManager;
+        this.rsTextureProvider = rsTextureProvider;
         loadUnderlays();
         loadOverlays();
     }
@@ -57,12 +56,6 @@ public class SceneRegionBuilder {
         SceneRegion sceneRegion = new SceneRegion(region);
         int baseX = sceneRegion.getBaseX();
         int baseY = sceneRegion.getBaseY();
-
-        // TODO: prevents overflow at edge of map
-        boolean hasLeftRegion = regionLoader.findRegionForWorldCoordinates(baseX - 1, baseY) != null;
-        boolean hasRightRegion = regionLoader.findRegionForWorldCoordinates(baseX + Region.X, baseY) != null;
-        boolean hasUpRegion = regionLoader.findRegionForWorldCoordinates(baseX, baseY + Region.Y) != null;
-        boolean hasDownRegion = regionLoader.findRegionForWorldCoordinates(baseX, baseY - 1) != null;
 
         int blend = 5;
         int len = Constants.REGION_SIZE * blend * 2;
@@ -83,7 +76,7 @@ public class SceneRegionBuilder {
 
                     int xHeightDiff = getTileHeight(z, worldX + 1, worldY) - getTileHeight(z, worldX - 1, worldY);
                     int yHeightDiff = getTileHeight(z, worldX, worldY + 1) - getTileHeight(z, worldX, worldY - 1);
-                    int diff = (int) Math.sqrt((double) (xHeightDiff * xHeightDiff + yHeightDiff * yHeightDiff + 65536));
+                    int diff = (int) Math.sqrt(xHeightDiff * xHeightDiff + yHeightDiff * yHeightDiff + 65536);
                     int var16 = (xHeightDiff << 8) / diff;
                     int var17 = 65536 / diff;
                     int var18 = (yHeightDiff << 8) / diff;
@@ -200,8 +193,10 @@ public class SceneRegionBuilder {
                                 underlayRgb = colorPalette[var0];
                             }
 
+                            // TODO: underlayHsl seems to be more accurate than underlayRgb
                             if (overlayId == 0) {
-                                sceneRegion.addTile(z, xi, yi, 0, 0, -1, swHeight, seHeight, neHeight, nwHeight, method4220(rgb, swColor), method4220(rgb, seColor), method4220(rgb, neColor), method4220(rgb, nwColor), 0, 0, 0, 0, underlayRgb, 0);
+                                UnderlayDefinition underlay = findUnderlay(underlayId - 1);
+                                sceneRegion.addTile(z, xi, yi, 0, 0, -1, swHeight, seHeight, neHeight, nwHeight, method4220(rgb, swColor), method4220(rgb, seColor), method4220(rgb, neColor), method4220(rgb, nwColor), 0, 0, 0, 0, underlayRgb, 0, underlay);
                             } else {
                                 int overlayPath = r.getOverlayPath(z, xi, yi) + 1;
                                 int overlayRotation = r.getOverlayRotation(z, xi, yi);
@@ -250,7 +245,8 @@ public class SceneRegionBuilder {
                                     int var0 = adjustHSLListness0(rgb, 96);
                                     overlayRgb = colorPalette[var0];
                                 }
-                                sceneRegion.addTile(z, xi, yi, overlayPath, overlayRotation, overlayTexture, swHeight, seHeight, neHeight, nwHeight, method4220(rgb, swColor), method4220(rgb, seColor), method4220(rgb, neColor), method4220(rgb, nwColor), adjustHSLListness0(overlayHsl, swColor), adjustHSLListness0(overlayHsl, seColor), adjustHSLListness0(overlayHsl, neColor), adjustHSLListness0(overlayHsl, nwColor), underlayRgb, overlayRgb);
+                                UnderlayDefinition underlay = findUnderlay(underlayId - 1);
+                                sceneRegion.addTile(z, xi, yi, overlayPath, overlayRotation, overlayTexture, swHeight, seHeight, neHeight, nwHeight, method4220(rgb, swColor), method4220(rgb, seColor), method4220(rgb, neColor), method4220(rgb, nwColor), adjustHSLListness0(overlayHsl, swColor), adjustHSLListness0(overlayHsl, seColor), adjustHSLListness0(overlayHsl, neColor), adjustHSLListness0(overlayHsl, nwColor), underlayRgb, overlayRgb, underlay);
                             }
                         }
                     }
@@ -265,11 +261,24 @@ public class SceneRegionBuilder {
                 return;
             }
 
+            int width;
+            int length;
+            if (loc.getOrientation() != 1 && loc.getOrientation() != 3) {
+                width = objectDefinition.getSizeX();
+                length = objectDefinition.getSizeY();
+            } else {
+                width = objectDefinition.getSizeY();
+                length = objectDefinition.getSizeX();
+            }
+
             int z = loc.getPosition().getZ();
             int x = loc.getPosition().getX();
             int y = loc.getPosition().getY();
-//            int xSize = (x << 7) + (width << 6);
-//            int ySize = (y << 7) + (length << 6);
+
+            int sceneX = loc.getPosition().getX() - baseX;
+            int sceneY = loc.getPosition().getY() - baseY;
+            int xSize = (sceneX << 7) + (width << 6);
+            int ySize = (sceneY << 7) + (length << 6);
 
             int swHeight = getTileHeight(z, x, y);
             int seHeight = getTileHeight(z, x + 1, y);
@@ -277,19 +286,47 @@ public class SceneRegionBuilder {
             int nwHeight = getTileHeight(z, x, y + 1);
 
             int height = swHeight + seHeight + neHeight + nwHeight >> 2;
+            int[] orientationTransform = {1, 2, 4, 8}; // field544
+            int[] xTransforms = {1, 0, -1, 0}; //field541
+            int[] yTransforms = {0, -1, 0, 1}; //field547
+
+            StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
 
             if (loc.getType() == LocationType.FLOOR_DECORATION.getValue()) {
-                StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-
                 if (objectDefinition.getContouredGround() >= 0) {
-//                     model = model.contourGround(mapLoader, xSize, height, ySize, true, objectDefinition.getContouredGround(), worldX, worldY);
+                    try {
+                        model = model.contourGround(sceneRegion.getTileHeights()[loc.getPosition().getZ()], xSize, height, ySize, true, objectDefinition.getContouredGround());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
-                sceneRegion.newFloorDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, 0, 0);
-            } else {
-                StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, modelDefinition.tag, 0);
+                sceneRegion.newFloorDecoration(z, sceneX, sceneY, height, model, model.tag);
             }
+            if (loc.getType() == LocationType.DIAGONAL_WALL.getValue()) {
+                sceneRegion.newGameObject(z, sceneX, sceneY, height, model, 0, modelDefinition.tag);
+            }
+
+            if (loc.getType() == LocationType.INTERACTABLE_WALL_DECORATION.getValue()) {
+                sceneRegion.newWallDecoration(z, sceneX, sceneY, height, model, null, orientationTransform[loc.getOrientation()], 0, 0, 0, modelDefinition.tag);
+            }
+
+            if (loc.getType() == LocationType.INTERACTABLE_WALL.getValue()) {
+                sceneRegion.newWallDecoration(z, sceneX, sceneY, height, model, null, orientationTransform[loc.getOrientation()], 0, 16 * xTransforms[loc.getOrientation()], 16 * yTransforms[loc.getOrientation()], modelDefinition.tag);
+            }
+
+            if (loc.getType() == LocationType.INTERACTABLE.getValue() || loc.getType() == LocationType.DIAGONAL_INTERACTABLE.getValue()) {
+                sceneRegion.newGameObject(z, sceneX, sceneY, height, model, loc.getType() == 11 ? 256 : 0, modelDefinition.tag);
+            }
+
+            if (loc.getType() >= 12 && loc.getType() < 22) {
+                sceneRegion.newGameObject(z, sceneX, sceneY, height, model, 0, modelDefinition.tag);
+            }
+
+//            else {
+//                StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
+//                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, modelDefinition.tag, 0);
+//            }
 
 //            if (loc.getType() == LocationType.INTERACTABLE_WALL_DECORATION.getValue()) {
 //                Entity entity;
@@ -303,136 +340,133 @@ public class SceneRegionBuilder {
 //
 //                int[] orientationTransform = {1, 2, 4, 8};
 //                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, entity, null, orientationTransform[loc.getOrientation()], 0, modelDefinition.tag, 0);
-//            } else {
-//                StaticObject model = new StaticObject(modelDefinition, objectDefinition.getAmbient() + 64, objectDefinition.getContrast() + 768, -50, -10, -50);
-//                sceneRegion.newWallDecoration(z, loc.getPosition().getX() - baseX, loc.getPosition().getY() - baseY, height, model, null, 0, 0, modelDefinition.tag, 0);
-//            }
-        });
+//        }
+            });
 
-        return sceneRegion;
-    }
-
-    public int getTileHeight(int z, int x, int y) {
-        Region r = regionLoader.findRegionForWorldCoordinates(x, y);
-        if (r == null) {
-            return 0;
-        }
-        return r.getTileHeight(z, x % 64, y % 64);
-    }
-
-    public int getTileSettings(int z, int x, int y) {
-        Region r = regionLoader.findRegionForWorldCoordinates(x, y);
-        if (r == null) {
-            return 0;
+            return sceneRegion;
         }
 
-        return r.getTileSetting(z, x % 64, y % 64);
-    }
-
-    private void loadUnderlays() throws IOException {
-        Storage storage = store.getStorage();
-        Index index = store.getIndex(IndexType.CONFIGS);
-        Archive archive = index.getArchive(ConfigType.UNDERLAY.getId());
-
-        byte[] archiveData = storage.loadArchive(archive);
-        ArchiveFiles files = archive.getFiles(archiveData);
-
-        for (FSFile file : files.getFiles()) {
-            UnderlayLoader loader = new UnderlayLoader();
-            UnderlayDefinition underlay = loader.load(file.getFileId(), file.getContents());
-
-            underlays.put(underlay.getId(), underlay);
+        public int getTileHeight(int z, int x, int y) {
+            Region r = regionLoader.findRegionForWorldCoordinates(x, y);
+            if (r == null) {
+                return 0;
+            }
+            return r.getTileHeight(z, x % 64, y % 64);
         }
-    }
 
-    private UnderlayDefinition findUnderlay(int id) {
-        return underlays.get(id);
-    }
-
-    private void loadOverlays() throws IOException {
-        Storage storage = store.getStorage();
-        Index index = store.getIndex(IndexType.CONFIGS);
-        Archive archive = index.getArchive(ConfigType.OVERLAY.getId());
-
-        byte[] archiveData = storage.loadArchive(archive);
-        ArchiveFiles files = archive.getFiles(archiveData);
-
-        for (FSFile file : files.getFiles()) {
-            OverlayLoader loader = new OverlayLoader();
-            OverlayDefinition overlay = loader.load(file.getFileId(), file.getContents());
-
-            overlays.put(overlay.getId(), overlay);
-        }
-    }
-
-    private OverlayDefinition findOverlay(int id) {
-        return overlays.get(id);
-    }
-
-    private static int convert(int d) {
-        if (d >= 0) {
-            return d % 64;
-        } else {
-            return 64 - -(d % 64) - 1;
-        }
-    }
-
-    static int method4220(int var0, int var1) {
-        if (var0 == -1) {
-            return 12345678;
-        } else {
-            var1 = (var0 & 127) * var1 / 128;
-            if (var1 < 2) {
-                var1 = 2;
-            } else if (var1 > 126) {
-                var1 = 126;
+        public int getTileSettings(int z, int x, int y) {
+            Region r = regionLoader.findRegionForWorldCoordinates(x, y);
+            if (r == null) {
+                return 0;
             }
 
-            return (var0 & 65408) + var1;
+            return r.getTileSetting(z, x % 64, y % 64);
         }
-    }
 
-    static final int adjustHSLListness0(int var0, int var1) {
-        if (var0 == -2) {
-            return 12345678;
-        } else if (var0 == -1) {
-            if (var1 < 2) {
-                var1 = 2;
-            } else if (var1 > 126) {
-                var1 = 126;
+        private void loadUnderlays () throws IOException {
+            Storage storage = store.getStorage();
+            Index index = store.getIndex(IndexType.CONFIGS);
+            Archive archive = index.getArchive(ConfigType.UNDERLAY.getId());
+
+            byte[] archiveData = storage.loadArchive(archive);
+            ArchiveFiles files = archive.getFiles(archiveData);
+
+            for (FSFile file : files.getFiles()) {
+                UnderlayLoader loader = new UnderlayLoader();
+                UnderlayDefinition underlay = loader.load(file.getFileId(), file.getContents());
+
+                underlays.put(underlay.getId(), underlay);
+            }
+        }
+
+        private UnderlayDefinition findUnderlay ( int id){
+            return underlays.get(id);
+        }
+
+        private void loadOverlays () throws IOException {
+            Storage storage = store.getStorage();
+            Index index = store.getIndex(IndexType.CONFIGS);
+            Archive archive = index.getArchive(ConfigType.OVERLAY.getId());
+
+            byte[] archiveData = storage.loadArchive(archive);
+            ArchiveFiles files = archive.getFiles(archiveData);
+
+            for (FSFile file : files.getFiles()) {
+                OverlayLoader loader = new OverlayLoader();
+                OverlayDefinition overlay = loader.load(file.getFileId(), file.getContents());
+
+                overlays.put(overlay.getId(), overlay);
+            }
+        }
+
+        private OverlayDefinition findOverlay ( int id){
+            return overlays.get(id);
+        }
+
+        private static int convert ( int d){
+            if (d >= 0) {
+                return d % 64;
+            } else {
+                return 64 - -(d % 64) - 1;
+            }
+        }
+
+        static int method4220 ( int var0, int var1){
+            if (var0 == -1) {
+                return 12345678;
+            } else {
+                var1 = (var0 & 127) * var1 / 128;
+                if (var1 < 2) {
+                    var1 = 2;
+                } else if (var1 > 126) {
+                    var1 = 126;
+                }
+
+                return (var0 & 65408) + var1;
+            }
+        }
+
+        static final int adjustHSLListness0 ( int var0, int var1){
+            if (var0 == -2) {
+                return 12345678;
+            } else if (var0 == -1) {
+                if (var1 < 2) {
+                    var1 = 2;
+                } else if (var1 > 126) {
+                    var1 = 126;
+                }
+
+                return var1;
+            } else {
+                var1 = (var0 & 127) * var1 / 128;
+                if (var1 < 2) {
+                    var1 = 2;
+                } else if (var1 > 126) {
+                    var1 = 126;
+                }
+
+                return (var0 & 65408) + var1;
+            }
+        }
+
+        int hslToRgb ( int var0, int var1, int var2){
+            if (var2 > 179) {
+                var1 /= 2;
             }
 
-            return var1;
-        } else {
-            var1 = (var0 & 127) * var1 / 128;
-            if (var1 < 2) {
-                var1 = 2;
-            } else if (var1 > 126) {
-                var1 = 126;
+            if (var2 > 192) {
+                var1 /= 2;
             }
 
-            return (var0 & 65408) + var1;
+            if (var2 > 217) {
+                var1 /= 2;
+            }
+
+            if (var2 > 243) {
+                var1 /= 2;
+            }
+
+            int var3 = (var1 / 32 << 7) + (var0 / 4 << 10) + var2 / 2;
+            return var3;
         }
     }
-
-    int hslToRgb(int var0, int var1, int var2) {
-        if (var2 > 179) {
-            var1 /= 2;
-        }
-
-        if (var2 > 192) {
-            var1 /= 2;
-        }
-
-        if (var2 > 217) {
-            var1 /= 2;
-        }
-
-        if (var2 > 243) {
-            var1 /= 2;
-        }
-
-        int var3 = (var1 / 32 << 7) + (var0 / 4 << 10) + var2 / 2;
-        return var3;
-    }
-}

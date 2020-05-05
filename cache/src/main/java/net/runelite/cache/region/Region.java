@@ -182,14 +182,6 @@ public class Region
 		return locations;
 	}
 
-	public List<Location> getLocationsAt(int z, int x, int y) {
-		return locations.stream().filter(l ->
-				l.getPosition().getX() == x &&
-				l.getPosition().getY() == y &&
-				l.getPosition().getZ() == z)
-				.collect(Collectors.toList());
-	}
-
 	public int getRegionX()
 	{
 		return baseX >> 6;

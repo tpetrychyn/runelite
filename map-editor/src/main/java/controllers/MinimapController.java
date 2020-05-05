@@ -14,7 +14,6 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.shape.Rectangle;
 import net.runelite.api.Constants;
 import scene.Scene;
 import scene.SceneTile;
@@ -38,9 +37,6 @@ public class MinimapController {
     private Slider sliderZoom;
 
     @FXML
-    private BorderPane borderPane;
-
-    @FXML
     private ScrollPane scrollPane;
 
     int sceneWidth;
@@ -57,7 +53,7 @@ public class MinimapController {
             mouseX = (int) e.getX();
             mouseY = (int) e.getY();
 
-            scene.getSelectedTile().set(scene.getTile(0, mouseX / tileSize.get(), (canvasHeight - mouseY) / tileSize.get()));
+            scene.getHoveredEntity().set(scene.getTile(0, mouseX / tileSize.get(), (canvasHeight - mouseY) / tileSize.get()));
         });
 
         ChangeListener<SceneTile> c = (obs, oldVal, newVal) -> {
@@ -75,9 +71,9 @@ public class MinimapController {
 
         chkHover.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                scene.getSelectedTile().addListener(c);
+                scene.getHoveredEntity().addListener(c);
             } else {
-                scene.getSelectedTile().removeListener(c);
+                scene.getHoveredEntity().removeListener(c);
             }
         });
 

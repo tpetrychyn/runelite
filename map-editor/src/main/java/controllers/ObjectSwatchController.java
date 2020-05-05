@@ -34,7 +34,7 @@ public class ObjectSwatchController {
                 Parent root1 = fxmlLoader.load();
                 Stage stage = new Stage();
                 stage.initModality(Modality.NONE);
-                stage.setTitle("ABC");
+                stage.setTitle("Object Picker");
                 stage.setScene(new Scene(root1));
                 stage.show();
             } catch (IOException ex) {

@@ -101,9 +101,9 @@ void main()
         vHsl = 11111;
     }
 
-    int x = (pickerId >> 20) & 0xFFF;
-    int y = (pickerId >> 4) & 0xFFF;
-    int type = pickerId & 0xF;
+    int x = (pickerId >> 18) & 0x1FFF;
+    int y = (pickerId >> 5) & 0x1FFF;
+    int type = pickerId & 0x1F;
     int idx = x + 64 * (y + 64 * type);
     if (selectedIds[idx] == 1) {
         vColor.a = 0.8;

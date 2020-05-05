@@ -1,6 +1,7 @@
 package di;
 
 import com.google.inject.*;
+import de.javagl.obj.Obj;
 import javafx.fxml.FXMLLoader;
 import lombok.SneakyThrows;
 import models.ObjectSwatchModel;
@@ -13,8 +14,10 @@ import net.runelite.cache.region.RegionLoader;
 import net.runelite.cache.util.StoreLocation;
 import renderer.Camera;
 import scene.Scene;
+import scene.SceneRegionBuilder;
 
 import javax.inject.Singleton;
+import java.io.File;
 import java.io.IOException;
 
 public class BasicModule extends AbstractModule {
@@ -23,14 +26,11 @@ public class BasicModule extends AbstractModule {
     @SneakyThrows
     @Override
     protected void configure() {
-        bind(FXMLLoader.class).toProvider(FXMLLoaderProvider.class);
-
         bind(ObjectSwatchModel.class).toInstance(new ObjectSwatchModel());
-        bind(Scene.class).toInstance(new Scene());
+
+
         bind(Camera.class).toInstance(new Camera());
-
-
-        // Ca
+        bind(Scene.class).toProvider(SceneProvider.class);
         bind(Store.class).toProvider(StoreProvider.class);
         bind(RSTextureProvider.class).toProvider(RSTextureProviderProvider.class);
         bind(SpriteManager.class).toProvider(SpriteManagerProvider.class);
@@ -41,34 +41,17 @@ public class BasicModule extends AbstractModule {
 }
 
 @Singleton
-class FXMLLoaderProvider implements Provider<FXMLLoader> {
-    private final FXMLLoader fxmlLoader;
+class SceneProvider implements Provider<Scene> {
+    private final Scene scene;
 
-    public FXMLLoaderProvider() {
-        Injector injector = Guice.createInjector(new BasicModule());
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setControllerFactory(injector::getInstance);
-        this.fxmlLoader = fxmlLoader;
+    @Inject
+    public SceneProvider(SceneRegionBuilder sceneRegionBuilder) {
+        scene = new Scene(sceneRegionBuilder);
     }
 
     @Override
-    public FXMLLoader get() {
-        return fxmlLoader;
-    }
-}
-
-@Singleton
-class StoreProvider implements Provider<Store> {
-    private final Store store;
-
-    public StoreProvider() throws IOException {
-        store = new Store(StoreLocation.LOCATION);
-        store.load();
-    }
-
-    @Override
-    public Store get() {
-        return store;
+    public Scene get() {
+        return scene;
     }
 }
 

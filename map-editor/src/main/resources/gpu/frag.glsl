@@ -51,9 +51,7 @@ void main() {
       discard;
     }
   }
-//  if (Color.a == 0) {
-//    discard;
-//  }
+
   float n = fUv.x;
 
   int hsl = int(fHsl);
@@ -71,6 +69,10 @@ void main() {
     vec4 textureColorBrightness = pow(textureColor, vec4(brightness, brightness, brightness, 1.0f));
 
     smoothColor = textureColorBrightness * smoothColor;
+  }
+
+  if (smoothColor.a < 0.1) {
+    discard;
   }
 
   fragColor = smoothColor;

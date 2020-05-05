@@ -1,14 +1,20 @@
 package models;
 
+import com.google.inject.Inject;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Constants;
 import net.runelite.api.Perspective;
+import net.runelite.cache.definitions.UnderlayDefinition;
+import net.runelite.cache.region.Region;
 import renderer.SceneUploader;
 import renderer.helpers.GpuFloatBuffer;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
+import scene.Scene;
+import scene.SceneTile;
 
 import java.nio.IntBuffer;
 
@@ -30,7 +36,9 @@ public class TilePaintImpl extends Renderable {
     private int texture;
     private int rgb;
 
-    public TilePaintImpl(int swColor, int seColor, int neColor, int nwColor, int texture, int rgb, boolean isFlat) {
+    private UnderlayDefinition underlayDefinition;
+
+    public TilePaintImpl(int swColor, int seColor, int neColor, int nwColor, int texture, int rgb, boolean isFlat, UnderlayDefinition underlayDefinition) {
         this.isFlat = true;
         this.swColor = swColor;
         this.seColor = seColor;
@@ -39,6 +47,106 @@ public class TilePaintImpl extends Renderable {
         this.texture = texture;
         this.rgb = rgb;
         this.isFlat = isFlat;
+        this.underlayDefinition = underlayDefinition;
+    }
+
+    public void calcBlendColor(Scene scene) {
+        int baseX = sceneX;
+        int baseY = sceneY;
+        int blend = 5;
+        int[] hues = new int[blend * 2];
+        int[] sats = new int[blend * 2];
+        int[] light = new int[blend * 2];
+        int[] mul = new int[blend * 2];
+        int[] num = new int[blend * 2];
+        for (int xi = -blend * 2; xi < blend * 2; ++xi) {
+            for (int yi = -blend; yi < blend; ++yi) {
+                int xr = xi + 5;
+                if (xr >= -blend && xr < blend) {
+                    SceneTile tile = scene.getTile(0, baseX + xr, baseY + yi);
+                    if (tile != null && tile.getTilePaint() != null) {
+                        UnderlayDefinition underlay = tile.getTilePaint().underlayDefinition;
+                        hues[yi + blend] += underlay.getHue();
+                        sats[yi + blend] += underlay.getSaturation();
+                        light[yi + blend] += underlay.getLightness();
+                        mul[yi + blend] += underlay.getHueMultiplier();
+                        num[yi + blend]++;
+                    }
+                }
+
+                int xl = xi - 5;
+                if (xl >= -blend && xl < blend) {
+                    SceneTile tile = scene.getTile(0, baseX + xl, baseY + yi);
+                    if (tile != null && tile.getTilePaint() != null) {
+                        UnderlayDefinition underlay = tile.getTilePaint().underlayDefinition;
+                        hues[yi + blend] += underlay.getHue();
+                        sats[yi + blend] += underlay.getSaturation();
+                        light[yi + blend] += underlay.getLightness();
+                        mul[yi + blend] += underlay.getHueMultiplier();
+                        num[yi + blend]++;
+                    }
+                }
+            }
+
+            if (xi >= 0) {
+                int runningHues = 0;
+                int runningSat = 0;
+                int runningLight = 0;
+                int runningMultiplier = 0;
+                int runningNumber = 0;
+
+                for (int yi = -blend * 2; yi < blend * 2; ++yi) {
+                    int yu = yi + 5;
+                    if (yu >= -blend && yu < blend) {
+                        runningHues += hues[yu + blend];
+                        runningSat += sats[yu + blend];
+                        runningLight += light[yu + blend];
+                        runningMultiplier += mul[yu + blend];
+                        runningNumber += num[yu + blend];
+                    }
+
+                    int yd = yi - 5;
+                    if (yd >= -blend && yd < blend) {
+                        runningHues -= hues[yd + blend];
+                        runningSat -= sats[yd + blend];
+                        runningLight -= light[yd + blend];
+                        runningMultiplier -= mul[yd + blend];
+                        runningNumber -= num[yd + blend];
+                    }
+
+                    if (yi >= 0) {
+                        if (xi == sceneX && yi == sceneY) {
+                            int swColor = scene.getRegionFromSceneCoord(xi, yi).getTileColors()[xi][yi];
+                            int seColor = scene.getRegionFromSceneCoord(xi + 1, yi).getTileColors()[xi + 1][yi];
+                            int neColor = scene.getRegionFromSceneCoord(xi + 1, yi + 1).getTileColors()[xi + 1][yi + 1];
+                            int nwColor = scene.getRegionFromSceneCoord(xi, yi + 1).getTileColors()[xi][yi + 1];
+
+                            if (runningMultiplier == 0 || runningNumber == 0) {
+                                continue;
+                            }
+                            int avgHue = runningHues * 256 / runningMultiplier;
+                            int avgSat = runningSat / runningNumber;
+                            int avgLight = runningLight / runningNumber;
+                            rgb = hslToRgb(avgHue, avgSat, avgLight);
+
+//                        if (avgLight < 0) {
+//                            avgLight = 0;
+//                        } else if (avgLight > 255) {
+//                            avgLight = 255;
+//                        }
+//
+//                        int underlayHsl = hslToRgb(avgHue, avgSat, avgLight);
+
+                            //int swColor, int seColor, int neColor, int nwColor
+                            this.swColor = method4220(rgb, swColor);
+                            this.seColor = method4220(rgb, seColor);
+                            this.neColor = method4220(rgb, neColor);
+                            this.nwColor = method4220(rgb, nwColor);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public TilePaintImpl(TilePaintImpl orig) {
@@ -91,7 +199,7 @@ public class TilePaintImpl extends Renderable {
         buffer.put(getSceneBufferOffset());
         buffer.put(FLAG_SCENE_BUFFER);
         buffer.put(x).put(y).put(z);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 0));
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 30));
     }
 
     public void draw(ModelBuffers modelBuffers, int sceneX, int sceneY) {
@@ -110,7 +218,7 @@ public class TilePaintImpl extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset());
         buffer.put(FLAG_SCENE_BUFFER);
         buffer.put(x).put(y).put(z);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 0));
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 30));
         buffer.put(-1).put(-1).put(-1).put(-1);
 
         setSceneBufferOffset(modelBuffers.getTargetBufferOffset());
@@ -136,7 +244,7 @@ public class TilePaintImpl extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
         buffer.put(0);
         buffer.put(x).put(y).put(z);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 0));
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 30));
         buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTempOffset(len);
@@ -159,5 +267,41 @@ public class TilePaintImpl extends Renderable {
         hash = 17 * hash + rgb;
         hash = 17 * hash + texture;
         return hash;
+    }
+
+    int hslToRgb(int var0, int var1, int var2) {
+        if (var2 > 179) {
+            var1 /= 2;
+        }
+
+        if (var2 > 192) {
+            var1 /= 2;
+        }
+
+        if (var2 > 217) {
+            var1 /= 2;
+        }
+
+        if (var2 > 243) {
+            var1 /= 2;
+        }
+
+        int var3 = (var1 / 32 << 7) + (var0 / 4 << 10) + var2 / 2;
+        return var3;
+    }
+
+    static int method4220(int var0, int var1) {
+        if (var0 == -1) {
+            return 12345678;
+        } else {
+            var1 = (var0 & 127) * var1 / 128;
+            if (var1 < 2) {
+                var1 = 2;
+            } else if (var1 > 126) {
+                var1 = 126;
+            }
+
+            return (var0 & 65408) + var1;
+        }
     }
 }

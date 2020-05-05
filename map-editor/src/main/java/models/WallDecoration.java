@@ -6,6 +6,7 @@ import lombok.Setter;
 import net.runelite.api.Entity;
 import net.runelite.api.Model;
 import net.runelite.api.Perspective;
+import net.runelite.cache.region.LocationType;
 import renderer.SceneUploader;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
@@ -19,7 +20,6 @@ import static renderer.helpers.ModelBuffers.MAX_TRIANGLE;
 @AllArgsConstructor
 public class WallDecoration extends Renderable {
     private long tag;
-    private int flags;
     private int x;
     private int y;
     private int height;
@@ -27,12 +27,16 @@ public class WallDecoration extends Renderable {
     private Entity entityB;
     private int orientationA;
     private int orientationB;
+    private int xOff;
+    private int yOff;
 
     public void draw(ModelBuffers modelBuffers, int sceneX, int sceneY) {
         Model model = entityA.getModel();
         if (model == null) {
             return;
         }
+
+        int typ = (int)(tag >> 3) & 0x1F;
 
         model.calculateBoundsCylinder();
         model.calculateExtreme(orientationA);
@@ -52,7 +56,7 @@ public class WallDecoration extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset());
         buffer.put(ModelBuffers.FLAG_SCENE_BUFFER | (model.getRadius() << 12) | orientationA);
         buffer.put(x).put(height).put(z);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 3));
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, typ));
         buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTargetBufferOffset(tc * 3);
@@ -149,7 +153,7 @@ public class WallDecoration extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
         buffer.put((model.getRadius() << 12) | getOrientationA());
         buffer.put(x).put(height).put(y);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 3));
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 22));
         buffer.put(-1).put(-1).put(-1).put(-1);
 
         modelBuffers.addTempOffset(len);

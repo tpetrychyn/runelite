@@ -7,17 +7,13 @@ import com.jogamp.newt.event.MouseListener;
 import javafx.animation.AnimationTimer;
 import lombok.Getter;
 import scene.Scene;
-import scene.SceneRegionBuilder;
 
 import javax.inject.Inject;
-import java.util.Map;
 
 @Getter
 public class InputHandler implements KeyListener, MouseListener {
     @Inject
     private Scene scene;
-    @Inject
-    private SceneRegionBuilder sceneRegionBuilder;
 
     private boolean isLeftMouseDown = false;
     public boolean leftMousePressed = false;
@@ -91,10 +87,10 @@ public class InputHandler implements KeyListener, MouseListener {
         }
 
         if (keys[KeyEvent.VK_K]) {
-            scene.Load(sceneRegionBuilder, 13360, 5);
+            scene.Load(13360, 5);
         }
         if (keys[KeyEvent.VK_L]) {
-            scene.Load(sceneRegionBuilder, 13408, 5);
+            scene.Load(13408, 5);
         }
 
         if (keys[KeyEvent.VK_R]) {

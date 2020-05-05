@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXMasonryPane?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -13,8 +12,10 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
@@ -26,7 +27,7 @@
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Close" />
+
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -45,9 +46,16 @@
                <children>
                   <ScrollPane fitToWidth="true" hbarPolicy="NEVER" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                      <content>
-                        <VBox minHeight="-Infinity" prefHeight="605.0" prefWidth="200.0">
+                        <VBox minHeight="-Infinity" prefHeight="873.0" prefWidth="198.0">
                            <children>
-                              <GridPane prefHeight="164.0" prefWidth="200.0">
+                              <Label text="Toolbox" />
+                              <FlowPane fx:id="paneToolbox" hgap="5.0" prefHeight="118.0" prefWidth="198.0" vgap="5.0" VBox.vgrow="SOMETIMES">
+                                 <padding>
+                                    <Insets left="5.0" right="5.0" />
+                                 </padding></FlowPane>
+                              <Label text="Tool Properties" />
+                              <Pane fx:id="paneToolProperties" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                              <GridPane prefHeight="120.0" prefWidth="198.0">
                                 <columnConstraints>
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -67,8 +75,6 @@
                                     <Label fx:id="lblCameraX" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                     <Label fx:id="lblCameraY" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                     <Label fx:id="lblCameraZ" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                                    <Label text="FPS" GridPane.rowIndex="7" />
-                                    <Label fx:id="lblFps" text="-1" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                                  </children>
                                  <rowConstraints>
                                     <RowConstraints />
@@ -78,11 +84,9 @@
                                     <RowConstraints />
                                     <RowConstraints />
                                     <RowConstraints />
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" />
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" />
                                  </rowConstraints>
                               </GridPane>
-                              <TextArea fx:id="debugText" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
+                              <TextArea fx:id="debugText" editable="false" prefHeight="170.0" prefWidth="198.0" wrapText="true" />
                            </children>
                         </VBox>
                      </content>

@@ -476,13 +476,13 @@ public class Scene {
 	@ObfuscatedSignature(
 		signature = "(IIIIIILee;IJI)Z"
 	)
-	public boolean newGameOjbect(int var1, int var2, int var3, int var4, int var5, int var6, Renderable var7, int var8, long var9, int var11) {
+	public boolean newGameOjbect(int z, int x, int y, int height, int width, int length, Renderable var7, int var8, long var9, int var11) {
 		if (var7 == null) {
 			return true;
 		} else {
-			int var12 = var5 * 64 + var2 * 128;
-			int var13 = var6 * 64 + var3 * 128;
-			return this.newGameObject(var1, var2, var3, var5, var6, var12, var13, var4, var7, var8, false, var9, var11);
+			int var12 = width * 64 + x * 128;
+			int var13 = length * 64 + y * 128;
+			return this.newGameObject(z, x, y, width, length, var12, var13, height, var7, var8, false, var9, var11);
 		}
 	}
 
@@ -539,15 +539,15 @@ public class Scene {
 		signature = "(IIIIIIIILee;IZJI)Z"
 	)
 	@Export("newGameObject")
-	boolean newGameObject(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, Renderable var9, int var10, boolean var11, long var12, int var14) {
+	boolean newGameObject(int z, int x, int y, int width, int length, int centerX, int centerY, int var8, Renderable var9, int var10, boolean var11, long var12, int var14) {
 		int var16;
-		for (int var15 = var2; var15 < var2 + var4; ++var15) {
-			for (var16 = var3; var16 < var3 + var5; ++var16) {
+		for (int var15 = x; var15 < x + width; ++var15) {
+			for (var16 = y; var16 < y + length; ++var16) {
 				if (var15 < 0 || var16 < 0 || var15 >= this.xSize || var16 >= this.ySize) {
 					return false;
 				}
 
-				Tile var17 = this.tiles[var1][var15][var16];
+				Tile var17 = this.tiles[z][var15][var16];
 				if (var17 != null && var17.gameObjectsCount >= 5) {
 					return false;
 				}
@@ -557,43 +557,43 @@ public class Scene {
 		GameObject var21 = new GameObject();
 		var21.tag = var12;
 		var21.flags = var14;
-		var21.plane = var1;
-		var21.centerX = var6;
-		var21.centerY = var7;
+		var21.plane = z;
+		var21.centerX = centerX;
+		var21.centerY = centerY;
 		var21.height = var8;
 		var21.entity = var9;
 		var21.orientation = var10;
-		var21.startX = var2;
-		var21.startY = var3;
-		var21.endX = var2 + var4 - 1;
-		var21.endY = var3 + var5 - 1;
+		var21.startX = x;
+		var21.startY = y;
+		var21.endX = x + width - 1;
+		var21.endY = y + length - 1;
 
-		for (var16 = var2; var16 < var2 + var4; ++var16) {
-			for (int var22 = var3; var22 < var3 + var5; ++var22) {
+		for (var16 = x; var16 < x + width; ++var16) {
+			for (int var22 = y; var22 < y + length; ++var22) {
 				int var18 = 0;
-				if (var16 > var2) {
+				if (var16 > x) {
 					++var18;
 				}
 
-				if (var16 < var2 + var4 - 1) {
+				if (var16 < x + width - 1) {
 					var18 += 4;
 				}
 
-				if (var22 > var3) {
+				if (var22 > y) {
 					var18 += 8;
 				}
 
-				if (var22 < var3 + var5 - 1) {
+				if (var22 < y + length - 1) {
 					var18 += 2;
 				}
 
-				for (int var19 = var1; var19 >= 0; --var19) {
+				for (int var19 = z; var19 >= 0; --var19) {
 					if (this.tiles[var19][var16][var22] == null) {
 						this.tiles[var19][var16][var22] = new Tile(var19, var16, var22);
 					}
 				}
 
-				Tile var23 = this.tiles[var1][var16][var22];
+				Tile var23 = this.tiles[z][var16][var22];
 				var23.gameObjects[var23.gameObjectsCount] = var21;
 				var23.gameObjectEdgeMasks[var23.gameObjectsCount] = var18;
 				var23.gameObjectsEdgeMask |= var18;

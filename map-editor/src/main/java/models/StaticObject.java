@@ -12,6 +12,7 @@ import net.runelite.cache.definitions.ModelDefinition;
 import net.runelite.cache.definitions.loaders.MapLoader;
 import net.runelite.cache.models.FaceNormal;
 import net.runelite.cache.models.VertexNormal;
+import net.runelite.cache.region.RegionLoader;
 
 import java.util.List;
 
@@ -402,18 +403,18 @@ public class StaticObject extends ModelDefinition implements Model {
         boundsType = 0;
     }
 
-    public StaticObject contourGround(MapLoader mapLoader, int xOff, int height, int yOff, boolean deepCopy, int clipType, int worldX, int worldY) {
+    public StaticObject contourGround(int[][] tileHeights, int xOff, int height, int yOff, boolean deepCopy, int clipType) {
         this.calculateBoundsCylinder();
         int left = xOff - this.xzRadius;
         int right = xOff + this.xzRadius;
         int top = yOff - this.xzRadius;
         int bottom = yOff + this.xzRadius;
-        if (left >= 0 && right + 128 >> 7 < Constants.SCENE_SIZE && top >= 0 && bottom + 128 >> 7 < Constants.SCENE_SIZE) {
+        if (left >= 0 && right + 128 >> 7 < Constants.REGION_SIZE && top >= 0 && bottom + 128 >> 7 < Constants.REGION_SIZE) {
             left >>= 7;
             right = right + 127 >> 7;
             top >>= 7;
             bottom = bottom + 127 >> 7;
-            if (height == mapLoader.getWorldTile(0, left, top).height && height == mapLoader.getWorldTile(0, right, top).height && height == mapLoader.getWorldTile(0, left, bottom).height && height == mapLoader.getWorldTile(0, right, bottom).height) {
+            if (height == tileHeights[left][top] && height == tileHeights[right][top] && height == tileHeights[left][bottom] && height == tileHeights[right][bottom]) {
                 return this;
             } else {
                 StaticObject model;
@@ -431,6 +432,8 @@ public class StaticObject extends ModelDefinition implements Model {
                     model.faceRenderPriorities = this.faceRenderPriorities;
                     model.faceAlphas = this.faceAlphas;
                     model.priority = this.priority;
+                    model.faceTextureVCoordinates = this.faceTextureVCoordinates;
+                    model.faceTextureUCoordinates = this.faceTextureUCoordinates;
                     model.faceTextures = this.faceTextures;
                     model.faceColors1 = this.faceColors1;
                     model.faceColors2 = this.faceColors2;
@@ -457,8 +460,8 @@ public class StaticObject extends ModelDefinition implements Model {
                         var16 = var14 & 127;
                         var17 = var13 >> 7;
                         var18 = var14 >> 7;
-                        var19 = mapLoader.getWorldTile(0, worldX + var17, worldY + var18).height * (128 - var15) + mapLoader.getWorldTile(0, worldX + var17+1, worldY + var18).height * var15 >> 7;
-                        var20 = mapLoader.getWorldTile(0, worldX + var17, worldY + var18+1).height * (128 - var15) + var15 * mapLoader.getWorldTile(0, worldX + var17+1, worldY + var18+1).height >> 7;
+                        var19 = tileHeights[var17][var18] * (128 - var15) + tileHeights[var17 + 1][var18] * var15 >> 7;
+                        var20 = tileHeights[var17][var18 + 1] * (128 - var15) + var15 * tileHeights[var17 + 1][var18 + 1] >> 7;
                         var21 = var19 * (128 - var16) + var20 * var16 >> 7;
                         model.vertexPositionsY[var12] = var21 + this.vertexPositionsY[var12] - height;
                     }
@@ -472,8 +475,8 @@ public class StaticObject extends ModelDefinition implements Model {
                             var17 = var15 & 127;
                             var18 = var14 >> 7;
                             var19 = var15 >> 7;
-                            var20 = mapLoader.getWorldTile(0, worldX + var18, worldY + var19).height * (128 - var16) + mapLoader.getWorldTile(0, worldX + var18+1, worldY + var19).height * var16 >> 7;
-                            var21 = mapLoader.getWorldTile(0, worldX + var18, worldY + var19+1).height * (128 - var16) + var16 *  mapLoader.getWorldTile(0, worldX + var18+1, worldY + var19+1).height >> 7;
+                            var20 = tileHeights[var18][var19] * (128 - var16) + tileHeights[var18 + 1][var19] * var16 >> 7;
+                            var21 = tileHeights[var18][var19 + 1] * (128 - var16) + var16 * tileHeights[var18 + 1][var19 + 1] >> 7;
                             int var22 = var20 * (128 - var17) + var21 * var17 >> 7;
                             model.vertexPositionsY[var12] = (clipType - var13) * (var22 - height) / clipType + this.vertexPositionsY[var12];
                         }

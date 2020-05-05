@@ -1,7 +1,9 @@
 package models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Entity;
 import net.runelite.api.Model;
 import net.runelite.api.Perspective;
 import renderer.SceneUploader;
@@ -12,17 +14,20 @@ import java.nio.IntBuffer;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class FloorDecoration extends Renderable {
-    private int id;
+    private Entity entity;
     private int orientation;
-    private Model model;
     private int x;
     private int y;
     private int height;
     private long tag;
-    private int flags;
 
     public void draw(ModelBuffers modelBuffers, int sceneX, int sceneY) {
+        Model model = entity.getModel();
+        if (model == null) {
+            return;
+        }
         int x = sceneX * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
         int z = sceneY * Perspective.LOCAL_TILE_SIZE + Perspective.LOCAL_HALF_TILE_SIZE;
 
@@ -83,9 +88,5 @@ public class FloorDecoration extends Renderable {
 //            tempOffset += len;
 //        }
 //    }
-    }
-
-    public String toString() {
-        return String.format("Floor Decoration: id %d, x %d, y %d, height %d", id, x, y, height);
     }
 }

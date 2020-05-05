@@ -33,6 +33,7 @@ import lombok.Data;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.definitions.loaders.ModelLoader;
 import net.runelite.cache.fs.*;
+import net.runelite.cache.region.LocationType;
 
 @Data
 public class ObjectDefinition {
@@ -42,7 +43,7 @@ public class ObjectDefinition {
     protected boolean isHollow = false;
     protected String name = "null";
     protected int[] modelIds;
-    protected int[] models;
+    protected int[] modelTypes;
     protected short[] recolorToFind;
     protected int mapAreaId = -1;
     protected short[] textureToReplace;
@@ -91,11 +92,25 @@ public class ObjectDefinition {
         return String.format("%s (%d)", name, id);
     }
 
+    public Map<Integer, ModelDefinition> getModelTypes(Store store) {
+        Map<Integer, ModelDefinition> modelDefMap = new HashMap<>();
+        if (modelTypes == null) {
+            // interactable is the default
+            modelDefMap.put(LocationType.INTERACTABLE.getValue(), getModel(store, LocationType.INTERACTABLE.getValue(), 0));
+        } else {
+            for (int typ : modelTypes) {
+                modelDefMap.put(typ, getModel(store, typ, 0));
+            }
+        }
+
+        return modelDefMap;
+    }
+
     public ModelDefinition getModel(Store store, int type, int orientation) {
         this.store = store;
         long modelTag;
-        if (this.models == null) {
-            modelTag = orientation + (this.id << 10);
+        if (this.modelTypes == null) {
+            modelTag = orientation + (10 << 3) + (this.id << 10);
         } else {
             modelTag = orientation + (type << 3) + (this.id << 10);
         }
@@ -112,15 +127,12 @@ public class ObjectDefinition {
             litModelCache.put(modelTag, litModel);
         }
 
-        if (litModel.faceAlphas != null) {
-            System.out.printf("");
-        }
         return litModel;
     }
 
     public ModelDefinition getModelDynamic(int type, int orientation, SequenceDefinition sequenceDefinition, int frame) {
         long modelTag;
-        if (this.models == null) {
+        if (this.modelTypes == null) {
             modelTag = orientation + (this.id << 10);
         } else {
             modelTag = orientation + (type << 3) + (this.id << 10);
@@ -149,7 +161,7 @@ public class ObjectDefinition {
 
     private ModelDefinition getModelDefinition(int type, int orientation) {
         ModelDefinition modelDefinition = null;
-        if (this.models == null) {
+        if (this.modelTypes == null) {
             if (type != 10 || this.modelIds == null) {
                 return null;
             }
@@ -202,8 +214,8 @@ public class ObjectDefinition {
             }
         } else {
             int modelIdx = -1;
-            for (int i = 0; i < this.models.length; i++) {
-                if (this.models[i] == type) {
+            for (int i = 0; i < this.modelTypes.length; i++) {
+                if (this.modelTypes[i] == type) {
                     modelIdx = i;
                     break;
                 }

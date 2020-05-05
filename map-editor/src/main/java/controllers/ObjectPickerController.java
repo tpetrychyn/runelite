@@ -6,10 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
@@ -26,15 +23,21 @@ import net.runelite.cache.ObjectManager;
 import net.runelite.cache.definitions.ModelDefinition;
 import net.runelite.cache.definitions.ObjectDefinition;
 import net.runelite.cache.fs.Store;
+import net.runelite.cache.item.RSTextureProvider;
+import net.runelite.cache.region.LocationType;
+import org.apache.commons.lang3.StringUtils;
 import renderer.MapEditor;
 
 import javax.inject.Inject;
+import java.util.Map;
 
 @Getter
 @Setter
 public class ObjectPickerController {
     @Inject
     private ObjectManager objectManager;
+    @Inject
+    private RSTextureProvider textureProvider;
     @Inject
     private Store store;
     @Inject
@@ -52,6 +55,9 @@ public class ObjectPickerController {
     private TextField txtAddToSwatchName;
     @FXML
     private Button btnAddToSwatch;
+
+    @FXML
+    private HBox paneTypeList;
 
     @FXML
     private ListView<ObjectDefinition> listView;
@@ -75,6 +81,7 @@ public class ObjectPickerController {
         // by setting them to a very large +z at the start it gives lots of room to zoom in and out
         g.setTranslateZ(10000);
         camera.setTranslateZ(9000);
+        g.setTranslateY(-10); // offset from controls on bottom
         p.getChildren().add(camera);
 
         SubScene subScene = new SubScene(p, 400, 400, true, SceneAntialiasing.BALANCED);
@@ -90,18 +97,38 @@ public class ObjectPickerController {
         entries.addAll(objectManager.getObjects());
         listView.setItems(entries);
 
+        ToggleGroup typeToggleGroup = new ToggleGroup();
         listView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                     if (newVal == null || newVal == oldVal) {
                         return;
                     }
-                    g.getChildren().clear();
-                    ModelDefinition m = newVal.getModel(store, 10, 0);
-                    if (m == null) {
+                    paneTypeList.getChildren().clear();
+
+                    Map<Integer, ModelDefinition> modelDefinitionMap = newVal.getModelTypes(store);
+                    if (modelDefinitionMap.size() == 0) {
                         return;
                     }
-                    MeshView[] mv = JavaFxHelpers.modelToMeshViews(m);
-                    g.getChildren().addAll(mv);
+                    boolean first = true;
+                    for (int t : modelDefinitionMap.keySet()) {
+                        if (modelDefinitionMap.get(t) == null) {
+                            continue;
+                        }
+                        ToggleButton b = new ToggleButton();
+                        b.setText(StringUtils.capitalize(LocationType.valueOf(t).toString().toLowerCase().replaceAll("_", " ")));
+                        b.setToggleGroup(typeToggleGroup);
+                        paneTypeList.getChildren().add(b);
 
+                        b.setOnAction(e -> {
+                            g.getChildren().clear();
+                            MeshView[] mv = JavaFxHelpers.modelToMeshViews(modelDefinitionMap.get(t), textureProvider);
+                            g.getChildren().addAll(mv);
+                        });
+
+                        if (first) {
+                            b.fire();
+                            first = false;
+                        }
+                    }
                     paneAddToSwatch.setVisible(true);
                     txtAddToSwatchName.setText(newVal.toString());
                     selectedObject = newVal;

@@ -8,7 +8,6 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
-import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
 import models.*;
 import net.runelite.api.Constants;
@@ -24,7 +23,6 @@ import renderer.helpers.GLUtil;
 import renderer.helpers.GpuIntBuffer;
 import renderer.helpers.ModelBuffers;
 import scene.Scene;
-import scene.SceneRegionBuilder;
 import scene.SceneTile;
 
 import javax.inject.Inject;
@@ -59,8 +57,6 @@ public class MapEditor implements GLEventListener {
 
     @Inject
     private RSTextureProvider textureProvider;
-    @Inject
-    private SceneRegionBuilder sceneRegionBuilder;
     @Inject
     private Store store;
     @Inject
@@ -142,7 +138,7 @@ public class MapEditor implements GLEventListener {
 
     public NewtCanvasJFX LoadMap() {
         scene.getSceneChangeListeners().add(e -> isSceneUploadRequired = true);
-        scene.Load(sceneRegionBuilder, 12085, 1);
+        scene.Load(10038, 1);
 
         // center camera in viewport
         camera.setCenterX(canvasWidth / 2);
@@ -186,10 +182,11 @@ public class MapEditor implements GLEventListener {
             }
         });
 
-        scene.getSelectedTile().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null) { return; }
-            //int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | objectId & 0xF;
-            hoverId = ((newVal.getX() & 0xFFF) << 20) | ((newVal.getY() & 0xFFF) << 4);
+        scene.getHoveredEntity().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                return;
+            }
+            hoverId = ((newVal.getX() & 0xFFFF) << 18) | ((newVal.getY() & 0xFFFF) << 5) | 30 & 0x1F;
         });
 
         return glCanvas;
@@ -215,7 +212,7 @@ public class MapEditor implements GLEventListener {
             initVao();
 
             // disable vsync
-            gl.setSwapInterval(0);
+//            gl.setSwapInterval(0);
         } catch (ShaderException e) {
             e.printStackTrace();
         }
@@ -327,7 +324,6 @@ public class MapEditor implements GLEventListener {
             return;
         }
 
-        // TODO: bring PickerType enum back
         // -1 = null hover, ignore
         // -2 = we want to pass through this object
         if (pickerId == -1) {
@@ -339,27 +335,46 @@ public class MapEditor implements GLEventListener {
             hoverId = pickerId;
         }
 
-        //int colorPickerId = ((x & 0xFFF) << 20) | ((y & 0xFFF) << 4) | objectId & 0xF;
-        int x = (pickerId >> 20) & 0xFFF;
-        int y = (pickerId >> 4) & 0xFFF;
-        int type = pickerId & 0xF;
+        int x = (pickerId >> 18) & 0x1FFF;
+        int y = (pickerId >> 5) & 0x1FFF;
+        int type = pickerId & 0x1F;
 
-        debugText += String.format("id %d\n x %d y %d objId %d \n", pickerId, x, y, type);
+        debugText += String.format("x %d y %d type %d \n", x, y, type);
         SceneTile tile = scene.getTile(0, x, y);
         if (tile != null) {
-            scene.getSelectedTile().set(tile);
-            if (injectedDec != null && tile.getTilePaint() != null) {
-                injectedDec.setSceneX(x);
-                injectedDec.setSceneY(y);
-                injectedDec.setHeight(tile.getTilePaint().getNwHeight());
-                return;
+            scene.getHoveredEntity().set(tile);
+            switch (type) {
+                case 30: // tile paint
+                    if (injectedDec != null) {
+                        injectedDec.setSceneX(x);
+                        injectedDec.setSceneY(y);
+                        injectedDec.setHeight(tile.getTilePaint().getNwHeight());
+                    }
+                    break;
+                case 31: // tile model
+                    if (injectedDec != null) {
+                        injectedDec.setSceneX(x);
+                        injectedDec.setSceneY(y);
+                        injectedDec.setHeight(tile.getTileModel().getHeight());
+                    }
+                    break;
             }
+
+            if (tile.getGameObjects().size() > 0) {
+                WallDecoration d = tile.getGameObjects().get(0);
+                long orientation = d.getTag() & 0xF;
+                long typ = (d.getTag() >> 3) & 0x1F;
+                long id = (d.getTag() >> 10) & 0xFFFF;
+                debugText += String.format("ori: %d type: %d id: %d \n", orientation, typ, id);
+                if (d.getEntityA() instanceof DynamicObject) {
+                    debugText += String.format("id %d \n", ((DynamicObject) d.getEntityA()).getId());
+                }
+            }
+
             if (tile.getWallDecoration() != null) {
                 WallDecoration d = tile.getWallDecoration();
-                debugText += String.format("wall dec: tag %d \n", d.getTag());
                 long orientation = d.getTag() & 0xF;
-                //orientation + (type << 3) + (this.id << 10);
-                long typ = (d.getTag() >> 3) & 0xFF;
+                long typ = (d.getTag() >> 3) & 0x1F;
                 long id = (d.getTag() >> 10) & 0xFFFF;
                 debugText += String.format("ori: %d type: %d id: %d \n", orientation, typ, id);
                 if (d.getEntityA() instanceof DynamicObject) {
@@ -386,6 +401,10 @@ public class MapEditor implements GLEventListener {
         FloorDecoration f = tile.getFloorDecoration();
         if (f != null) {
             f.draw(modelBuffers, x, y);
+        }
+
+        for (WallDecoration w : tile.getGameObjects()) {
+            w.draw(modelBuffers, x, y);
         }
 
         WallDecoration w = tile.getWallDecoration();
@@ -609,16 +628,18 @@ public class MapEditor implements GLEventListener {
             // to have logic to disregard culled faces in the priority depth testing.
             gl.glEnable(gl.GL_CULL_FACE);
 
-            // Enable blending for alpha
-            gl.glEnable(gl.GL_BLEND);
-            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+
+//            // Enable blending for alpha
+            // Tay - no blend due to depth test transparency issue
+//            gl.glEnable(gl.GL_BLEND);
+//            gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 
             // Draw output of compute shaders
             gl.glBindVertexArray(vaoHandle);
 
             gl.glDrawArrays(gl.GL_TRIANGLES, 0, modelBuffers.getTargetBufferOffset() + modelBuffers.getTempOffset());
 
-            gl.glDisable(gl.GL_BLEND);
+//            gl.glDisable(gl.GL_BLEND);
             gl.glDisable(gl.GL_CULL_FACE);
 
             gl.glUseProgram(0);
@@ -667,7 +688,6 @@ public class MapEditor implements GLEventListener {
         }
 
         debugText = "";
-//        minimapController.drawCanvas(scene);
     }
 
     String debugText = "";
@@ -966,9 +986,10 @@ public class MapEditor implements GLEventListener {
                 0,
                 0,
                 0,
-                0,
                 model,
                 null,
+                0,
+                0,
                 0,
                 0);
         showHover = false;
@@ -983,26 +1004,34 @@ public class MapEditor implements GLEventListener {
             return;
         }
         if (inputHandler.isMouseClicked()) {
+            scene.getSelectedEntity().set(scene.getHoveredEntity().getValue().getTilePaint());
             int maxTileObj = 15;
             int tileRad = scene.getRadius() * Constants.REGION_SIZE;
-            int x = (hoverId >> 20) & 0xFFF;
-            int y = (hoverId >> 4) & 0xFFF;
-            int obj = hoverId & 0xF;
+            int x = (hoverId >> 18) & 0x1FFF;
+            int y = (hoverId >> 5) & 0x1FFF;
+            int type = hoverId & 0x1F;
 
-            SceneTile tile = scene.getTile(0, x, y);
-            if (tile != null) {
-                if (injectedDec != null && tile.getTilePaint() != null) {
-                    injectedDec.setSceneX(x);
-                    injectedDec.setSceneY(y);
-                    injectedDec.setHeight(tile.getTilePaint().getNwHeight());
-                    dynamicDecorations.add(injectedDec);
-                    injectedDec = null;
-                    inputHandler.mouseClicked = false;
-                    return;
-                }
-            }
+//            SceneTile tile = scene.getTile(0, x, y);
+//            if (tile != null) {
+//                if (tile.getTilePaint() != null) {
+//                    tile.getTilePaint().getUnderlayDefinition().setHue(0);
+//                    tile.getTilePaint().getUnderlayDefinition().setSaturation(0);
+//                    tile.getTilePaint().getUnderlayDefinition().setLightness(0);
+//                    tile.getTilePaint().calcBlendColor(scene);
+//                    tile.getTilePaint().update(gl, bufferId, modelBuffers, sceneUploader, tile.getX(), tile.getY());
+//                }
+//                if (injectedDec != null && tile.getTilePaint() != null) {
+//                    injectedDec.setSceneX(x);
+//                    injectedDec.setSceneY(y);
+//                    injectedDec.setHeight(tile.getTilePaint().getNwHeight());
+//                    dynamicDecorations.add(injectedDec);
+//                    injectedDec = null;
+//                    inputHandler.mouseClicked = false;
+//                    return;
+//                }
+//            }
 
-            int idx = x + 64 * (y + 64 * obj);
+            int idx = x + 64 * (y + 64 * type);
             IntBuffer tt = GLBuffers.newDirectIntBuffer(tileRad * tileRad * maxTileObj * GLBuffers.SIZEOF_INT);
             tt.put(idx, 1);
             tt.flip();

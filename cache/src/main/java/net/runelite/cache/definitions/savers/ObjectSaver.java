@@ -33,14 +33,14 @@ public class ObjectSaver
 	public byte[] save(ObjectDefinition obj)
 	{
 		OutputStream out = new OutputStream();
-		if (obj.getModels() != null && obj.getModelIds() != null)
+		if (obj.getModelTypes() != null && obj.getModelIds() != null)
 		{
 			out.writeByte(1);
-			out.writeByte(obj.getModels().length);
-			for (int i = 0; i < obj.getModels().length; ++i)
+			out.writeByte(obj.getModelTypes().length);
+			for (int i = 0; i < obj.getModelTypes().length; ++i)
 			{
 				out.writeShort(obj.getModelIds()[i]);
-				out.writeByte(obj.getModels()[i]);
+				out.writeByte(obj.getModelTypes()[i]);
 			}
 		}
 		if (obj.getName() != null)
@@ -48,7 +48,7 @@ public class ObjectSaver
 			out.writeByte(2);
 			out.writeString(obj.getName());
 		}
-		if (obj.getModels() == null && obj.getModelIds() != null)
+		if (obj.getModelTypes() == null && obj.getModelIds() != null)
 		{
 			out.writeByte(5);
 			out.writeByte(obj.getModelIds().length);

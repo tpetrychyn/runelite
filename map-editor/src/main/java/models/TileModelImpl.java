@@ -54,7 +54,7 @@ public class TileModelImpl extends Renderable {
         buffer.put(modelBuffers.getTargetBufferOffset());
         buffer.put(FLAG_SCENE_BUFFER);
         buffer.put(x).put(y).put(z);
-        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 1));
+        buffer.put(modelBuffers.calcPickerId(sceneX, sceneY, 31));
         buffer.put(-1).put(-1).put(-1).put(-1); // animation
 
         modelBuffers.addTargetBufferOffset(getBufferLen());

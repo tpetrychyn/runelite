@@ -74,7 +74,7 @@ public class ObjectLoader
 					models[index] = is.readUnsignedByte();
 				}
 
-				def.setModels(models);
+				def.setModelTypes(models);
 				def.setModelIds(modelIds);
 			}
 		}
@@ -87,7 +87,7 @@ public class ObjectLoader
 			int length = is.readUnsignedByte();
 			if (length > 0)
 			{
-				def.setModels(null);
+				def.setModelTypes(null);
 				int[] objectModels = new int[length];
 
 				for (int index = 0; index < length; ++index)
@@ -383,7 +383,7 @@ public class ObjectLoader
 		if (def.getWallOrDoor() == -1)
 		{
 			def.setWallOrDoor(0);
-			if (def.getModelIds() != null && (def.getModels() == null || def.getModels()[0] == 10))
+			if (def.getModelIds() != null && (def.getModelTypes() == null || def.getModelTypes()[0] == 10))
 			{
 				def.setWallOrDoor(1);
 			}

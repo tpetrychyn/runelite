@@ -33,6 +33,8 @@ import scene.SceneTile;
 import net.runelite.api.*;
 import scene.Scene;
 
+import java.util.List;
+
 public class SceneUploader {
     int sceneId = (int) (System.currentTimeMillis() / 1000L);
     private int offset;
@@ -105,17 +107,20 @@ public class SceneUploader {
         if (wallDecoration != null) {
             Entity entityA = wallDecoration.getEntityA();
             if (entityA instanceof StaticObject) {
-                ((StaticObject) wallDecoration.getEntityA()).setBufferOffset(-1);
+                ((StaticObject) entityA).setBufferOffset(-1);
             }
             Entity entityB = wallDecoration.getEntityB();
             if (entityB instanceof StaticObject) {
-                ((StaticObject) wallDecoration.getEntityB()).setBufferOffset(-1);
+                ((StaticObject) entityB).setBufferOffset(-1);
             }
         }
 
         FloorDecoration floorDecoration = tile.getFloorDecoration();
         if (floorDecoration != null) {
-            floorDecoration.getModel().setBufferOffset(-1);
+            Entity entity = floorDecoration.getEntity();
+            if (entity instanceof StaticObject) {
+                ((StaticObject) entity).setBufferOffset(-1);
+            }
         }
 
 //		DecorativeObject decorativeObject = tile.getDecorativeObject();
@@ -127,6 +132,17 @@ public class SceneUploader {
 //			}
 //		}
 //
+
+        List<WallDecoration> gameObjects = tile.getGameObjects();
+        for (WallDecoration gameObject : gameObjects) {
+            if (gameObject == null) {
+                continue;
+            }
+            Entity entity = gameObject.getEntityA();
+            if (entity instanceof StaticObject) {
+                ((StaticObject) entity).setBufferOffset(-1);
+            }
+        }
 //		GameObject[] gameObjects = tile.getGameObjects();
 //		for (GameObject gameObject : gameObjects)
 //		{
@@ -186,7 +202,7 @@ public class SceneUploader {
             if (entityA instanceof StaticObject) {
                 uploadModel(entityA.getModel(), vertexBuffer, uvBuffer);
             } else if (entityA instanceof DynamicObject) {
-                for (int i=((DynamicObject) entityA).getSequenceDefinition().frameIds.length - ((DynamicObject) entityA).getSequenceDefinition().frameCount;i<((DynamicObject) entityA).getSequenceDefinition().frameIds.length;i++) {
+                for (int i = ((DynamicObject) entityA).getSequenceDefinition().frameIds.length - ((DynamicObject) entityA).getSequenceDefinition().frameCount; i < ((DynamicObject) entityA).getSequenceDefinition().frameIds.length; i++) {
                     uploadModel(((DynamicObject) entityA).getModel(i), vertexBuffer, uvBuffer);
                 }
             }
@@ -199,7 +215,10 @@ public class SceneUploader {
 
         FloorDecoration floorDecoration = tile.getFloorDecoration();
         if (floorDecoration != null) {
-            uploadModel(floorDecoration.getModel(), vertexBuffer, uvBuffer);
+            Entity entity = floorDecoration.getEntity();
+            if (entity instanceof StaticObject) {
+                uploadModel(entity.getModel(), vertexBuffer, uvBuffer);
+            }
         }
 
 //		DecorativeObject decorativeObject = tile.getDecorativeObject();
@@ -218,6 +237,16 @@ public class SceneUploader {
 //			}
 //		}
 //
+        List<WallDecoration> gameObjects = tile.getGameObjects();
+        for (WallDecoration gameObject : gameObjects) {
+            if (gameObject == null) {
+                continue;
+            }
+            Entity entity = gameObject.getEntityA();
+            if (entity instanceof StaticObject) {
+                uploadModel(entity.getModel(), vertexBuffer, uvBuffer);
+            }
+        }
 //		GameObject[] gameObjects = tile.getGameObjects();
 //		for (GameObject gameObject : gameObjects)
 //		{

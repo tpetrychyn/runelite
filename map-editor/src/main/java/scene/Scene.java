@@ -1,31 +1,31 @@
 package scene;
 
-import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
+import com.google.inject.Inject;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import lombok.Getter;
-import models.ObjectSwatchItem;
 import net.runelite.api.Constants;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class Scene {
+    private final SceneRegionBuilder sceneRegionBuilder;
     // NxM grid of regions to display
     private SceneRegion[][] regions;
     private int radius;
 
     private final List<ActionListener> sceneChangeListeners = new ArrayList<>();
-    private final ObjectProperty<SceneTile> selectedTile = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<SceneTile> hoveredEntity = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<Object> selectedEntity = new SimpleObjectProperty<>(null);
 
-    public void Load(SceneRegionBuilder sceneRegionBuilder, int centerRegionId, int radius) {
+    public Scene(SceneRegionBuilder sceneRegionBuilder) {
+        this.sceneRegionBuilder = sceneRegionBuilder;
+    }
+
+    public void Load(int centerRegionId, int radius) {
         this.radius = radius;
         this.regions = new SceneRegion[radius][radius];
 
@@ -81,41 +81,23 @@ public class Scene {
         return regions[gridX][gridY];
     }
 
-    public int calcTileColor(int z, int x, int y) {
-        SceneTile tile = getTile(z, x, y);
-        if (tile == null) {
-            return 12345678;
+    public SceneRegion getRegionFromSceneCoord(int x, int y) {
+        if (x < 0 || y < 0) {
+            return null;
         }
 
-        int var9 = (int) Math.sqrt(5100.0D);
-        int var10 = var9 * 768 >> 8;
-        int xHeightDiff = getTileHeight(z, x + 1, y) - getTileHeight(z, x - 1, y);
-        int yHeightDiff = getTileHeight(z, x, y + 1) - getTileHeight(z, x, y - 1);
-        int diff = (int) Math.sqrt((double) (xHeightDiff * xHeightDiff + yHeightDiff * yHeightDiff + 65536));
-        int var16 = (xHeightDiff << 8) / diff;
-        int var17 = 65536 / diff;
-        int var18 = (yHeightDiff << 8) / diff;
-        int var19 = (var16 * -50 + var18 * -50 + var17 * -10) / var10 + 96;
+        // figure which SceneRegion(n, m) the tile exists in
+        int gridX = x / Constants.REGION_SIZE;
+        int gridY = y / Constants.REGION_SIZE;
+        if (gridX >= radius || gridY >= radius) {
+            return null;
+        }
 
-        int color = (getTileSettings(0, x - 1, y) >> 2) + (getTileSettings(0, x, y - 1) >> 2) + (getTileSettings(0, x + 1, y) >> 3) + (getTileSettings(0, x, y + 1) >> 3) + (getTileSettings(0, x, y) >> 1);
-        return var19 - color;
+        return getRegion(gridX, gridY);
     }
 
-    public int getTileHeight(int z, int x, int y) {
-        SceneTile tile = getTile(z, x, y);
-        if (tile == null) {
-            return 0;
-        }
-
-        return tile.height != null ? tile.getHeight() : 0;
-    }
-
-    public int getTileSettings(int z, int x, int y) {
-        SceneTile tile = getTile(z, x, y);
-        if (tile == null) {
-            return 0;
-        }
-
-        return tile.getSettings();
+    public byte getTileSettings(int x, int y) {
+        SceneRegion r = getRegionFromSceneCoord(x, y);
+        return r.getTileSettings()[0][x][y];
     }
 }

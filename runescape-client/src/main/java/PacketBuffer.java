@@ -261,7 +261,6 @@ public class PacketBuffer extends Buffer {
 				}
 			}
 			else if (type != 10 && type != 11) {
-				// pretty sure this is all walls in here
 				int[] var10000;
 				if (type >= 12) {
 					if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
@@ -281,6 +280,7 @@ public class PacketBuffer extends Buffer {
 					}
 
 				} else if (type == 0) {
+					// pretty sure this is all walls in here
 					if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
 						renderable = objectDefinition.getRenderable(0, orientation, tileHeights, xSize, height, ySize);
 					} else {
@@ -411,9 +411,9 @@ public class PacketBuffer extends Buffer {
 
 					} else if (type == 3) {
 						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
-							renderable = objectDefinition.getRenderable(3, orientation, tileHeights, xSize, height, ySize);
+							renderable = objectDefinition.getRenderable(type, orientation, tileHeights, xSize, height, ySize);
 						} else {
-							renderable = new DynamicObject(type, 3, orientation, z, x, y, objectDefinition.animationId, true, (Renderable)null);
+							renderable = new DynamicObject(type, type, orientation, z, x, y, objectDefinition.animationId, true, null);
 						}
 
 						scene.newBoundaryObject(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field542[orientation], 0, tag, flags);
@@ -434,6 +434,7 @@ public class PacketBuffer extends Buffer {
 						}
 
 					} else if (type == 9) {
+						// diagonal wall
 						if (objectDefinition.animationId == -1 && objectDefinition.transforms == null) {
 							renderable = objectDefinition.getRenderable(type, orientation, tileHeights, xSize, height, ySize);
 						} else {
@@ -458,6 +459,7 @@ public class PacketBuffer extends Buffer {
 
 						scene.newWallDecoration(z, x, y, height, (Renderable)renderable, (Renderable)null, SceneRegion.field544[orientation], 0, 0, 0, tag, flags);
 					} else {
+						// special wall decorations
 						long var31;
 						Object var33;
 						if (type == 5) {
